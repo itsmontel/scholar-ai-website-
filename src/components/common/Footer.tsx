@@ -319,6 +319,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div>
               <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Study by subject</p>
               <ul className="space-y-2">
+                <li><a href="/blog/how-to-study-for-finals" className="text-stone-400 hover:text-white text-sm transition-colors">How to study for finals</a></li>
                 <li><a href="/study/biology" className="text-stone-400 hover:text-white text-sm transition-colors">Biology study tools</a></li>
                 <li><a href="/study/chemistry" className="text-stone-400 hover:text-white text-sm transition-colors">Chemistry study tools</a></li>
                 <li><a href="/study/anatomy" className="text-stone-400 hover:text-white text-sm transition-colors">Anatomy flashcards</a></li>
@@ -346,6 +347,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <li><a href="/blog/how-to-write-a-good-introduction" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a good introduction</a></li>
                 <li><a href="/blog/how-to-start-an-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to start an essay</a></li>
                 <li><a href="/blog/what-does-critically-evaluate-mean" className="text-stone-400 hover:text-white text-sm transition-colors">What critically evaluate means</a></li>
+                <li><a href="/blog/can-professors-tell-if-you-used-chatgpt" className="text-stone-400 hover:text-white text-sm transition-colors">Can professors tell if you used ChatGPT?</a></li>
                 <li><a href="/guides/how-to-write-argumentative-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to write an argumentative essay</a></li>
                 <li><a href="/guides/how-to-write-thesis-statement" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a thesis statement</a></li>
                 <li><a href="/guides/how-to-write-research-paper" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a research paper</a></li>
@@ -369,7 +371,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* VivoResume — sister product (logo: public/Vivoresumemeta.png) */}
+        {/* VivoResume — sister product (logo: public/vivoresume-logo.webp, 5KB) */}
         <div className="mb-10 rounded-2xl border-2 border-b-4 border-stone-600 bg-stone-900 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
           <a
             href="https://vivoresume.com"
@@ -378,7 +380,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             className="shrink-0 rounded-xl bg-white p-2.5 border-2 border-b-4 border-stone-200 transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#58CC02]/80"
           >
             <img
-              src="/Vivoresumemeta.png"
+              src="/vivoresume-logo.webp"
               alt="VivoResume — AI resume feedback"
               className="h-11 w-auto max-h-12 max-w-[160px] object-contain object-left"
               width={160}

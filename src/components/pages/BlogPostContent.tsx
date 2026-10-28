@@ -30,395 +30,37 @@ const h3 = 'text-lg font-semibold text-stone-800 dark:text-stone-100 mt-6 mb-2';
 const internalLink = 'text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 underline';
 const ctaButton = 'inline-block mt-8 mb-4 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-violet-500/20';
 
-// Reusable illustration components for blog posts
-const IllustrationWrapper: React.FC<{ children: React.ReactNode; bgColor?: string }> = ({ children, bgColor = 'bg-stone-100 dark:bg-stone-800/50' }) => (
-  <div className={`my-8 p-6 ${bgColor} rounded-2xl flex items-center justify-center`}>
-    {children}
-  </div>
+// Inline mascot illustrations (public/blog/inline/, 960px WebP, ~20KB each).
+// Lazy-loaded with an intrinsic size so they cost nothing until scrolled to
+// and never shift the text around them.
+const InlineArt: React.FC<{ name: string; alt: string }> = ({ name, alt }) => (
+  <figure className="my-8 overflow-hidden rounded-2xl bg-[#F3EAFF] dark:bg-violet-900/20">
+    <img
+      src={`/blog/inline/${name}.webp`}
+      alt={alt}
+      width={960}
+      height={537}
+      loading="lazy"
+      decoding="async"
+      className="block w-full h-auto"
+    />
+  </figure>
 );
 
-const WritingIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50 dark:bg-violet-900/20">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Desk */}
-      <rect x="40" y="120" width="200" height="8" rx="2" fill="#D1D5DB" />
-      {/* Paper */}
-      <rect x="80" y="60" width="80" height="55" rx="2" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="90" y1="72" x2="150" y2="72" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="90" y1="82" x2="145" y2="82" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="90" y1="92" x2="148" y2="92" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="90" y1="102" x2="130" y2="102" stroke="#E5E7EB" strokeWidth="2" />
-      {/* Pencil */}
-      <rect x="170" y="70" width="50" height="8" rx="1" fill="#FCD34D" transform="rotate(25 170 70)" />
-      <polygon points="165,83 170,78 170,88" fill="#F59E0B" transform="rotate(25 170 83)" />
-      {/* Person */}
-      <circle cx="200" cy="45" r="20" fill="#FCD9B6" />
-      <path d="M180 35 Q180 20 200 22 Q220 20 220 35" fill="#4B5563" />
-      <circle cx="194" cy="43" r="2.5" fill="#1F2937" />
-      <circle cx="206" cy="43" r="2.5" fill="#1F2937" />
-      <path d="M195 53 Q200 58 205 53" stroke="#1F2937" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M200 65 Q200 90 200 100" stroke="#6366F1" strokeWidth="14" strokeLinecap="round" />
-      <path d="M188 75 Q170 85 165 100" stroke="#FCD9B6" strokeWidth="8" strokeLinecap="round" />
-      <ellipse cx="164" cy="102" rx="6" ry="7" fill="#FCD9B6" />
-      {/* Lightbulb */}
-      <circle cx="230" cy="30" r="12" fill="#FEF3C7" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M227 42 L233 42" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M225 45 L235 45" stroke="#FCD34D" strokeWidth="2" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const CitationIllustration = () => (
-  <IllustrationWrapper bgColor="bg-green-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Stack of papers/books */}
-      <rect x="40" y="90" width="70" height="50" rx="3" fill="#E0E7FF" stroke="#A5B4FC" strokeWidth="2" />
-      <rect x="45" y="85" width="70" height="50" rx="3" fill="#DBEAFE" stroke="#93C5FD" strokeWidth="2" />
-      <rect x="50" y="80" width="70" height="50" rx="3" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="60" y1="92" x2="110" y2="92" stroke="#D1D5DB" strokeWidth="2" />
-      <line x1="60" y1="102" x2="105" y2="102" stroke="#D1D5DB" strokeWidth="2" />
-      <line x1="60" y1="112" x2="108" y2="112" stroke="#D1D5DB" strokeWidth="2" />
-      {/* Quote marks */}
-      <text x="150" y="60" fontSize="60" fill="#10B981" fontFamily="Georgia" opacity="0.3">"</text>
-      <text x="210" y="130" fontSize="60" fill="#10B981" fontFamily="Georgia" opacity="0.3">"</text>
-      {/* Citation text */}
-      <rect x="160" y="70" width="80" height="40" rx="4" fill="white" stroke="#10B981" strokeWidth="2" />
-      <line x1="170" y1="82" x2="230" y2="82" stroke="#D1FAE5" strokeWidth="2" />
-      <line x1="170" y1="92" x2="225" y2="92" stroke="#D1FAE5" strokeWidth="2" />
-      <line x1="170" y1="102" x2="210" y2="102" stroke="#D1FAE5" strokeWidth="2" />
-      {/* Check mark */}
-      <circle cx="250" cy="60" r="15" fill="#10B981" />
-      <path d="M242 60 L248 66 L258 54" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const GrammarIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Document */}
-      <rect x="60" y="30" width="100" height="110" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="75" y1="50" x2="145" y2="50" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="75" y1="65" x2="140" y2="65" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="75" y1="80" x2="145" y2="80" stroke="#E5E7EB" strokeWidth="2" />
-      {/* Error underline */}
-      <path d="M90 80 Q95 84 100 80 Q105 76 110 80" stroke="#EF4444" strokeWidth="2" fill="none" />
-      <line x1="75" y1="95" x2="135" y2="95" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="75" y1="110" x2="142" y2="110" stroke="#E5E7EB" strokeWidth="2" />
-      {/* Magnifying glass */}
-      <circle cx="190" cy="70" r="30" fill="none" stroke="#8B5CF6" strokeWidth="4" />
-      <line x1="212" y1="92" x2="235" y2="115" stroke="#8B5CF6" strokeWidth="6" strokeLinecap="round" />
-      {/* A with check inside magnifying glass */}
-      <text x="178" y="80" fontSize="28" fill="#8B5CF6" fontWeight="bold">A</text>
-      <path d="M195 72 L200 77 L208 65" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const ComparisonIllustration = () => (
-  <IllustrationWrapper bgColor="bg-amber-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Three style cards */}
-      <rect x="30" y="40" width="60" height="80" rx="4" fill="#DBEAFE" stroke="#3B82F6" strokeWidth="2" />
-      <text x="60" y="70" textAnchor="middle" fontSize="14" fill="#3B82F6" fontWeight="bold">APA</text>
-      <line x1="40" y1="85" x2="80" y2="85" stroke="#93C5FD" strokeWidth="2" />
-      <line x1="40" y1="95" x2="75" y2="95" stroke="#93C5FD" strokeWidth="2" />
-      <line x1="40" y1="105" x2="78" y2="105" stroke="#93C5FD" strokeWidth="2" />
-      
-      <rect x="110" y="40" width="60" height="80" rx="4" fill="#FCE7F3" stroke="#EC4899" strokeWidth="2" />
-      <text x="140" y="70" textAnchor="middle" fontSize="14" fill="#EC4899" fontWeight="bold">MLA</text>
-      <line x1="120" y1="85" x2="160" y2="85" stroke="#F9A8D4" strokeWidth="2" />
-      <line x1="120" y1="95" x2="155" y2="95" stroke="#F9A8D4" strokeWidth="2" />
-      <line x1="120" y1="105" x2="158" y2="105" stroke="#F9A8D4" strokeWidth="2" />
-      
-      <rect x="190" y="40" width="60" height="80" rx="4" fill="#D1FAE5" stroke="#10B981" strokeWidth="2" />
-      <text x="220" y="70" textAnchor="middle" fontSize="12" fill="#10B981" fontWeight="bold">Chicago</text>
-      <line x1="200" y1="85" x2="240" y2="85" stroke="#6EE7B7" strokeWidth="2" />
-      <line x1="200" y1="95" x2="235" y2="95" stroke="#6EE7B7" strokeWidth="2" />
-      <line x1="200" y1="105" x2="238" y2="105" stroke="#6EE7B7" strokeWidth="2" />
-      
-      {/* Arrows between */}
-      <path d="M95 80 L105 80" stroke="#9CA3AF" strokeWidth="2" markerEnd="url(#arrow)" />
-      <path d="M175 80 L185 80" stroke="#9CA3AF" strokeWidth="2" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const AIAssistantIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Robot/AI character */}
-      <rect x="100" y="40" width="80" height="70" rx="10" fill="#E0E7FF" stroke="#6366F1" strokeWidth="2" />
-      <circle cx="125" cy="65" r="10" fill="white" stroke="#6366F1" strokeWidth="2" />
-      <circle cx="125" cy="65" r="4" fill="#6366F1" />
-      <circle cx="155" cy="65" r="10" fill="white" stroke="#6366F1" strokeWidth="2" />
-      <circle cx="155" cy="65" r="4" fill="#6366F1" />
-      <path d="M120 90 Q140 100 160 90" stroke="#6366F1" strokeWidth="3" fill="none" strokeLinecap="round" />
-      {/* Antenna */}
-      <line x1="140" y1="40" x2="140" y2="25" stroke="#6366F1" strokeWidth="3" />
-      <circle cx="140" cy="20" r="5" fill="#6366F1" />
-      {/* Speech bubbles */}
-      <rect x="190" y="30" width="60" height="25" rx="4" fill="white" stroke="#10B981" strokeWidth="2" />
-      <text x="220" y="47" textAnchor="middle" fontSize="10" fill="#10B981">Feedback</text>
-      <rect x="30" y="60" width="55" height="25" rx="4" fill="white" stroke="#3B82F6" strokeWidth="2" />
-      <text x="57" y="77" textAnchor="middle" fontSize="10" fill="#3B82F6">Essay</text>
-      {/* Arrows */}
-      <path d="M85 72 L95 72" stroke="#3B82F6" strokeWidth="2" />
-      <path d="M185 55 L190 50" stroke="#10B981" strokeWidth="2" />
-      {/* Student */}
-      <circle cx="230" cy="110" r="18" fill="#FCD9B6" />
-      <path d="M212 100 Q212 85 230 88 Q248 85 248 100" fill="#4B5563" />
-      <circle cx="224" cy="108" r="2" fill="#1F2937" />
-      <circle cx="236" cy="108" r="2" fill="#1F2937" />
-      <path d="M225 118 Q230 122 235 118" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const ToolsIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Toolbox */}
-      <rect x="90" y="70" width="100" height="60" rx="4" fill="#FEE2E2" stroke="#F87171" strokeWidth="2" />
-      <rect x="90" y="60" width="100" height="15" rx="2" fill="#FECACA" stroke="#F87171" strokeWidth="2" />
-      <rect x="130" y="55" width="20" height="10" rx="2" fill="#F87171" />
-      {/* Tools popping out */}
-      <rect x="105" y="30" width="8" height="35" rx="1" fill="#FCD34D" />
-      <rect x="105" y="25" width="8" height="8" rx="1" fill="#F59E0B" />
-      <rect x="135" y="20" width="10" height="45" rx="1" fill="#60A5FA" />
-      <circle cx="140" cy="15" r="8" fill="#3B82F6" />
-      <rect x="165" y="35" width="8" height="30" rx="1" fill="#34D399" />
-      <polygon points="169,35 165,25 173,25" fill="#10B981" />
-      {/* Labels below toolbox - widely spaced so text fits */}
-      <text x="95" y="138" textAnchor="middle" fontSize="7" fill="#4B5563" fontWeight="500">Grammar</text>
-      <text x="140" y="138" textAnchor="middle" fontSize="7" fill="#4B5563" fontWeight="500">Citation</text>
-      <text x="185" y="138" textAnchor="middle" fontSize="7" fill="#4B5563" fontWeight="500">Style</text>
-    </svg>
-  </IllustrationWrapper>
-);
-
-const FlashcardsIllustration = () => (
-  <IllustrationWrapper bgColor="bg-cyan-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Stack of flashcards */}
-      <rect x="50" y="70" width="90" height="60" rx="6" fill="#E0F2FE" stroke="#0EA5E9" strokeWidth="2" transform="rotate(-5 95 100)" />
-      <rect x="55" y="65" width="90" height="60" rx="6" fill="#BAE6FD" stroke="#0EA5E9" strokeWidth="2" transform="rotate(-2 100 95)" />
-      <rect x="60" y="60" width="90" height="60" rx="6" fill="white" stroke="#0EA5E9" strokeWidth="2" />
-      {/* Question mark on front card */}
-      <text x="105" y="98" textAnchor="middle" fontSize="32" fill="#0EA5E9" fontWeight="bold">?</text>
-      {/* Flipped card with answer */}
-      <rect x="165" y="50" width="80" height="55" rx="6" fill="#ECFDF5" stroke="#10B981" strokeWidth="2" />
-      <text x="205" y="85" textAnchor="middle" fontSize="24" fill="#10B981" fontWeight="bold">A</text>
-      {/* Flip arrow */}
-      <path d="M152 80 Q160 70 168 80" stroke="#6B7280" strokeWidth="2" fill="none" markerEnd="url(#arrow)" />
-      <polygon points="168,77 172,82 166,82" fill="#6B7280" />
-      {/* Brain icon */}
-      <circle cx="240" cy="130" r="18" fill="#F0FDFA" stroke="#14B8A6" strokeWidth="2" />
-      <path d="M232 130 Q235 120 240 125 Q245 120 248 130 Q250 138 240 140 Q230 138 232 130" fill="#14B8A6" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const QuizIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Quiz paper */}
-      <rect x="70" y="25" width="100" height="120" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
-      {/* Question 1 with checkmark */}
-      <circle cx="90" cy="50" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
-      <text x="90" y="54" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">1</text>
-      <line x1="105" y1="50" x2="155" y2="50" stroke="#E5E7EB" strokeWidth="2" />
-      <path d="M160 47 L165 52 L173 42" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Question 2 with checkmark */}
-      <circle cx="90" cy="75" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
-      <text x="90" y="79" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">2</text>
-      <line x1="105" y1="75" x2="155" y2="75" stroke="#E5E7EB" strokeWidth="2" />
-      <path d="M160 72 L165 77 L173 67" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Question 3 with X */}
-      <circle cx="90" cy="100" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
-      <text x="90" y="104" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">3</text>
-      <line x1="105" y1="100" x2="155" y2="100" stroke="#E5E7EB" strokeWidth="2" />
-      <path d="M160 95 L172 107 M172 95 L160 107" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" />
-      {/* Question 4 */}
-      <circle cx="90" cy="125" r="8" fill="#DDD6FE" stroke="#8B5CF6" strokeWidth="2" />
-      <text x="90" y="129" textAnchor="middle" fontSize="10" fill="#8B5CF6" fontWeight="bold">4</text>
-      <line x1="105" y1="125" x2="155" y2="125" stroke="#E5E7EB" strokeWidth="2" />
-      {/* Score badge */}
-      <circle cx="210" cy="70" r="30" fill="#8B5CF6" />
-      <text x="210" y="65" textAnchor="middle" fontSize="16" fill="white" fontWeight="bold">85%</text>
-      <text x="210" y="82" textAnchor="middle" fontSize="10" fill="#DDD6FE">Score</text>
-      {/* Student thinking */}
-      <circle cx="210" cy="130" r="15" fill="#FCD9B6" />
-      <circle cx="205" cy="128" r="2" fill="#1F2937" />
-      <circle cx="215" cy="128" r="2" fill="#1F2937" />
-      <path d="M205 135 Q210 138 215 135" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const CrosswordIllustration = () => (
-  <IllustrationWrapper bgColor="bg-amber-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Crossword grid */}
-      <rect x="60" y="30" width="120" height="100" rx="4" fill="white" stroke="#F59E0B" strokeWidth="2" />
-      {/* Grid lines */}
-      <line x1="90" y1="30" x2="90" y2="130" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="120" y1="30" x2="120" y2="130" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="150" y1="30" x2="150" y2="130" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="60" y1="55" x2="180" y2="55" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="60" y1="80" x2="180" y2="80" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="60" y1="105" x2="180" y2="105" stroke="#FCD34D" strokeWidth="1" />
-      {/* Filled letters */}
-      <text x="75" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">S</text>
-      <text x="105" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">T</text>
-      <text x="135" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">U</text>
-      <text x="165" y="48" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">D</text>
-      <text x="135" y="73" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">N</text>
-      <text x="135" y="98" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">I</text>
-      <text x="135" y="123" textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">T</text>
-      {/* Black squares */}
-      <rect x="60" y="80" width="30" height="25" fill="#1F2937" />
-      <rect x="150" y="80" width="30" height="25" fill="#1F2937" />
-      <rect x="60" y="105" width="30" height="25" fill="#1F2937" />
-      <rect x="150" y="105" width="30" height="25" fill="#1F2937" />
-      {/* Clue numbers */}
-      <text x="64" y="40" fontSize="8" fill="#F59E0B" fontWeight="bold">1</text>
-      <text x="124" y="40" fontSize="8" fill="#F59E0B" fontWeight="bold">2</text>
-      {/* Pencil */}
-      <rect x="200" y="50" width="45" height="8" rx="1" fill="#FCD34D" transform="rotate(30 200 50)" />
-      <polygon points="195,62 200,55 200,65" fill="#F59E0B" transform="rotate(30 197 60)" />
-      {/* Lightbulb moment */}
-      <circle cx="230" cy="120" r="15" fill="#FEF3C7" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M227 130 L233 130" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M225 133 L235 133" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M230 110 L230 118" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M224 113 L228 117" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M236 113 L232 117" stroke="#FCD34D" strokeWidth="2" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const PomodoroTimerIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Tomato/timer body */}
-      <ellipse cx="140" cy="95" rx="55" ry="45" fill="#FEE2E2" stroke="#F87171" strokeWidth="2" />
-      <ellipse cx="140" cy="88" rx="45" ry="38" fill="#FECACA" />
-      {/* Timer face */}
-      <circle cx="140" cy="90" r="28" fill="white" stroke="#F87171" strokeWidth="2" />
-      <line x1="140" y1="90" x2="140" y2="68" stroke="#F87171" strokeWidth="3" strokeLinecap="round" />
-      <line x1="140" y1="90" x2="158" y2="78" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
-      <circle cx="140" cy="90" r="3" fill="#F87171" />
-      {/* 25 min label */}
-      <text x="140" y="125" textAnchor="middle" fontSize="12" fill="#F87171" fontWeight="bold">25 min</text>
-      {/* Leaves */}
-      <path d="M95 55 Q105 45 115 55 Q108 58 95 55" fill="#86EFAC" stroke="#22C55E" strokeWidth="1" />
-      <path d="M165 55 Q175 45 185 55 Q178 58 165 55" fill="#86EFAC" stroke="#22C55E" strokeWidth="1" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const StudyEffectivelyHeroIllustration = () => (
-  <IllustrationWrapper bgColor="bg-gradient-to-r from-violet-50 to-violet-50">
-    <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
-      {/* Student at desk */}
-      <rect x="60" y="100" width="120" height="8" rx="2" fill="#D1D5DB" />
-      <rect x="85" y="55" width="70" height="50" rx="4" fill="white" stroke="#6366F1" strokeWidth="2" />
-      <line x1="95" y1="68" x2="145" y2="68" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="95" y1="78" x2="140" y2="78" stroke="#E5E7EB" strokeWidth="2" />
-      <line x1="95" y1="88" x2="135" y2="88" stroke="#E5E7EB" strokeWidth="2" />
-      <circle cx="160" cy="40" r="18" fill="#FCD9B6" />
-      <path d="M142 35 Q142 22 160 25 Q178 22 178 35" fill="#4B5563" />
-      <circle cx="155" cy="38" r="2" fill="#1F2937" />
-      <circle cx="165" cy="38" r="2" fill="#1F2937" />
-      <path d="M156 48 Q160 52 164 48" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      <path d="M160 58 Q160 95 160 100" stroke="#6366F1" strokeWidth="12" strokeLinecap="round" />
-      {/* Lightbulb */}
-      <circle cx="230" cy="50" r="18" fill="#FEF3C7" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M224 62 L236 62" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M222 66 L238 66" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M230 44 L230 54" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M218 50 L226 50" stroke="#FCD34D" strokeWidth="2" />
-      <path d="M234 50 L242 50" stroke="#FCD34D" strokeWidth="2" />
-      {/* Checkmark badge */}
-      <circle cx="250" cy="115" r="20" fill="#10B981" />
-      <path d="M240 115 L247 122 L262 105" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const StudyToolsHeroIllustration = () => (
-  <IllustrationWrapper bgColor="bg-gradient-to-r from-violet-50 to-violet-50">
-    <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
-      {/* Central brain/learning icon */}
-      <circle cx="160" cy="80" r="35" fill="#EEF2FF" stroke="#6366F1" strokeWidth="3" />
-      <path d="M145 80 Q150 65 160 70 Q170 65 175 80 Q178 95 160 100 Q142 95 145 80" fill="#6366F1" />
-      <circle cx="153" cy="78" r="3" fill="#EEF2FF" />
-      <circle cx="167" cy="78" r="3" fill="#EEF2FF" />
-      {/* Flashcard */}
-      <rect x="40" y="50" width="50" height="35" rx="4" fill="white" stroke="#0EA5E9" strokeWidth="2" />
-      <text x="65" y="72" textAnchor="middle" fontSize="16" fill="#0EA5E9" fontWeight="bold">?</text>
-      <path d="M95 67 L120 75" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 2" />
-      {/* Quiz */}
-      <rect x="230" y="45" width="50" height="40" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
-      <circle cx="245" cy="58" r="5" fill="#DDD6FE" />
-      <line x1="255" y1="58" x2="270" y2="58" stroke="#E5E7EB" strokeWidth="2" />
-      <circle cx="245" cy="72" r="5" fill="#DDD6FE" />
-      <line x1="255" y1="72" x2="270" y2="72" stroke="#E5E7EB" strokeWidth="2" />
-      <path d="M200 75 L225 70" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 2" />
-      {/* Crossword */}
-      <rect x="135" y="125" width="50" height="30" rx="3" fill="white" stroke="#F59E0B" strokeWidth="2" />
-      <line x1="152" y1="125" x2="152" y2="155" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="168" y1="125" x2="168" y2="155" stroke="#FCD34D" strokeWidth="1" />
-      <line x1="135" y1="140" x2="185" y2="140" stroke="#FCD34D" strokeWidth="1" />
-      <path d="M160 115 L160 125" stroke="#9CA3AF" strokeWidth="2" strokeDasharray="4 2" />
-      {/* Sparkles */}
-      <circle cx="120" cy="40" r="4" fill="#FCD34D" />
-      <circle cx="200" cy="35" r="3" fill="#10B981" />
-      <circle cx="100" cy="110" r="3" fill="#EC4899" />
-      <circle cx="220" cy="115" r="4" fill="#3B82F6" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const EssayAnalysisIllustration = () => (
-  <IllustrationWrapper bgColor="bg-violet-50 dark:bg-violet-900/20">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      <rect x="50" y="25" width="100" height="110" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
-      <line x1="65" y1="45" x2="135" y2="45" stroke="#C4B5FD" strokeWidth="2" />
-      <line x1="65" y1="60" x2="130" y2="60" stroke="#10B981" strokeWidth="2" />
-      <line x1="65" y1="75" x2="140" y2="75" stroke="#C4B5FD" strokeWidth="2" />
-      <line x1="65" y1="90" x2="95" y2="90" stroke="#F59E0B" strokeWidth="2" />
-      <line x1="65" y1="105" x2="125" y2="105" stroke="#C4B5FD" strokeWidth="2" />
-      <circle cx="180" cy="50" r="22" fill="#8B5CF6" />
-      <path d="M172 50 L176 54 L188 42" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="165" y="90" width="60" height="35" rx="4" fill="#F5F3FF" stroke="#8B5CF6" strokeWidth="2" />
-      <text x="195" y="108" textAnchor="middle" fontSize="9" fill="#6D28D9" fontWeight="bold">Rubric</text>
-      <line x1="170" y1="115" x2="220" y2="115" stroke="#C4B5FD" strokeWidth="1" />
-    </svg>
-  </IllustrationWrapper>
-);
-
-const PlagiarismIllustration = () => (
-  <IllustrationWrapper bgColor="bg-emerald-50">
-    <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
-      {/* Document with checkmark - original work */}
-      <rect x="50" y="35" width="80" height="100" rx="4" fill="white" stroke="#10B981" strokeWidth="2" />
-      <line x1="60" y1="55" x2="120" y2="55" stroke="#D1FAE5" strokeWidth="2" />
-      <line x1="60" y1="70" x2="115" y2="70" stroke="#D1FAE5" strokeWidth="2" />
-      <line x1="60" y1="85" x2="125" y2="85" stroke="#D1FAE5" strokeWidth="2" />
-      <line x1="60" y1="100" x2="110" y2="100" stroke="#D1FAE5" strokeWidth="2" />
-      <circle cx="160" cy="85" r="25" fill="#10B981" />
-      <path d="M150 85 L157 92 L172 75" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Shield - protection */}
-      <path d="M200 40 L230 55 L230 90 Q215 110 200 120 Q185 110 170 90 L170 55 Z" fill="#ECFDF5" stroke="#10B981" strokeWidth="2" />
-      <path d="M195 75 L205 85 L223 65" stroke="#10B981" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Citation marks */}
-      <text x="75" y="95" fontSize="24" fill="#10B981" fontFamily="Georgia" opacity="0.5">&quot;</text>
-      <text x="135" y="45" fontSize="18" fill="#059669" fontWeight="bold">Original</text>
-    </svg>
-  </IllustrationWrapper>
-);
+const WritingIllustration = () => <InlineArt name="writing" alt="Scholar the mascot writing with a giant pencil" />;
+const CitationIllustration = () => <InlineArt name="citation" alt="Scholar tying a quote to its source book with a ribbon" />;
+const GrammarIllustration = () => <InlineArt name="grammar" alt="Scholar fitting the last piece into a sentence puzzle" />;
+const ComparisonIllustration = () => <InlineArt name="comparison" alt="Scholar comparing two highlighted drafts side by side" />;
+const AIAssistantIllustration = () => <InlineArt name="ai-assistant" alt="Scholar working on a laptop with a friendly AI helper" />;
+const ToolsIllustration = () => <InlineArt name="tools" alt="Scholar surrounded by study tool icons" />;
+const FlashcardsIllustration = () => <InlineArt name="flashcards" alt="Scholar flipping a giant flashcard" />;
+const QuizIllustration = () => <InlineArt name="quiz" alt="Scholar raising a hand beside a quiz board with the right answer lit up" />;
+const CrosswordIllustration = () => <InlineArt name="crossword" alt="Scholar placing a tile in a crossword grid" />;
+const PomodoroTimerIllustration = () => <InlineArt name="pomodoro" alt="Scholar studying beside a tomato Pomodoro timer" />;
+const StudyEffectivelyHeroIllustration = () => <InlineArt name="study-effectively" alt="Scholar calmly sitting on a stack of books with a lightbulb above" />;
+const StudyToolsHeroIllustration = () => <InlineArt name="study-tools" alt="Scholar riding a paper airplane over notebooks and flashcards" />;
+const EssayAnalysisIllustration = () => <InlineArt name="essay-analysis" alt="Scholar checking an essay with a stethoscope" />;
+const PlagiarismIllustration = () => <InlineArt name="plagiarism" alt="Scholar guarding an original paper with a shield" />;
 
 /**
  * Renders full article body per slug for SEO and readability.
@@ -431,6 +73,328 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-study-for-finals':
+      return (
+        <>
+          <p className={p}>
+            It is the same every December and every May. Thanksgiving break ends, the syllabus you skimmed in August suddenly has four exams and a final paper on it, and somebody in the group chat posts the finals schedule with three of your exams inside 48 hours. You open your notes, read the first page twice, and start wondering how you are supposed to learn a whole semester in two weeks.
+          </p>
+          <p className={p}>
+            You are not. You are supposed to rebuild what you already half-know, find the gaps, and close the ones worth the most points. That is a much smaller job, and this guide breaks it into a plan you can start tonight, whether you have two weeks, three days, or one night.
+          </p>
+
+          <h2 className={h2}>How to study for finals: the short version</h2>
+          <p className={p}>
+            <strong>1. Do the grade math first</strong>, so you know which final matters most. <strong>2. Build a map</strong> of every topic from the syllabus, study guide and past exams. <strong>3. Test yourself</strong> instead of rereading: practice questions, flashcards, blank-page recall. <strong>4. Space it out</strong> over several days, mixing subjects. <strong>5. Sleep</strong>, especially the night before. Everything below is how to do each step well.
+          </p>
+
+          <h2 className={h2}>Step 1: Do the grade math before you study anything</h2>
+          <p className={p}>
+            Most students give every final the same effort, or worse, give the most effort to the class they like. Ten minutes with your grade portal fixes that. For each class, find your current grade and how much the final is worth on the syllabus, then use this:
+          </p>
+          <p className={p}>
+            <strong>Score you need on the final = (target grade − current grade × (1 − final weight)) ÷ final weight</strong>
+          </p>
+          <p className={p}>
+            Say you have an 82 in Biology and the final is worth 20%. To finish with an 80, you need (80 − 82 × 0.8) ÷ 0.2 = <strong>72</strong> on the final. To finish with a 90 you would need 122, which is not happening. So your goal in that class is a safe B, and you can study accordingly. Now say you have a 78 in Statistics, the final is worth 35%, and you need an 80 to keep a scholarship GPA. That works out to about <strong>84</strong> on the final. Statistics just became your priority class.
+          </p>
+          <p className={p}>
+            Do this for every class and rank them. The classes where a realistic final score moves your letter grade get the most hours. The ones that are locked in either way get enough to stay locked in. If you want to see what it does to your GPA, our free <a href="/tools/gpa-calculator" onClick={handleNavigate('gpa-calculator')} className={internalLink}>GPA calculator</a> will show you in a minute.
+          </p>
+
+          <h2 className={h2}>Step 2: Build a map of what will be on the exam</h2>
+          <p className={p}>
+            You cannot study &quot;the whole course.&quot; You can study a list. Make one page per class and fill it from these, in this order:
+          </p>
+          <p className={p}>
+            <strong>The study guide or review sheet</strong>, if your professor gave one. It is the closest thing you will get to the exam itself. <strong>Past exams and midterms</strong>, including your own graded ones. Whatever you lost points on in October is a gift now. <strong>The syllabus schedule</strong>, which lists every topic in order, so nothing gets forgotten. <strong>The review session</strong> if there is one. Go, even if it is at 7pm on a Sunday. Professors and TAs drop more hints there than anywhere else. <strong>Office hours.</strong> Ask one direct question: &quot;Which topics should I prioritize for the final?&quot; Most professors will answer it.
+          </p>
+          <p className={p}>
+            Also check whether each final is cumulative. If the syllabus does not say, ask. A cumulative final means your map includes the first weeks of the semester, which is exactly what everyone forgets.
+          </p>
+          <p className={p}>
+            Then mark every topic on your map red, amber or green: red for &quot;could not explain it,&quot; amber for &quot;sort of,&quot; green for &quot;could teach it.&quot; Be honest. The whole plan runs on this list.
+          </p>
+
+          <h2 className={h2}>Step 3: A 2-week finals study plan</h2>
+          <h3 className={h3}>Days 14 to 8: Rebuild</h3>
+          <p className={p}>
+            Work through the red topics first, one or two per class per day. For each one, go back to the lecture slides or the textbook section, then close them and write down everything you can remember on a blank page. Check what you missed. That last part is the studying. Turn what you missed into flashcards or practice questions as you go. If your notes are a mess, here is how to <a href="/blog/turn-lecture-notes-into-study-guide" className={internalLink}>turn lecture notes into a study guide</a> without recopying everything.
+          </p>
+          <h3 className={h3}>Days 7 to 3: Test</h3>
+          <p className={p}>
+            Switch from learning to testing. Do practice problems and past exams under timed conditions, with your notes closed. Mix classes in the same day instead of spending a whole day on one subject. Every mistake goes back on the map as red. By the end of this phase the map should be mostly amber and green, and you will know exactly which few topics are still weak.
+          </p>
+          <h3 className={h3}>Days 2 and 1: Sharpen</h3>
+          <p className={p}>
+            No new material. Run through your flashcards, redo the questions you got wrong, and do one last blank-page recall of the big topics for each class. Write a one-page summary of formulas, dates or definitions you keep mixing up and read it the morning of the exam. Stop at a sensible time.
+          </p>
+          <h3 className={h3}>Exam day</h3>
+          <p className={p}>
+            Eat something, get there early, and skim your one-page summary, not your whole notebook. In the exam, read every question first, answer the ones you know to bank points, then come back. If you blank, write down anything related on scrap paper. Recall usually comes back once you start.
+          </p>
+
+          <QuizIllustration />
+
+          <h2 className={h2}>What the research says actually works</h2>
+          <p className={p}>
+            Two study methods have more evidence behind them than anything else. A large 2013 review of learning techniques by John Dunlosky and colleagues rated <strong>practice testing</strong> and <strong>distributed practice</strong> as the two highest-utility methods for students. Rereading and highlighting, the two most popular, were rated low.
+          </p>
+          <p className={p}>
+            <strong>Practice testing</strong> means pulling information out of your memory instead of putting it back in. In a well-known 2006 experiment, Henry Roediger and Jeffrey Karpicke found students who practiced recalling a passage remembered much more of it a week later than students who spent the same time rereading it. Rereading feels productive because the material looks familiar. Familiar is not the same as being able to answer a question about it with a blank page in front of you.
+          </p>
+          <p className={p}>
+            <strong>Distributed practice</strong>, or spacing, means studying a topic across several sessions on different days rather than all at once. Four 30-minute sessions on enzymes across a week beat one two-hour session the night before. That is why the plan above starts two weeks out and keeps coming back to the same topics.
+          </p>
+          <p className={p}>
+            Put them together and you get the simplest rule for finals: <strong>if you are not answering questions, you are probably not studying.</strong> We go deeper on this in our <a href="/blog/how-to-study-effectively-complete-guide" className={internalLink}>complete guide to studying effectively</a>.
+          </p>
+
+          <h2 className={h2}>What wastes your time during finals week</h2>
+          <p className={p}>
+            <strong>Rereading your notes from the start.</strong> It feels safe and covers almost nothing you do not already recognize. <strong>Highlighting</strong> textbook pages yellow. <strong>Recopying notes</strong> neatly, which is mostly handwriting practice. <strong>Making beautiful study guides</strong> you never test yourself on. <strong>Studying with your phone face up.</strong> If you cannot leave it alone, there are ways to <a href="/blog/block-websites-until-you-study-earn-screen-time" className={internalLink}>block distracting sites until you have studied</a>. <strong>Group study that turns into group hanging out.</strong> Study groups work when people quiz each other. They do not work as a place to read silently next to friends.
+          </p>
+
+          <h2 className={h2}>Sleep is part of studying, not a break from it</h2>
+          <InlineArt name="sleep" alt="Scholar the mascot sleeping peacefully next to a stack of books" />
+          <p className={p}>
+            The all-nighter is a finals week tradition, and it is a bad trade. Your brain consolidates what you learned during sleep, so the hours you cut are partly the hours that would have locked in the studying. You also walk into the exam slower, more anxious and more likely to misread questions. The CDC recommends at least seven hours a night for adults, and finals week is when that matters most.
+          </p>
+          <p className={p}>
+            If you are choosing between two more hours of cramming and sleep, take the sleep. If you are choosing between one more episode and sleep, you already know the answer.
+          </p>
+
+          <h2 className={h2}>If you only have 3 days, or one night</h2>
+          <p className={p}>
+            <strong>Three days:</strong> skip the rebuild phase. Spend day one making the map and doing one past exam or practice set per class to find your reds. Spend day two only on the reds, testing yourself as you go. Use day three for mixed practice and a one-page summary. Sleep both nights.
+          </p>
+          <p className={p}>
+            <strong>One night:</strong> you cannot learn everything, so do not try. Go straight to the study guide or the professor&apos;s review slides and pick the topics most likely to show up. For each one, read it once, close it, and write what you remember. Do every practice question you can find. Stop with enough time to sleep at least five or six hours, because walking in exhausted costs more points than the extra topic would win you. Then, when it is over, start earlier next semester.
+          </p>
+
+          <h2 className={h2}>When the final is a paper, not an exam</h2>
+          <p className={p}>
+            A lot of humanities and social science classes end with a final paper instead of a test, and those quietly eat finals week if you leave them until last. Start the paper first, even if it is due after your exams. Write a rough draft early, then come back to it with fresh eyes between exams. Check it against the assignment prompt and the rubric before you submit, not after. If it is your first big college paper, our guide to <a href="/blog/first-college-paper-fall-semester" className={internalLink}>writing your first college paper</a> walks through the whole process.
+          </p>
+
+          <h2 className={h2}>Three finals in one day, burnout and asking for help</h2>
+          <p className={p}>
+            If you have three or more exams on the same day, check your registrar&apos;s website. Many US colleges have a policy that lets you move one of them, but usually only if you ask before a set deadline. If you are sick or dealing with something serious at home, contact your professor and your dean of students office before the exam, not after. An incomplete or a rescheduled exam is far easier to arrange in advance. And if finals week is hitting your mental health hard, your campus counseling center exists for exactly this. Using it is normal.
+          </p>
+          <p className={p}>
+            For everyday burnout, use short, focused blocks with real breaks. The Pomodoro method, 25 minutes on and 5 off, is popular for a reason, and our free <a href="/tools/pomodoro-timer" onClick={handleNavigate('pomodoro-timer')} className={internalLink}>Pomodoro timer</a> runs in your browser. Get outside once a day. Eat actual meals.
+          </p>
+
+          <h2 className={h2}>Turn your notes into a finals study pack</h2>
+          <p className={p}>
+            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days, which covers finals week.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Make my finals study pack →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How early should I start studying for finals?',
+                answer:
+                  'Two weeks before your first final is ideal for most college courses. That gives you time to rebuild weak topics, then switch to practice testing, and to space your review across several days, which helps you remember more than cramming the same hours into one night.',
+              },
+              {
+                question: 'What is the best way to study for finals?',
+                answer:
+                  'Test yourself and space it out. Research reviews rate practice testing and distributed practice as the most effective study methods, and rereading and highlighting as among the least. Use past exams, practice problems, flashcards and blank-page recall over several days.',
+              },
+              {
+                question: 'How do I calculate what I need on my final?',
+                answer:
+                  'Use: needed score = (target grade − current grade × (1 − final weight)) ÷ final weight. For example, with an 82 and a final worth 20%, you need a 72 on the final to finish with an 80.',
+              },
+              {
+                question: 'Is it better to pull an all-nighter or sleep before a final?',
+                answer:
+                  'Sleep. Your brain consolidates memories during sleep, and going without it slows your thinking and makes mistakes more likely. The CDC recommends at least seven hours a night for adults. If you have to choose, a few hours of sleep beats a few more hours of cramming.',
+              },
+              {
+                question: 'How can I study for finals in one night?',
+                answer:
+                  'Focus only on the topics most likely to appear, using the study guide or review slides. For each one, read it once, close it, and write down what you remember. Do every practice question you can find, then stop early enough to get at least five or six hours of sleep.',
+              },
+              {
+                question: 'What should I do if I have three finals in one day?',
+                answer:
+                  'Check your registrar or academic calendar. Many US colleges let students reschedule one exam when they have three or more on the same day, but you usually have to ask before a deadline. Contact your professor or dean of students office early.',
+              },
+            ]}
+          />
+        </>
+      );
+
+    case 'can-professors-tell-if-you-used-chatgpt':
+      return (
+        <>
+          <p className={p}>
+            Every semester the same search spikes the night before a deadline: <em>can professors tell if you used ChatGPT?</em> Usually it is typed by someone who used it a little, panicked, and now wants to know how much trouble they are in. Sometimes it is typed by someone who wrote every word themselves and just got an email saying their essay was flagged as AI. Both deserve a straight answer, so here it is.
+          </p>
+          <p className={p}>
+            Short version: professors often can tell, but not the way most students think. The detector score is the weakest part of the case. What gets students caught is a paper that does not sound like them, sources that do not exist, and a conversation in office hours where they cannot explain their own argument. What protects honest students is a draft history and the ability to talk about their work. This guide covers both sides.
+          </p>
+
+          <AIAssistantIllustration />
+
+          <h2 className={h2}>Can professors actually tell if you used ChatGPT?</h2>
+          <p className={p}>
+            Sometimes yes, sometimes no, and the cases where they are confident are rarely about software. A professor who has read your discussion posts, your in-class writing and your last two papers has a sense of how you write. When a paper arrives with a different vocabulary, a smoother rhythm, and none of the small habits that were in everything else you handed in, they notice. They may not be able to prove anything from that alone, but it is often what makes them look closer.
+          </p>
+          <p className={p}>
+            The second thing they notice is that a lot of generated writing says very little. It is fluent and balanced and on topic, and it could have been written about any prompt in the course. Markers grade the argument, and a paper with no real argument stands out whether a human or a chatbot wrote it. That is why the honest question is not only &quot;will I get caught&quot; but &quot;will this paper actually earn the grade.&quot; We cover what markers reward in <a href="/blog/students-who-get-as-dont-work-harder" className={internalLink}>why students who get As don&apos;t work harder</a>.
+          </p>
+
+          <h2 className={h2}>How AI detectors work, and why they get it wrong</h2>
+          <p className={p}>
+            Tools like Turnitin&apos;s AI writing indicator and the standalone detectors you find online do not search a database of ChatGPT answers. There is no such database. They estimate how predictable your text is. Language models tend to choose likely words in likely orders, so text that is very smooth and very predictable scores as more &quot;AI-like.&quot; Text with odd word choices, uneven sentence lengths and personal detail scores as more human.
+          </p>
+          <p className={p}>
+            The problem is that plenty of human writing is predictable. Formal academic prose is predictable on purpose. Students writing in a second language often use simpler, more common phrasing, and research from Stanford in 2023 found detectors flagged non-native English writers far more often than native speakers. Short answers are hard to judge at all. Heavily edited writing, including writing polished by a grammar checker, can look more uniform than a rough draft.
+          </p>
+          <p className={p}>
+            The companies know this. OpenAI withdrew its own AI text classifier in 2023 because it was not accurate enough, and Turnitin tells institutions its AI score should not be used as the only basis for action. Many universities have said the same in their academic integrity guidance. A detector score is a reason for a professor to look closer. On its own, it is not proof.
+          </p>
+
+          <h2 className={h2}>What actually gets students caught</h2>
+          <p className={p}>
+            <strong>Sources that do not exist.</strong> This is the most common way it goes wrong. Chatbots produce citations that look real: plausible authors, plausible journal names, plausible page numbers, a DOI that leads nowhere. A marker who clicks one reference and finds nothing does not need a detector. A fabricated source is an integrity problem on its own, whatever produced it. Our <a href="/blog/citation-checker-academic-writing" className={internalLink}>citation checker guide</a> explains how to verify every reference before you submit.
+          </p>
+          <p className={p}>
+            <strong>Quotes that are not in the text.</strong> Generated essays about a novel or a set reading often quote lines that sound right but appear nowhere in the book. Your professor has read the book.
+          </p>
+          <p className={p}>
+            <strong>A voice that changed overnight.</strong> If your in-class writing has short sentences and a few comma splices and your take-home essay reads like a polished magazine feature, the gap is visible. Professors compare.
+          </p>
+          <p className={p}>
+            <strong>Answering a different question.</strong> Chatbots answer the most common version of a prompt. If your brief asked you to critically evaluate one specific study and the paper gives a general overview of the topic, it reads as generated even when it is not. The verb in the brief matters, which is why we wrote <a href="/blog/what-does-critically-evaluate-mean" className={internalLink}>what critically evaluate actually means</a>.
+          </p>
+          <p className={p}>
+            <strong>Not being able to explain it.</strong> More and more professors respond to a suspicious paper with a conversation: walk me through your argument, why did you choose this source, what did you mean in this paragraph. Students who wrote the paper can do that, even if it is messy. Students who did not usually cannot, and that conversation tends to settle the matter more than any score.
+          </p>
+          <p className={p}>
+            <strong>Document history.</strong> Google Docs and Word keep version history. An essay that appears in one paste at 2am, with no drafts, no edits and no typing history, is a pattern some instructors check. Some courses now ask for drafts or process notes for exactly this reason.
+          </p>
+
+          <h2 className={h2}>What professors look at besides the detector score</h2>
+          <p className={p}>
+            When a paper is flagged, most careful instructors look for things a score cannot show. Does the paper engage with the specific readings and lectures from this course, or only with the topic in general? Does it use the terms the way the course used them? Does it include details only someone in the class would know, like a point from week four or a dataset the seminar discussed? Does the argument build, or does every paragraph restate the same balanced point?
+          </p>
+          <p className={p}>
+            They also look at consistency across your work, and at whether the paper does what the rubric asks. A generic paper that hits none of the rubric criteria will lose marks whether or not anyone suspects AI. If you want to see your draft the way a marker will, run a <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> before you hand it in.
+          </p>
+
+          <h2 className={h2}>What if you are falsely accused of using AI?</h2>
+          <p className={p}>
+            This is happening to honest students, and it is stressful. Stay calm, and do not ignore the email. Here is what helps.
+          </p>
+          <p className={p}>
+            <strong>Gather your process.</strong> Open the version history in Google Docs or Word and export it or screenshot it. Collect your outline, your notes, your research tabs, any earlier drafts, and the PDFs of your sources with your highlights. Evidence that the paper grew over time is the strongest thing you can bring.
+          </p>
+          <p className={p}>
+            <strong>Offer to talk through the paper.</strong> Ask for a meeting and offer to explain your argument, why you chose each source, and how the draft changed. Someone who wrote the paper can usually do this well, and it carries more weight than a percentage.
+          </p>
+          <p className={p}>
+            <strong>Ask what the evidence is.</strong> Politely ask whether the concern is based only on a detector score. Point out, calmly, that detector makers say scores should not be the sole basis for a finding. Ask for the course or university policy on AI in writing.
+          </p>
+          <p className={p}>
+            <strong>Use the official process.</strong> Most universities have an academic integrity process with a right to respond and to appeal. Your student advocate, ombuds office or student union can help you prepare. If English is not your first language and you think that influenced the flag, it is reasonable to say so.
+          </p>
+          <p className={p}>
+            The best protection starts before any accusation: write in a document with version history, keep your notes, and save your sources. It takes no extra time and it makes your process visible.
+          </p>
+
+          <h2 className={h2}>Is using ChatGPT for school actually cheating?</h2>
+          <p className={p}>
+            It depends on the course, and in 2026 the rules really do differ. Some professors ban generative AI for any part of an assignment. Some allow brainstorming but not drafting. Some allow anything as long as you disclose it. The syllabus is the rulebook, and when it is unclear, ask in writing before you start. &quot;Can I use AI to check my grammar?&quot; is a reasonable email to send.
+          </p>
+          <p className={p}>
+            Across most policies, a few lines are consistent. Submitting generated text as your own writing without permission is treated as misconduct. Inventing sources is misconduct regardless of how they were made. Getting feedback on writing you did yourself is treated very differently from having something write for you, in the same way a writing center appointment is different from paying someone to write your paper. Our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a> goes through where that line usually sits.
+          </p>
+
+          <h2 className={h2}>How to use AI without risking your grade</h2>
+          <p className={p}>
+            You do not have to choose between ignoring AI completely and risking an integrity case. These uses fit most policies, and they make you a better writer instead of a nervous one. Check your syllabus first.
+          </p>
+          <p className={p}>
+            <strong>Use it to understand, not to write.</strong> Ask it to explain a concept from the lecture in simpler terms, then go back to the reading and check it. Treat the answer as a study partner&apos;s guess, not a source.
+          </p>
+          <p className={p}>
+            <strong>Use it to quiz yourself.</strong> Turning your own notes into questions and flashcards is one of the most effective ways to study, and it involves no submitted writing at all. Here is how to <a href="/blog/turn-lecture-notes-into-study-guide" className={internalLink}>turn lecture notes into a study guide</a>.
+          </p>
+          <p className={p}>
+            <strong>Get feedback on a draft you wrote.</strong> Write the paper yourself, then ask where the argument is weak, which paragraph drifts, and whether the thesis answers the question. Then fix it yourself. That is the same thing a tutor or writing center does, and it leaves the writing and the thinking yours.
+          </p>
+          <p className={p}>
+            <strong>Find real sources, then read them.</strong> Use tools that search actual databases and return papers you can open. Read what you cite. If you cannot open the PDF, you cannot quote it.
+          </p>
+          <p className={p}>
+            <strong>Disclose when the course asks you to.</strong> If your professor requires an AI use statement, write an honest one. A short note that you used a tool to check grammar or to quiz yourself costs nothing and removes any doubt.
+          </p>
+
+          <h2 className={h2}>Why trying to beat the detector is a bad plan</h2>
+          <p className={p}>
+            The internet is full of &quot;undetectable AI&quot; tools and tricks for rewording generated text. Leaving aside that using them to pass off generated work breaks most academic integrity policies, they do not fix the real problems. A reworded generated essay still cites sources that may not exist, still answers the generic version of the prompt, still sounds nothing like your in-class writing, and still falls apart when your professor asks you to explain paragraph three. The detector was never the main risk. The paper was.
+          </p>
+          <p className={p}>
+            The time you would spend disguising a generated paper is about the time it takes to write a solid draft and get feedback on it. The second option gets you a better grade and nothing to worry about afterwards.
+          </p>
+
+          <h2 className={h2}>A quick self-check before you submit</h2>
+          <p className={p}>
+            One: can you explain your thesis out loud in two sentences without looking? Two: can you open every source in your bibliography, and is every quote on the page you cited? Three: does the paper use the specific readings, terms and examples from your course? Four: does it sound like the rest of your writing? Five: does your document history show the paper being written? If all five are yes, you have nothing to worry about from any detector, and you have probably written a better paper too.
+          </p>
+
+          <h2 className={h2}>Get feedback on your own draft</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives professor-style feedback on writing you did yourself: an estimated grade, a rubric breakdown, and every line marked green, amber or red, so you can see where the argument is weak and fix it in your own words. Your essays stay private to your account and are never used to train AI. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my essay before I submit →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Can professors tell if you used ChatGPT?',
+                answer:
+                  'Often, but rarely from a detector score alone. What gives it away is a voice that does not match your other work, sources or quotes that do not exist, a generic answer to a specific prompt, and not being able to explain the paper when asked.',
+              },
+              {
+                question: 'Are AI detectors accurate?',
+                answer:
+                  'Not reliably enough to prove anything on their own. They estimate how predictable text is, so formal writing, short answers and writing by non-native English speakers can be flagged wrongly. OpenAI withdrew its own classifier in 2023 over accuracy, and Turnitin says its score should not be the only basis for action.',
+              },
+              {
+                question: 'Does Turnitin detect ChatGPT?',
+                answer:
+                  'Turnitin has an AI writing indicator that estimates how much of a submission may be machine-generated. Instructors see it alongside the similarity report. It is a signal for a closer look, not a verdict, and most universities ask instructors to consider other evidence too.',
+              },
+              {
+                question: 'What should I do if I am falsely accused of using AI?',
+                answer:
+                  'Stay calm and respond. Export your document version history, gather your notes, outline and sources, and offer to talk through your argument. Ask whether the concern rests only on a detector score, and use your university’s formal process and student advocacy services if needed.',
+              },
+              {
+                question: 'Is using ChatGPT for school cheating?',
+                answer:
+                  'It depends on your course policy. Submitting generated text as your own without permission is usually misconduct, and inventing sources always is. Getting feedback on a draft you wrote, or using AI to quiz yourself, is treated very differently. Check the syllabus and ask in writing if unsure.',
+              },
+              {
+                question: 'How can I prove I wrote my essay?',
+                answer:
+                  'Write in Google Docs or Word so version history records the paper being built. Keep your outline, notes, drafts and source PDFs. Being able to explain your argument and choices in a conversation is the strongest proof of all.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'what-does-critically-evaluate-mean':
       return (
         <>
@@ -2354,7 +2318,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Spaced repetition: study less, remember more</h2>
           <p className={p}>
-            Cramming the night before an exam might get you through the test. It will not get the information into long-term memory. Your brain needs time and repeated exposure to move information from short-term to long-term storage. That is what spaced repetition is for.
+            Cramming the night before an exam might get you through the test. It will not get the information into long-term memory. Your brain needs time and repeated exposure to move information from short-term to long-term storage. That is what spaced repetition is for. If finals are coming up, here is a <a href="/blog/how-to-study-for-finals" className={internalLink}>2-week plan for studying for finals</a> built on exactly this.
           </p>
           <p className={p}>
             The idea is simple: review material at increasing intervals. You see something today, then again in three days, then in a week, then in two weeks. Each time you successfully recall it, the interval gets longer. The material that is hardest to remember shows up more often. The stuff you know well appears less frequently. You spend your time on what you actually need to learn.
@@ -2634,37 +2598,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             It&apos;s leverage.
           </p>
 
-          <IllustrationWrapper bgColor="bg-violet-50">
-            <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
-              {/* Podium */}
-              <rect x="100" y="100" width="50" height="50" rx="3" fill="#6366F1" />
-              <rect x="60" y="115" width="45" height="35" rx="3" fill="#A5B4FC" />
-              <rect x="145" y="120" width="45" height="30" rx="3" fill="#C7D2FE" />
-              {/* Person 1 (winner) */}
-              <circle cx="125" cy="78" r="14" fill="#FCD9B6" />
-              <path d="M108 70 Q108 58 125 60 Q142 58 142 70" fill="#1F2937" />
-              <circle cx="119" cy="76" r="2" fill="#1F2937" />
-              <circle cx="131" cy="76" r="2" fill="#1F2937" />
-              <path d="M120 85 Q125 89 130 85" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-              {/* Trophy */}
-              <rect x="119" y="56" width="12" height="12" rx="2" fill="#FCD34D" stroke="#F59E0B" strokeWidth="1.5" />
-              <text x="125" y="66" textAnchor="middle" fontSize="8" fill="#F59E0B" fontWeight="bold">A</text>
-              {/* Person 2 (left) */}
-              <circle cx="82" cy="90" r="12" fill="#FCD9B6" />
-              <path d="M68 83 Q68 73 82 74 Q96 73 96 83" fill="#4B5563" />
-              <circle cx="77" cy="88" r="1.5" fill="#1F2937" />
-              <circle cx="87" cy="88" r="1.5" fill="#1F2937" />
-              {/* Person 3 (right) */}
-              <circle cx="167" cy="93" r="12" fill="#FCD9B6" />
-              <path d="M153 86 Q153 76 167 77 Q181 76 181 86" fill="#6B7280" />
-              <circle cx="162" cy="91" r="1.5" fill="#1F2937" />
-              <circle cx="172" cy="91" r="1.5" fill="#1F2937" />
-              {/* Sparkles */}
-              <circle cx="250" cy="40" r="5" fill="#FCD34D" />
-              <circle cx="70" cy="40" r="4" fill="#10B981" />
-              <circle cx="260" cy="100" r="4" fill="#EC4899" />
-            </svg>
-          </IllustrationWrapper>
+          <StudyEffectivelyHeroIllustration />
 
           <h2 className={h2}>I. Effort is not the same as output</h2>
           <p className={p}>
@@ -2689,46 +2623,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Every lecture hall is quietly divided into three groups. Nobody talks about it, but it&apos;s there.
           </p>
 
-          <IllustrationWrapper bgColor="bg-violet-50">
-            <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
-              {/* Three columns */}
-              {/* Passive */}
-              <rect x="20" y="30" width="80" height="110" rx="6" fill="#F1F5F9" stroke="#CBD5E1" strokeWidth="2" />
-              <text x="60" y="52" textAnchor="middle" fontSize="9" fill="#64748B" fontWeight="bold">PASSIVE</text>
-              <circle cx="60" cy="75" r="14" fill="#FCD9B6" />
-              <path d="M48 68 Q48 59 60 61 Q72 59 72 68" fill="#94A3B8" />
-              <circle cx="56" cy="74" r="1.5" fill="#1F2937" />
-              <circle cx="64" cy="74" r="1.5" fill="#1F2937" />
-              <path d="M56 82 Q60 84 64 82" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-              <rect x="30" y="100" width="60" height="6" rx="1" fill="#E2E8F0" />
-              <rect x="30" y="112" width="50" height="6" rx="1" fill="#E2E8F0" />
-              <rect x="30" y="124" width="55" height="6" rx="1" fill="#E2E8F0" />
-              {/* Stressed */}
-              <rect x="120" y="30" width="80" height="110" rx="6" fill="#FEF2F2" stroke="#FECACA" strokeWidth="2" />
-              <text x="160" y="52" textAnchor="middle" fontSize="9" fill="#EF4444" fontWeight="bold">STRESSED</text>
-              <circle cx="160" cy="75" r="14" fill="#FCD9B6" />
-              <path d="M148 68 Q148 59 160 61 Q172 59 172 68" fill="#374151" />
-              <circle cx="156" cy="74" r="1.5" fill="#1F2937" />
-              <circle cx="164" cy="74" r="1.5" fill="#1F2937" />
-              <path d="M156 83 Q160 80 164 83" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-              <rect x="130" y="100" width="60" height="5" rx="1" fill="#FECACA" />
-              <rect x="130" y="110" width="55" height="5" rx="1" fill="#FECACA" />
-              <rect x="130" y="120" width="60" height="5" rx="1" fill="#FECACA" />
-              <rect x="130" y="130" width="40" height="5" rx="1" fill="#FECACA" />
-              {/* Leverage */}
-              <rect x="220" y="30" width="80" height="110" rx="6" fill="#F0FDF4" stroke="#86EFAC" strokeWidth="2" />
-              <text x="260" y="52" textAnchor="middle" fontSize="9" fill="#16A34A" fontWeight="bold">LEVERAGE</text>
-              <circle cx="260" cy="75" r="14" fill="#FCD9B6" />
-              <path d="M248 68 Q248 59 260 61 Q272 59 272 68" fill="#1F2937" />
-              <circle cx="256" cy="74" r="1.5" fill="#1F2937" />
-              <circle cx="264" cy="74" r="1.5" fill="#1F2937" />
-              <path d="M256 82 Q260 86 264 82" stroke="#1F2937" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-              <rect x="230" y="100" width="60" height="6" rx="3" fill="#86EFAC" />
-              <rect x="230" y="112" width="50" height="6" rx="3" fill="#86EFAC" />
-              <circle cx="300" cy="60" r="12" fill="#FEF3C7" stroke="#FCD34D" strokeWidth="2" />
-              <text x="300" y="65" textAnchor="middle" fontSize="14" fill="#F59E0B" fontWeight="bold">A</text>
-            </svg>
-          </IllustrationWrapper>
+          <ComparisonIllustration />
 
           <h3 className={h3}>Group One: The Passive Students</h3>
           <p className={p}>

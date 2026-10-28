@@ -52,7 +52,7 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({ variant
       <div className="mt-12 mb-8 p-8 bg-[#F3EAFF] dark:bg-[#A560E8]/10 rounded-2xl border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/30" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <div className="text-center max-w-md mx-auto">
           <div className="w-14 h-14 bg-white dark:bg-stone-800 rounded-2xl border-2 border-b-4 border-[#A560E8]/30 flex items-center justify-center mx-auto mb-4">
-            <img src="/mascot-celebrating.webp" alt="Newsletter mascot" className="w-10 h-10 object-contain" />
+            <img src="/mascot-celebrating-80.webp" alt="" width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 object-contain" />
           </div>
           <h3 className="text-xl font-extrabold text-stone-900 dark:text-stone-100 mb-2">Subscribe to Our Newsletter</h3>
           <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">

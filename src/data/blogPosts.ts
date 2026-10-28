@@ -27,6 +27,36 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-study-for-finals',
+    title: 'How to Study for Finals: A 2-Week Plan (2026)',
+    description:
+      'How to study for finals in college: a 2-week plan, the grade math for which final matters most, methods that beat rereading, and what to do with one night.',
+    date: '2026-10-28',
+    author: 'WriteScholar Team',
+    readTime: '10 min read',
+    category: 'Study skills',
+    keyTakeaways: [
+      'Do the grade math first. Work out the score you need on each final and give the most hours to the classes where a realistic score changes your letter grade.',
+      'Test yourself instead of rereading. Practice questions, past exams, flashcards and blank-page recall, spaced over several days, are the methods research rates highest.',
+      'Sleep is part of studying. Your brain consolidates what you learned overnight, and an all-nighter usually costs more points than it wins.',
+    ],
+  },
+  {
+    slug: 'can-professors-tell-if-you-used-chatgpt',
+    title: 'Can Professors Tell If You Used ChatGPT? (2026)',
+    description:
+      'Can professors tell if you used ChatGPT? How AI detectors like Turnitin actually work, why they flag honest students, what really gets people caught, and what to do if you are falsely accused.',
+    date: '2026-10-28',
+    author: 'WriteScholar Team',
+    readTime: '10 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Detector scores are the weakest evidence. Professors spot fake sources, quotes that are not in the text, a voice that changed overnight, and students who cannot explain their own paper.',
+      'AI detectors measure how predictable text is, so formal writing and non-native English writers get flagged wrongly. Even the companies say a score alone is not proof.',
+      'Protect yourself: write with version history on, keep notes and sources, and use AI for feedback on your own draft, not to write it.',
+    ],
+  },
+  {
     slug: 'what-does-critically-evaluate-mean',
     title: 'What Does Critically Evaluate Mean in an Essay? (2026)',
     description:

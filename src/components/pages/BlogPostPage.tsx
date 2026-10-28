@@ -9,6 +9,7 @@ import BlogShareRail from '../blog/BlogShareRail';
 import BlogMascot from '../blog/BlogMascot';
 import BlogKeyTakeaways from '../blog/BlogKeyTakeaways';
 import BlogPostCta from '../blog/BlogPostCta';
+import { hasBlogArt, blogHeroSrc, blogOgPath, BLOG_HERO_SIZE } from '../blog/blogImages';
 import { useBlogArticleToc } from '../../hooks/useBlogArticleToc';
 import {
   SITE_ORIGIN,
@@ -79,7 +80,8 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     const canonicalUrl = absoluteCanonicalUrl(canonicalPath);
     const title = `${post.title} | WriteScholar`;
 
-    const ogImage = ogImageUrlForBlogPost(post.slug);
+    const ogPath = blogOgPath(post.slug);
+    const ogImage = ogPath ? `${SITE_ORIGIN}${ogPath}` : ogImageUrlForBlogPost(post.slug);
     applyPageSeoTags({
       title,
       description: post.description,
@@ -170,6 +172,32 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
               text: 'On most campuses, feedback on a draft you wrote is treated differently from generated text. Read your syllabus. Never submit prose you could not explain, and never invent sources.',
             },
           },
+        ],
+      });
+    } else if (post.slug === 'how-to-study-for-finals') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'How early should I start studying for finals?', acceptedAnswer: { '@type': 'Answer', text: 'Two weeks before your first final is ideal for most college courses. That gives you time to rebuild weak topics, then switch to practice testing, and to space your review across several days, which helps you remember more than cramming the same hours into one night.' } },
+          { '@type': 'Question', name: 'What is the best way to study for finals?', acceptedAnswer: { '@type': 'Answer', text: 'Test yourself and space it out. Research reviews rate practice testing and distributed practice as the most effective study methods, and rereading and highlighting as among the least. Use past exams, practice problems, flashcards and blank-page recall over several days.' } },
+          { '@type': 'Question', name: 'How do I calculate what I need on my final?', acceptedAnswer: { '@type': 'Answer', text: 'Use: needed score = (target grade − current grade × (1 − final weight)) ÷ final weight. For example, with an 82 and a final worth 20%, you need a 72 on the final to finish with an 80.' } },
+          { '@type': 'Question', name: 'Is it better to pull an all-nighter or sleep before a final?', acceptedAnswer: { '@type': 'Answer', text: 'Sleep. Your brain consolidates memories during sleep, and going without it slows your thinking and makes mistakes more likely. The CDC recommends at least seven hours a night for adults. If you have to choose, a few hours of sleep beats a few more hours of cramming.' } },
+          { '@type': 'Question', name: 'How can I study for finals in one night?', acceptedAnswer: { '@type': 'Answer', text: 'Focus only on the topics most likely to appear, using the study guide or review slides. For each one, read it once, close it, and write down what you remember. Do every practice question you can find, then stop early enough to get at least five or six hours of sleep.' } },
+          { '@type': 'Question', name: 'What should I do if I have three finals in one day?', acceptedAnswer: { '@type': 'Answer', text: 'Check your registrar or academic calendar. Many US colleges let students reschedule one exam when they have three or more on the same day, but you usually have to ask before a deadline. Contact your professor or dean of students office early.' } },
+        ],
+      });
+    } else if (post.slug === 'can-professors-tell-if-you-used-chatgpt') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: "Can professors tell if you used ChatGPT?", acceptedAnswer: { '@type': 'Answer', text: "Often, but rarely from a detector score alone. What gives it away is a voice that does not match your other work, sources or quotes that do not exist, a generic answer to a specific prompt, and not being able to explain the paper when asked." } },
+          { '@type': 'Question', name: "Are AI detectors accurate?", acceptedAnswer: { '@type': 'Answer', text: "Not reliably enough to prove anything on their own. They estimate how predictable text is, so formal writing, short answers and writing by non-native English speakers can be flagged wrongly. OpenAI withdrew its own classifier in 2023 over accuracy, and Turnitin says its score should not be the only basis for action." } },
+          { '@type': 'Question', name: "Does Turnitin detect ChatGPT?", acceptedAnswer: { '@type': 'Answer', text: "Turnitin has an AI writing indicator that estimates how much of a submission may be machine-generated. It is a signal for a closer look, not a verdict, and most universities ask instructors to consider other evidence too." } },
+          { '@type': 'Question', name: "What should I do if I am falsely accused of using AI?", acceptedAnswer: { '@type': 'Answer', text: "Stay calm and respond. Export your document version history, gather your notes, outline and sources, and offer to talk through your argument. Ask whether the concern rests only on a detector score, and use your university's formal process if needed." } },
+          { '@type': 'Question', name: "Is using ChatGPT for school cheating?", acceptedAnswer: { '@type': 'Answer', text: "It depends on your course policy. Submitting generated text as your own without permission is usually misconduct, and inventing sources always is. Getting feedback on a draft you wrote is treated very differently. Check the syllabus." } },
+          { '@type': 'Question', name: "How can I prove I wrote my essay?", acceptedAnswer: { '@type': 'Answer', text: "Write in Google Docs or Word so version history records the paper being built. Keep your outline, notes, drafts and source PDFs, and be ready to explain your argument in a conversation." } },
         ],
       });
     } else if (post.slug === 'what-does-critically-evaluate-mean') {
@@ -391,6 +419,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   const category = post.category ?? 'Tips';
   const authorRole = post.authorRole ?? BLOG_DEFAULT_AUTHOR_ROLE;
   const authorBio = post.authorBio ?? BLOG_DEFAULT_AUTHOR_BIO;
+  const hasArt = hasBlogArt(post.slug);
   const updatedLabel = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
@@ -452,7 +481,9 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           </p>
         </header>
 
-          <BlogMascot slug={post.slug} />
+          {/* The hero artwork already stars the mascot, and the animated one
+              is ~1MB, so it only shows on posts without artwork. */}
+          {!hasArt && <BlogMascot slug={post.slug} />}
         </div>
 
         {/* Three-column layout (desktop) */}
@@ -475,6 +506,18 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           {/* Center: article */}
           <div className="min-w-0">
             <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-7 md:p-9 mb-6">
+              {hasArt && (
+                <img
+                  src={blogHeroSrc(post.slug)}
+                  alt={`Scholar, the WriteScholar mascot, illustrating ${post.title}`}
+                  width={BLOG_HERO_SIZE.width}
+                  height={BLOG_HERO_SIZE.height}
+                  // React 18 drops camelCase fetchPriority; the lowercase attribute reaches the DOM.
+                  {...{ fetchpriority: 'high' }}
+                  decoding="async"
+                  className="w-full h-auto rounded-xl mb-8 bg-[#F3EAFF]"
+                />
+              )}
               <div className="rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800 px-4 py-4 sm:px-5 sm:py-5 mb-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-2">Written by</p>
                 <p className="text-lg font-bold text-stone-900 dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -494,7 +537,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
               </div>
             </div>
 
-            <BlogPostCta onNavigate={onNavigate} primaryPage="signup" primaryLabel="Get started free →" />
+            <BlogPostCta onNavigate={onNavigate} primaryPage="signup" primaryLabel="Try it for $1 →" />
 
             <div className="mt-10">
               <NewsletterSubscription variant="blog" />

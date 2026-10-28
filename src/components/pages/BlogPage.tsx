@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import LandingSectionLayers from '../common/LandingSectionLayers';
 import NewsletterSubscription from '../common/NewsletterSubscription';
 import BlogMascot from '../blog/BlogMascot';
+import { hasBlogArt, blogCardSrc, BLOG_CARD_SIZE } from '../blog/blogImages';
 import { getBlogPostsSortedDesc, BlogPostMeta } from '../../data/blogPosts';
 import { SITE_ORIGIN, injectJsonLd, removeJsonLd } from '../../utils/seo';
 
@@ -53,6 +54,20 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       { bg: '#FBF8FF', accent: '#7733B5', secondary: '#C9A0F0' },
     ];
     const color = colors[index % colors.length];
+
+    if (hasBlogArt(post.slug)) {
+      return (
+        <img
+          src={blogCardSrc(post.slug)}
+          alt=""
+          width={BLOG_CARD_SIZE.width}
+          height={BLOG_CARD_SIZE.height}
+          loading={index < 3 ? 'eager' : 'lazy'}
+          decoding="async"
+          className="w-full h-full object-cover"
+        />
+      );
+    }
 
     if (post.slug.includes('what-does-critically-evaluate-mean')) {
       return (
