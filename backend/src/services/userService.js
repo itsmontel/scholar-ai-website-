@@ -34,6 +34,31 @@ class UserService {
     }
   }
 
+  /**
+   * Any account whose inbox matches this address (Gmail dots and +tags
+   * collapse, see utils/canonicalEmail). Falls back to the exact address
+   * until migrations/20261101_users_email_canonical.sql has run.
+   */
+  async findUserByInbox(email) {
+    const { canonicalEmail } = require('../utils/canonicalEmail');
+    const key = canonicalEmail(email);
+    if (!key) return null;
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .select('id, email, email_verified, onboarding_completed, google_id, password_hash')
+        .eq('email_canonical', key)
+        .limit(1)
+        .maybeSingle();
+      if (!error) return data || null;
+      const msg = `${error.message || ''}`.toLowerCase();
+      if (!(msg.includes('email_canonical') && (msg.includes('column') || msg.includes('schema cache')))) throw error;
+    } catch (error) {
+      console.error('Error finding user by inbox:', error);
+    }
+    return this.findUserByEmail(email);
+  }
+
   async findUserById(id) {
     try {
       const { data, error } = await this.getSupabaseClient()
@@ -92,11 +117,29 @@ class UserService {
     }
   }
 
+  /**
+   * Insert a users row with its inbox key (email_canonical). Until
+   * migrations/20261101_users_email_canonical.sql has run the column is
+   * missing, so the insert is retried without it.
+   */
+  async insertUserRow(row) {
+    const { canonicalEmail } = require('../utils/canonicalEmail');
+    const withKey = row.email ? { ...row, email_canonical: canonicalEmail(row.email) } : row;
+    let { data, error } = await this.getSupabaseClient().from('users').insert([withKey]).select().single();
+    if (error) {
+      const msg = `${error.message || ''}`.toLowerCase();
+      if (withKey !== row && msg.includes('email_canonical') && (msg.includes('column') || msg.includes('schema cache'))) {
+        console.warn('users.email_canonical missing. Run migrations/20261101_users_email_canonical.sql');
+        ({ data, error } = await this.getSupabaseClient().from('users').insert([row]).select().single());
+      }
+    }
+    if (error) throw error;
+    return data;
+  }
+
   async createGoogleUser({ googleId, email, name, picture, emailVerified = true, signupDevice = null }) {
     try {
-      const { data, error } = await this.getSupabaseClient()
-        .from('users')
-        .insert({
+      const data = await this.insertUserRow({
           google_id: googleId,
           email: email?.toLowerCase(),
           name: name,
@@ -111,13 +154,7 @@ class UserService {
           signup_device: signupDevice,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
+        });
 
       return data;
     } catch (error) {
@@ -128,9 +165,7 @@ class UserService {
 
   async createAppleUser({ email, name, firstName = null, lastName = null, emailVerified = true, signupDevice = null }) {
     try {
-      const { data, error } = await this.getSupabaseClient()
-        .from('users')
-        .insert({
+      const data = await this.insertUserRow({
           email: email?.toLowerCase(),
           name: name,
           first_name: firstName,
@@ -141,13 +176,7 @@ class UserService {
           signup_device: signupDevice,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
+        });
 
       return data;
     } catch (error) {
@@ -158,17 +187,7 @@ class UserService {
 
   async createUser(userData) {
     try {
-      const { data, error } = await this.getSupabaseClient()
-        .from('users')
-        .insert([userData])
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return data;
+      return await this.insertUserRow(userData);
     } catch (error) {
       console.error('Error creating user:', error);
       throw error;

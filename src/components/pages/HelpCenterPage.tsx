@@ -96,8 +96,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     {
       id: 101,
       category: 'getting-started',
-      question: 'How do credits and the $1 trial work?',
-      answer: 'Every essay analysis, study pack and citation search uses 1 credit. Try everything for $1: 7 days of Pro with 5 credits, every comment, score and fix unlocked. After the trial, Pro is $19.99/month for 99 credits, and Premium is $39.99/month for 199 credits. Unused credits roll over each month, up to 499. Pausing your plan keeps your credits; cancelling resets them to 0. The writing editor and the free utilities never use credits.',
+      question: 'How do credits and the free plan work?',
+      answer: 'A free account grades 1 essay a month (200 to 10,000 words) with the estimated grade, the score, every rubric score and full feedback on the first quarter of the essay; it resets on the 1st. Every essay analysis, study pack and citation search on a paid plan uses 1 credit. Pro is $19.99/month for 99 credits at the student launch price (list $39.99) and adds feedback on the whole essay, the rewrites, one-click fixes, rubric check, export, study packs and citations. Premium is $39.99/month (list $59.99) for 199 credits. Unused credits roll over each month, up to 499. Pausing your plan keeps your credits; cancelling resets them to 0. The writing editor and the free utilities never use credits.',
       tags: ['getting-started', 'credits', 'trial', 'pricing', 'billing']
     },
     {

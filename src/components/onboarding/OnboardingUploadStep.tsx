@@ -229,7 +229,7 @@ export function OnboardingUploadStep({
       </PrimaryButton>
       <p className="mt-2 flex items-center justify-center gap-1.5 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
         <CreditCoin size={15} />
-        Uses 1 of your {freeCredits} free credits · no card needed
+        {freeCredits === 1 ? 'Uses your free grade this month' : `Uses 1 of your ${freeCredits} free credits`} · no card needed
       </p>
       <button
         type="button"

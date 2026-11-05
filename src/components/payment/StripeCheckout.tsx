@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 interface StripeCheckoutProps {
   planType: 'pro' | 'premium';
@@ -88,6 +89,7 @@ const StripeCheckout: React.FC<StripeCheckoutProps> = ({
       });
 
       const data = await response.json();
+      if (openVerifyEmailIfNeeded(response.status, data)) { setIsLoading(false); return; }
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to create checkout session');

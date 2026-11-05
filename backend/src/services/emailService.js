@@ -1223,6 +1223,102 @@ class EmailService {
       return { success: false, error: error.message };
     }
   }
+
+  /**
+   * Sent right after the free-grade gate creates an account. One job:
+   * verify the address. The first grade is already on screen; the link
+   * unlocks the rest of the month's free grades.
+   */
+  async sendFreeGradeWelcomeEmail(email, verificationToken) {
+    const setUrl = `${process.env.BACKEND_URL || 'http://localhost:3001'}/api/auth/verify-email?token=${verificationToken}`;
+    if (!this.transporter) {
+      console.log(`[email] Free grade welcome (dev mode) to ${email}: ${setUrl}`);
+      return { success: true, message: 'Email service not configured - link logged to console' };
+    }
+    try {
+      const { mascotUrl } = getEmailAssets();
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
+      const mailOptions = {
+        from: `"WriteScholar" <${fromAddress}>`,
+        to: email,
+        replyTo: replyToAddress,
+        subject: 'Verify your email to keep your free essay grades',
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="color-scheme" content="light">
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.bg}; font-family: ${NUNITO_STACK};">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.bg};">
+              <tr>
+                <td align="center" style="padding: 36px 16px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: ${EMAIL_COLORS.white}; border-radius: 24px; border: 2px solid ${EMAIL_COLORS.border}; overflow: hidden;">
+                    ${emailHeaderBlock('One quick step', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
+                    <tr>
+                      <td style="padding: 8px 32px 28px;">
+                        <h1 style="margin: 0 0 10px 0; font-family: ${NUNITO_STACK}; font-size: 26px; font-weight: 800; color: ${EMAIL_COLORS.text}; text-align: center; line-height: 1.2;">
+                          Confirm your account
+                        </h1>
+                        <p style="margin: 0 0 24px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                          Your first report is saved to your account. Verify this email to confirm it, and you get a free grade every month, so you can grade your next essay and see how you improve.
+                        </p>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 4px 0 26px 0;">
+                              ${ctaButton(setUrl, 'Verify my email', EMAIL_COLORS.purple, EMAIL_COLORS.purpleDark)}
+                            </td>
+                          </tr>
+                        </table>
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="border-top: 2px solid ${EMAIL_COLORS.border}; padding-top: 20px;">
+                              <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: ${EMAIL_COLORS.textMuted}; text-align: center; text-transform: uppercase; letter-spacing: 0.1em;">Or paste this link</p>
+                              <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; word-break: break-all; text-align: center; background: ${EMAIL_COLORS.surfaceSoft}; border-radius: 10px; padding: 10px 12px;">
+                                ${setUrl}
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="background-color: ${EMAIL_COLORS.surfaceSoft}; padding: 20px 32px; border-top: 2px solid ${EMAIL_COLORS.border};">
+                        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
+                          Your free plan: 1 essay grade a month, with your score, every rubric score and line-by-line feedback on the first part of your essay.
+                        </p>
+                        <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
+                          If you did not grade an essay with us, ignore this email and nothing happens.
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 16px 32px 22px; text-align: center;">
+                        <p style="margin: 0; font-size: 11px; font-weight: 700; color: ${EMAIL_COLORS.textFaint}; letter-spacing: 0.04em;">
+                          © 2026 WriteScholar · AI toolkit for students
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
+        `
+      };
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('Free grade welcome email sent to:', email);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('Failed to send free grade welcome email:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = new EmailService();

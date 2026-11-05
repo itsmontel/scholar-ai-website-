@@ -16,10 +16,17 @@ import {
   TRIAL_DAYS as APP_TRIAL_DAYS,
   TRIAL_CREDITS,
   TRIAL_PRICE,
+  STANDARD_MONTHLY_PRICE,
+  LIST_MONTHLY_PRICE,
+  LAUNCH_OFFER_ENABLED,
+  LAUNCH_OFFER_LABEL,
+  LAUNCH_OFFER_FOOTNOTE,
+  launchSaving,
   CHECKOUT_OFFER_KEY,
 } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 import type { EssayUnlockSummary } from '../../utils/paywall';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 /* ═══════════════════════════════════════════════════════════════
    SoftPaywall — Duolingo-style upsell modal.
@@ -63,8 +70,8 @@ interface SoftPaywallProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
-  { text: 'Know exactly what’s costing you marks: every comment, rewrite, and your rubric score', icon: '🔓', color: '#A560E8' },
-  { text: 'Fix it in one click, straight into your draft', icon: '✍️', color: '#A560E8' },
+  { text: 'A rewrite for every comment on this essay, applied to your draft in one click', icon: '✍️', color: '#A560E8' },
+  { text: 'Check the essay against your professor’s rubric and export it as Word or PDF', icon: '🔓', color: '#A560E8' },
   { text: 'Walk into exams ready with full flashcards, quizzes, and study games', icon: '🎯', color: '#FF9600' },
   { text: 'Get through any reading in minutes, not evenings', icon: '📚', color: '#58CC02' },
   { text: 'References done right, exported to Word & PDF', icon: '📄', color: '#FF4B4B' },
@@ -87,8 +94,8 @@ const SOCIAL_PROOF = [
 ];
 
 const TRIAL_DAYS = APP_TRIAL_DAYS;
-const PRO_MONTHLY = '$19.99';
-const PREMIUM_MONTHLY = '$39.99';
+const PRO_MONTHLY = `$${STANDARD_MONTHLY_PRICE.pro}`;
+const PREMIUM_MONTHLY = `$${STANDARD_MONTHLY_PRICE.premium}`;
 
 // ─── NEWCUSTOMER welcome discount (new-customer first month) ─────────
 // One promo code across every surface (soft paywall, pricing, billing,
@@ -310,6 +317,7 @@ const SoftPaywall = ({
       });
 
       const data = await res.json();
+      if (openVerifyEmailIfNeeded(res.status, data)) { setIsCheckoutLoading(false); return; }
       if (!res.ok) throw new Error(data.message || 'Failed to create checkout session');
 
       const url = data?.data?.checkoutUrl;
@@ -450,7 +458,7 @@ const SoftPaywall = ({
               ? `Get ${planName} for a discounted ${lastChanceFirstMonth}`
               : showDiscount
                 ? `Start ${planName} for ${firstPaywallFirstMonth}`
-                : 'Get better grades'}
+                : `Start ${planName} for ${monthlyPrice}/mo`}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
@@ -759,7 +767,7 @@ const SoftPaywall = ({
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 {essayUnlock
-                  ? <>You&apos;ve seen where. Now see how to fix it, {firstName}.</>
+                  ? <>You&apos;ve seen what to fix. Now let {planName} fix it, {firstName}.</>
                   : variant === 'postTutorial'
                     ? <>Get the grade you actually deserve, {firstName}.</>
                     : showTrial ? <>Make this your best semester yet, {firstName}.</> : <>Stop leaving marks on the table, {firstName}.</>}
@@ -770,7 +778,7 @@ const SoftPaywall = ({
                 ) : essayUnlock ? (
                   showDiscount
                     ? <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
-                    : <>Subscribe to {planName} to read every note on this essay. Cancel anytime.</>
+                    : <>{planName} opens the rewrite behind every comment on this essay and applies them in one click. <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>{LAUNCH_OFFER_ENABLED ? <> at the student launch price, not ${LIST_MONTHLY_PRICE[checkoutPlan]}</> : null}. Cancel anytime.</>
                 ) : variant === 'postTutorial' ? (
                   showTrial
                     ? <>Try everything for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">${TRIAL_PRICE}</span>: {TRIAL_DAYS} days and {TRIAL_CREDITS} credits for essay feedback, study packs and citations. Cancel anytime.</>
@@ -779,6 +787,8 @@ const SoftPaywall = ({
                   <>Try {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">${TRIAL_PRICE}</span>: {TRIAL_DAYS} days and {TRIAL_CREDITS} credits, everything unlocked. Cancel anytime.</>
                 ) : showDiscount ? (
                   <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
+                ) : LAUNCH_OFFER_ENABLED ? (
+                  <>{planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span> at the student launch price, not ${LIST_MONTHLY_PRICE[checkoutPlan]}. Cancel anytime.</>
                 ) : (
                   <>Subscribe to {planName}. Cancel anytime.</>
                 )}
@@ -792,8 +802,8 @@ const SoftPaywall = ({
                 </p>
                 <div className="mt-1.5 grid grid-cols-3 gap-2">
                   {[
-                    { n: essayUnlock.notes, label: essayUnlock.notes === 1 ? 'comment' : 'comments' },
-                    { n: essayUnlock.sections, label: essayUnlock.sections === 1 ? 'section score' : 'section scores' },
+                    { n: essayUnlock.notes, label: essayUnlock.notes === 1 ? 'rewrite ready' : 'rewrites ready' },
+                    { n: essayUnlock.sections, label: essayUnlock.sections === 1 ? 'rubric section' : 'rubric sections' },
                     { n: essayUnlock.fixes, label: essayUnlock.fixes === 1 ? 'top fix' : 'top fixes' },
                   ].map((item) => (
                     <div key={item.label}>
@@ -852,6 +862,12 @@ const SoftPaywall = ({
                     <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{firstPaywallFirstMonth}</span>
                     <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">first month</span>
                   </>
+                ) : LAUNCH_OFFER_ENABLED ? (
+                  <>
+                    <span className="text-2xl sm:text-3xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2 decoration-[#FF4B4B] tabular-nums">${LIST_MONTHLY_PRICE[checkoutPlan]}</span>
+                    <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{monthlyPrice}</span>
+                    <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">/ month</span>
+                  </>
                 ) : (
                   <>
                     <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{monthlyPrice}</span>
@@ -860,14 +876,20 @@ const SoftPaywall = ({
                 )}
               </div>
               <p className="text-sm text-[#3C3C3C] dark:text-stone-100 font-extrabold mb-1">
-                {showTrial ? <>{TRIAL_DAYS}-day trial · {TRIAL_CREDITS} credits · {planName}</> : <>Upgrade to {planName}</>}
+                {showTrial
+                  ? <>{TRIAL_DAYS}-day trial · {TRIAL_CREDITS} credits · {planName}</>
+                  : LAUNCH_OFFER_ENABLED && !showDiscount
+                    ? <>{LAUNCH_OFFER_LABEL} · save ${launchSaving(checkoutPlan)} a month</>
+                    : <>Upgrade to {planName}</>}
               </p>
               <p className="text-xs text-stone-500 dark:text-stone-400 font-bold mb-4 leading-snug">
                 {showTrial
                   ? <>After {TRIAL_DAYS} days: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel before then and you won&apos;t be charged again.</>
                   : showDiscount
                     ? <>After first month: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel anytime.</>
-                    : <>Cancel anytime.</>}
+                    : LAUNCH_OFFER_ENABLED
+                      ? <>{LAUNCH_OFFER_FOOTNOTE} Cancel anytime.</>
+                      : <>Cancel anytime.</>}
               </p>
               {checkoutPlan === 'premium' && (
                 <p className="text-xs text-[#D97F00] font-extrabold mb-3 leading-snug">

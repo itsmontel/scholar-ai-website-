@@ -1091,8 +1091,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 </h2>
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
                   {config.type === 'subject'
-                    ? 'Try it for $1 and see the gaps before the exam does. Cancel anytime.'
-                    : 'Try everything for $1 for 7 days. Used by 50,000+ college students.'}
+                    ? 'Pro is $19.99/mo at the student launch price. See the gaps before the exam does. Cancel anytime.'
+                    : 'Three essay grades a month are free, no card. Used by 50,000+ college students.'}
                 </p>
               </div>
               <a
@@ -1208,10 +1208,10 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
             </h2>
             <p className="text-stone-700 dark:text-stone-300 max-w-md mx-auto mb-6 leading-relaxed text-[15px]">
               {config.type === 'subject'
-                ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Try it for $1.'
+                ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Your first grade each month is free.'
                 : config.type === 'landing'
-                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Try it for $1 for 7 days, then Pro is $19.99/mo. Cancel anytime.'
-                  : 'Try everything for $1 for 7 days, then Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
+                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Your first grade each month is free, no card; Pro is $19.99/mo at the student launch price for the rewrites. Cancel anytime.'
+                  : 'Three essay grades a month are free; Pro is $19.99/mo at the student launch price. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

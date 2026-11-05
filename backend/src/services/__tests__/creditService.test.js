@@ -4,7 +4,7 @@
  * are replaced with an in-memory fake.
  */
 
-// Exercise the free-week logic with it switched on.
+// Free tier: 3 essay grades a calendar month.
 process.env.FREE_CREDITS = '3';
 
 const mockDb = { user: {}, actions: [], achievements: null };
@@ -166,49 +166,49 @@ test('cancelling resets the balance to 0', async () => {
 });
 
 const HOUR_MS = 60 * 60 * 1000;
-const agoIso = (ms) => new Date(Date.now() - ms).toISOString();
 
-test('a new free account gets 3 credits to use within 7 days', async () => {
+const monthStart = (offsetMonths = 0) => {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offsetMonths, 1));
+};
+const inThisMonth = (ms) => new Date(monthStart().getTime() + ms).toISOString();
+
+test('a free account gets 3 essay grades a month', async () => {
   mockState.plan = 'free';
   let c = await credits.getCreditState('u1');
-  expect([c.total, c.used, c.remaining, c.freeDaysLeft, c.freeExpired]).toEqual([3, 0, 3, 7, false]);
-  const startedAt = mockDb.achievements.stats.free_credits_started_at;
-  expect(c.freeExpiresAt).toBe(new Date(Date.parse(startedAt) + 7 * 24 * HOUR_MS).toISOString());
+  expect([c.total, c.used, c.remaining, c.freeExpired, c.freeExpiresAt]).toEqual([3, 0, 3, false, null]);
+  expect(c.periodStart).toBe(monthStart().toISOString());
+  expect(c.periodEnd).toBe(monthStart(1).toISOString());
+  expect(c.freeResetsAt).toBe(monthStart(1).toISOString());
 
-  mockDb.actions.push({ kind: 'analysis', at: new Date(Date.parse(startedAt) + 1000).toISOString() });
-  mockDb.actions.push({ kind: 'pack', at: new Date(Date.parse(startedAt) + 2000).toISOString() });
+  mockDb.actions.push({ kind: 'analysis', at: inThisMonth(1000) });
+  mockDb.actions.push({ kind: 'analysis', at: inThisMonth(2000) });
+  // Study packs and citations are Pro, so they never touch the free count.
+  mockDb.actions.push({ kind: 'pack', at: inThisMonth(3000) });
+  mockDb.actions.push({ kind: 'cite', at: inThisMonth(4000) });
   c = await credits.getCreditState('u1');
   expect([c.used, c.remaining]).toEqual([2, 1]);
-  // The stamp is written once.
-  expect(mockDb.achievements.stats.free_credits_started_at).toBe(startedAt);
+  // No stamp is needed any more.
+  expect(mockDb.achievements).toBeNull();
 });
 
-test('free credits ignore what was used before the week started', async () => {
+test("last month's grades do not count against this month", async () => {
   mockState.plan = 'free';
-  mockDb.actions.push({ kind: 'analysis', at: agoIso(30 * 24 * HOUR_MS) });
+  mockDb.actions.push({ kind: 'analysis', at: new Date(monthStart().getTime() - 1000).toISOString() });
   const c = await credits.getCreditState('u1');
   expect([c.used, c.remaining]).toEqual([0, 3]);
 });
 
-test('free credits expire after 7 days', async () => {
+test('the monthly limit is hard', async () => {
   mockState.plan = 'free';
-  mockDb.achievements = { stats: { free_credits_started_at: agoIso(8 * 24 * HOUR_MS), uploads_count: 2 }, unlocked_badges: {} };
+  for (let i = 0; i < 4; i++) mockDb.actions.push({ kind: 'analysis', at: inThisMonth(1000 * (i + 1)) });
   const c = await credits.getCreditState('u1');
-  expect([c.remaining, c.freeDaysLeft, c.freeExpired]).toEqual([0, 0, true]);
+  expect([c.used, c.remaining, c.total]).toEqual([3, 0, 3]);
 });
 
-test('the stamp keeps the other achievement stats', async () => {
-  mockState.plan = 'free';
-  mockDb.achievements = { stats: { uploads_count: 4 }, unlocked_badges: {} };
-  await credits.getCreditState('u1');
-  expect(mockDb.achievements.stats.uploads_count).toBe(4);
-  expect(typeof mockDb.achievements.stats.free_credits_started_at).toBe('string');
-});
-
-test('accounts that have had a trial or paid plan get no free credits', async () => {
+test('lapsed subscribers get the same free grades as everyone else', async () => {
   mockState.plan = 'free';
   mockState.everPaid = true;
   const c = await credits.getCreditState('u1');
-  expect([c.total, c.remaining, c.freeExpiresAt]).toEqual([0, 0, null]);
-  expect(mockDb.achievements).toBeNull();
+  expect([c.total, c.remaining]).toEqual([3, 3]);
 });

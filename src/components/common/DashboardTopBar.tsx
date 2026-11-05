@@ -626,10 +626,8 @@ export default function DashboardTopBar({
                     const c = usageStats.credits;
                     const footer = isPaidUsage && c && c.rollover > 0
                       ? `${c.rollover} rolled over · unused credits carry into next month`
-                      : !isPaidUsage && c?.freeExpiresAt
-                        ? c.freeExpired
-                          ? `Free credits expired ${shortDate(c.freeExpiresAt) ?? ''}`.trim()
-                          : `Free credits expire ${shortDate(c.freeExpiresAt) ?? 'in 7 days'}`
+                      : !isPaidUsage && c && c.freeCredits > 0
+                        ? `${c.freeCredits} free grade${c.freeCredits === 1 ? '' : 's'} a month · resets ${shortDate(c.freeResetsAt ?? c.periodEnd) ?? 'on the 1st'}`
                         : getUsagePeriodFooterText(
                             usageStats.previewsAreLifetime === true,
                             usageStats.daysUntilReset

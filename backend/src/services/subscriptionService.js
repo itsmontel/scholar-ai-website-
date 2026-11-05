@@ -25,9 +25,9 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     maxDocuments: 3, // hard cap on TOTAL documents owned (not monthly)
-    // No free credits. Analyses, study packs and citation searches start
-    // with the 3-day trial (3 credits).
-    analysesPerMonth: 0,
+    // Free accounts get creditService.FREE_CREDITS essay grades a month
+    // (3). Study packs and citation searches are Pro.
+    analysesPerMonth: 1,
     citationSearchesPerMonth: 0,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,

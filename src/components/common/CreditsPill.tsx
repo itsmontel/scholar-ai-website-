@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import CreditCoin from './CreditCoin';
 import { trackEvent } from '../../utils/analytics';
-import { freeDaysLeftLabel, isPaidCreditPlan, shortDate, type CreditState } from '../../utils/credits';
-import { MONTHLY_CREDITS, TRIAL_CREDITS, TRIAL_DAYS, TRIAL_PRICE, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
+import { isPaidCreditPlan, shortDate, type CreditState } from '../../utils/credits';
+import { MONTHLY_CREDITS, STANDARD_MONTHLY_PRICE, LIST_MONTHLY_PRICE, LAUNCH_OFFER_ENABLED, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
 
 /**
  * Top-right credit counter + its dropdown. One credit = one essay
- * analysis, study pack or citation search. Shows the free week's
- * credits (and when they expire), the trial's credits, the paid balance
- * (with rollover), a low/empty state, and the 499 cap.
+ * analysis, study pack or citation search. Shows the free plan's
+ * monthly grades (and when they reset), the trial's credits, the paid
+ * balance (with rollover), a low/empty state, and the 499 cap.
  */
 export default function CreditsPill({
   credits,
@@ -42,12 +42,16 @@ export default function CreditsPill({
 
   const paid = credits ? isPaidCreditPlan(credits.plan) : false;
   const remaining = credits?.remaining ?? 0;
-  /** Never-paid account inside (or just past) its free week. */
+  /** Free plan with a monthly grade allowance. */
   const freeWeek = !paid && !!credits && credits.freeCredits > 0;
   const freeLive = freeWeek && !credits?.freeExpired;
+  const freeResets = shortDate(credits?.freeResetsAt ?? credits?.periodEnd ?? null);
   const atCap = paid && !!credits && credits.total >= credits.cap;
   const low = paid && !credits?.isTrial && remaining <= 3;
   const empty = (!paid && !freeLive) || remaining <= 0;
+  // Free accounts always see "Get more" (they have at most a few grades);
+  // paid accounts only once they are out.
+  const showGetMore = empty || (!paid && remaining <= 3);
 
   const openPaywall = () => {
     setOpen(false);
@@ -81,7 +85,7 @@ export default function CreditsPill({
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-label={`${remaining} credits${paid ? '' : ', get credits'}. Open credit details`}
-        className={`inline-flex items-center gap-1.5 h-10 sm:h-11 pl-1.5 ${empty ? 'pr-1' : 'pr-3.5'} rounded-full border-2 border-b-4 transition-transform duration-200 hover:scale-[1.03] active:border-b-2 ${pillTone}`}
+        className={`inline-flex items-center gap-1.5 h-10 sm:h-11 pl-1.5 ${showGetMore ? 'pr-1' : 'pr-3.5'} rounded-full border-2 border-b-4 transition-transform duration-200 hover:scale-[1.03] active:border-b-2 ${pillTone}`}
       >
         <CreditCoin size={26} />
         <span className="text-[16px] font-black tabular-nums text-[#3C3C3C] dark:text-stone-50">{remaining}</span>
@@ -90,8 +94,9 @@ export default function CreditsPill({
         ) : (
           <span className={`text-[12.5px] font-extrabold ${low ? 'text-[#8F3A0C] dark:text-orange-300' : 'text-[#6B4E00] dark:text-[#F5D670]'}`}>{label}</span>
         )}
-        {empty && (
-          <span className="ml-1 h-7 sm:h-8 px-2.5 rounded-full bg-[#A560E8] text-white text-[11.5px] font-black flex items-center">
+        {showGetMore && (
+          <span className="ws-get-more ml-1 h-7 sm:h-8 px-3 rounded-full border-2 border-[#7733B5] bg-[#A560E8] text-white text-[12px] font-black flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2l2.4 6.9H22l-6.1 4.4 2.3 7.1L12 16l-6.2 4.4 2.3-7.1L2 8.9h7.6z" /></svg>
             Get more
           </span>
         )}
@@ -104,10 +109,8 @@ export default function CreditsPill({
             <p className="text-[12px] font-extrabold text-stone-500 dark:text-stone-400">
               {!paid
                 ? freeLive && credits
-                  ? freeDaysLeftLabel(credits) ?? ''
-                  : freeWeek && credits
-                    ? `Expired ${shortDate(credits.freeExpiresAt) ?? ''}`.trim()
-                    : 'No plan yet'
+                  ? freeResets ? `Resets ${freeResets}` : 'Resets monthly'
+                  : 'No plan yet'
                 : credits?.isTrial
                   ? `Trial ends ${shortDate(credits.periodEnd) ?? 'soon'}`
                   : credits?.isPaused
@@ -123,7 +126,7 @@ export default function CreditsPill({
           <div className="flex items-baseline gap-2">
             <span className="text-[44px] leading-none font-black tracking-tight tabular-nums">{remaining}</span>
             <span className="text-[14px] font-extrabold text-stone-500 dark:text-stone-400">
-              {!paid ? (freeWeek && credits ? `of ${credits.total} free` : 'credits') : credits?.isTrial ? `of ${credits.total} free` : `of ${credits?.cap ?? 499} max`}
+              {!paid ? (freeWeek && credits ? `of ${credits.total} free grade${credits.total === 1 ? '' : 's'}` : 'credits') : credits?.isTrial ? `of ${credits.total} free` : `of ${credits?.cap ?? 499} max`}
             </span>
           </div>
 
@@ -172,25 +175,23 @@ export default function CreditsPill({
           {freeLive && credits && (
             <Note tone={remaining <= 0 ? 'warn' : 'info'}>
               {remaining > 0
-                ? `Use them by ${shortDate(credits.freeExpiresAt) ?? 'the end of the week'} or they expire. Free grades show your grade and every highlight; Pro opens the comments, section scores and fixes.`
-                : `You've used your ${credits.total} free credits. Pro gives you ${MONTHLY_CREDITS.pro} a month and opens every comment and fix.`}
+                ? `Your free grade shows your score, every rubric score and full feedback on the first part of your essay. Pro opens the rest, the rewrites and one-click fixes, plus study packs and citations.`
+                : `You've used your free grade${credits.total === 1 ? '' : 's'} this month. They reset ${freeResets ?? 'on the 1st'}, or Pro gives you ${MONTHLY_CREDITS.pro} credits a month and every rewrite.`}
             </Note>
-          )}
-          {freeWeek && credits?.freeExpired && (
-            <Note tone="warn">Your free credits expired on {shortDate(credits.freeExpiresAt) ?? 'day 7'}. Pro gives you {MONTHLY_CREDITS.pro} a month, and anything you don&apos;t use rolls over.</Note>
           )}
 
           <Note>
-            1 credit = 1 essay analysis, study pack or citation search.
-            {paid ? ` Unused credits roll over every month, up to ${credits?.cap ?? 499}.` : ''}
+            {paid
+              ? `1 credit = 1 essay analysis, study pack or citation search. Unused credits roll over every month, up to ${credits?.cap ?? 499}.`
+              : 'Free plan: essay grades only. Study packs and citation searches are part of Pro.'}
           </Note>
 
           {!paid ? (
             <button type="button" onClick={openPaywall} className="h-12 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] border-2 border-b-4 border-[#7733B5] text-white text-[14px] font-extrabold uppercase tracking-wide active:border-b-2">
-              {TRIAL_DAYS > 0
-                ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE} · ${TRIAL_CREDITS} credits`
-                : WELCOME_DISCOUNT_AT_SIGNUP && freeWeek
-                  ? 'Get Pro · 50% off month 1'
+              {WELCOME_DISCOUNT_AT_SIGNUP && freeWeek
+                ? 'Get Pro · 50% off month 1'
+                : LAUNCH_OFFER_ENABLED
+                  ? `Get Pro · $${STANDARD_MONTHLY_PRICE.pro}/mo, not $${LIST_MONTHLY_PRICE.pro}`
                   : `Get ${MONTHLY_CREDITS.pro} credits a month`}
             </button>
           ) : credits?.isTrial ? (

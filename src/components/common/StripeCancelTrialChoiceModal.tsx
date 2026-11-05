@@ -3,6 +3,7 @@ import {
   CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
   LAST_TUTORIAL_CHECKOUT_PLAN_KEY,
 } from '../../constants/paywallSession';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
@@ -54,6 +55,7 @@ const StripeCancelTrialChoiceModal = ({
         }),
       });
       const data = await res.json().catch(() => ({}));
+      if (openVerifyEmailIfNeeded(res.status, data)) { setBusy(null); return; }
       if (!res.ok) {
         throw new Error((data as { message?: string }).message || 'Could not start checkout');
       }

@@ -24,7 +24,7 @@ import {
   type OnboardingAnswers,
   type OnboardingQuestion,
 } from './onboardingContent';
-import { FREE_CREDITS, FREE_CREDIT_DAYS, STANDARD_MONTHLY_PRICE, TRIAL_CREDITS, TRIAL_DAYS, TRIAL_PRICE } from '../../config/pricing';
+import { FREE_CREDITS, STANDARD_MONTHLY_PRICE, TRIAL_CREDITS, TRIAL_DAYS, TRIAL_PRICE } from '../../config/pricing';
 
 /** No free credits: the plan screen sells the $1 trial instead of a free first upload. */
 const PAID_TRIAL = FREE_CREDITS <= 0;
@@ -386,7 +386,7 @@ export default function CreditsOnboardingFlow({
               </div>
             </div>
             <ul className="w-full flex flex-col gap-3 text-left lg:bg-white/80 lg:dark:bg-stone-900/80 lg:border-2 lg:border-[#EADFF8] lg:dark:border-stone-700 lg:rounded-3xl lg:p-6">
-              {['Reading your answers', goalLine(answers), 'Choosing where to start', PAID_TRIAL ? `Planning your ${TRIAL_DAYS} days` : `Planning your ${FREE_CREDITS} free credits`].map((label, i) => {
+              {['Reading your answers', goalLine(answers), 'Choosing where to start', PAID_TRIAL ? `Planning your ${TRIAL_DAYS} days` : `Planning your free grade`].map((label, i) => {
                 const done = buildTick > i;
                 return (
                   <li key={label} className="flex items-center gap-3 text-[15px] lg:text-[16px] font-extrabold">
@@ -422,7 +422,7 @@ export default function CreditsOnboardingFlow({
                       {rec.tool === 'study-pack' ? 'Make my study pack' : 'Grade my essay'}
                     </PrimaryButton>
                     <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
-                      Free · uses 1 of your {FREE_CREDITS} credits · no card needed
+                      Free · uses your free grade this month · no card needed
                     </p>
                   </>
                 )}
@@ -450,10 +450,10 @@ export default function CreditsOnboardingFlow({
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <div className="text-[17px] font-black">
-                    {PAID_TRIAL ? `Your ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : `Your ${FREE_CREDITS} free credits`}
+                    {PAID_TRIAL ? `Your ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : `Your free grade each month`}
                   </div>
                   <div className="text-[12px] font-extrabold text-[#7A5A00] dark:text-[#F5D670]">
-                    {PAID_TRIAL ? `${TRIAL_CREDITS} credits · every comment and fix unlocked` : `Use them within ${FREE_CREDIT_DAYS} days`}
+                    {PAID_TRIAL ? `${TRIAL_CREDITS} credits · every comment and fix unlocked` : 'Grade, every rubric score and line-by-line feedback · resets monthly'}
                   </div>
                 </div>
                 <div className="flex gap-0.5">
@@ -646,7 +646,7 @@ function Welcome({ onNext, onLogout, firstName }: { onNext: () => void; onLogout
         </div>
         <div className="flex flex-col gap-6">
           <span className="self-start inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-stone-900 border-2 border-[#EADFF8] dark:border-stone-700 text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">
-            <CreditCoin size={18} /> {PAID_TRIAL ? `Try everything for $${TRIAL_PRICE}` : `${FREE_CREDITS} free credits waiting`}
+            <CreditCoin size={18} /> {PAID_TRIAL ? `Try everything for $${TRIAL_PRICE}` : `Your free grade is waiting`}
           </span>
           {headline}
           <p className="wso-subtitle text-[18px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 max-w-[30rem]">

@@ -29,10 +29,19 @@ export const SKIP_ONBOARDING_STRIPE = false;
  * hard gate again with the credit system and a 3-day trial at the end of
  * onboarding, which did not convert either. 2026-10-26: free credits with
  * a server-locked preview. Current (2026-10-27): no free credits; the way
- * in is the $1, 7-day trial (5 credits). This stays true so free users
+ * in is the free first grade (3 a month). This stays true so free users
  * can still browse the real app and hit the soft paywall on any action.
  */
 export const FREEMIUM_PREVIEW = true;
+
+/**
+ * The long first-run onboarding ("Make this your best semester yet" and
+ * its questions). Off since 2026-11-05: students start from the essay box
+ * on the landing page and answer two quick questions while it grades.
+ * The flow still lives in OnboardingPage / CreditsOnboardingFlow; set this
+ * to true to bring it back. /onboarding-test still previews it.
+ */
+export const ONBOARDING_ENABLED = false;
 
 /**
  * Free-tier in-app writing editor allowance, in words.

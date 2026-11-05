@@ -21,6 +21,7 @@ import { useFlashOffer } from '../../hooks/useFlashOffer';
 import CreditsOnboardingFlow, { PLAN_STEP } from '../onboarding/CreditsOnboardingFlow';
 import { OnboardingUploadStep, OnboardingWorkingStep } from '../onboarding/OnboardingUploadStep';
 import { surveyPayload, pathFor, type OnboardingAnswers } from '../onboarding/onboardingContent';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -1985,6 +1986,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         }),
       });
       const data = await res.json().catch(() => null);
+      if (openVerifyEmailIfNeeded(res.status, data)) { setStartingTrial(false); return; }
       const url = data?.data?.checkoutUrl;
       if (!res.ok || !url) {
         setTrialError((data && typeof data.message === 'string' && data.message) || 'We could not start checkout. Please try again.');
@@ -2076,6 +2078,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         }),
       });
       const data = await res.json().catch(() => null);
+      if (openVerifyEmailIfNeeded(res.status, data)) { setStartingTrial(false); return; }
       const url = data?.data?.checkoutUrl;
       if (!res.ok || !url) {
         setTrialError((data && typeof data.message === 'string' && data.message) || 'We could not start checkout. Please try again.');
@@ -2139,6 +2142,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         }),
       });
       const data = await res.json().catch(() => null);
+      if (openVerifyEmailIfNeeded(res.status, data)) { setStartingTrial(false); return; }
       const url = data?.data?.checkoutUrl;
       if (!res.ok || !url) {
         setTrialError(

@@ -14,6 +14,10 @@ import {
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
+import HeroEssayGrader, { type EssayFacts } from '../landing/HeroEssayGrader';
+import FreeGradeGate, { clearPendingEssay, readPendingEssay, stashPendingEssay, type GateUser } from '../common/FreeGradeGate';
+import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
+import { trackEvent } from '../../utils/analytics';
 // Below-the-fold landing sections are lazy-loaded so the hero paints
 // fast. Each chunk is hundreds-of-lines + transitive deps; loading
 // them on demand cuts initial JS for the landing page significantly.
@@ -31,7 +35,7 @@ const LandingStudyToolsHero = lazyWithRetry(() => import('../landing/LandingStud
 const LandingHowItWorksSection = lazyWithRetry(() => import('../landing/LandingHowItWorksSection'));
 const LandingWritingWorkspaceSection = lazyWithRetry(() => import('../landing/LandingWritingWorkspaceSection'));
 const LandingChatGPTComparisonSection = lazyWithRetry(() => import('../landing/LandingChatGPTComparisonSection'));
-const LandingMotivationSection = lazyWithRetry(() => import('../landing/LandingMotivationSection'));
+// LandingMotivationSection ("Studying that actually sticks") is hidden; see the note where it rendered.
 const LandingTestimonialsSection = lazyWithRetry(() => import('../landing/LandingTestimonialsSection'));
 const LandingFAQSection = lazyWithRetry(() => import('../landing/LandingFAQSection'));
 const LandingFinalCTASection = lazyWithRetry(() => import('../landing/LandingFinalCTASection'));
@@ -47,7 +51,9 @@ const LANDING_HIDE_SECONDARY_SECTIONS = true;
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 interface LandingPageProps {
   onNavigate: (page: string, slug?: string) => void;
-  user?: { plan?: string; subscription_plan?: string } | null;
+  user?: { plan?: string; subscription_plan?: string; id?: string } | null;
+  /** The free-grade gate created or signed in an account; token and user are in localStorage. */
+  onAuth?: (user: GateUser) => void;
 }
 
 /* ─── DottedShot — big focal product screenshot ──────────────────
@@ -543,55 +549,46 @@ function HeroProductShowcase({ idx, setIdx }: { idx: number; setIdx: Dispatch<Se
 }
 
 /**
- * Hero "Study Games" tile — single autoplaying <video> that cycles
- * through Word Blitz → Word Tower → Crater Blast and loops. We can't
- * use the native `loop` attribute because that prevents `onEnded`
- * from firing, so we drive the cycle manually. `key={src}` re-mounts
- * the element on each swap so Safari starts playback cleanly.
+ * A real screenshot or clip floating in one corner of the hero. The
+ * outer div drifts, the figure carries the tilt, so the two transforms
+ * never fight. Only rendered on wide screens (see useWideHero), so
+ * phones never download the clips.
  */
-const HERO_STUDY_GAMES_PLAYLIST = [
-  '/hero-word-blitz.mp4',
-  '/hero-word-tower.mp4',
-  '/writescholar-crater-blast-demo.mp4',
-] as const;
-
-/**
- * Hero side tile: a feature clip in a white card with a yellow lip and
- * a warm yellow glow, tilted a little and gently drifting. Outer div
- * drifts, inner figure carries the tilt so the two transforms don't fight.
- */
-const HeroTile = ({
+const HeroCornerTile = ({
   label,
   tilt,
-  delay = '0s',
-  compact = false,
-  className = '',
+  position,
+  delay,
   children,
 }: {
   label: string;
-  tilt: 'left' | 'right';
-  delay?: string;
-  compact?: boolean;
-  className?: string;
+  tilt: string;
+  position: string;
+  delay: string;
   children: ReactNode;
 }) => (
   <div
-    className={`w-full ${compact ? '' : 'max-w-[15rem]'} motion-safe:animate-[hero-tile-drift_8.5s_ease-in-out_infinite] ${className}`}
+    className={`absolute w-[290px] 2xl:w-[360px] ${position} motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]`}
     style={{ animationDelay: delay }}
   >
     <figure
-      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4 shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)]' : 'rounded-[20px] border-[3px] border-b-[6px] shadow-[0_20px_46px_-12px_rgba(255,200,0,0.55)]'} ${tilt === 'left' ? '-rotate-[3deg]' : 'rotate-[3deg]'}`}
+      className={`m-0 overflow-hidden rounded-2xl border-2 border-[#1C1917] bg-white ${tilt}`}
+      style={{ boxShadow: '6px 6px 0 #7733B5' }}
     >
-      <div className="relative aspect-[16/10] w-full bg-[#1C1030]">{children}</div>
-      <figcaption
-        className={`text-center font-black text-[#3C3C3C] border-t-2 border-[#FFF1B8] ${compact ? 'px-1 py-1 text-[10px]' : 'px-3 py-1.5 text-[13px]'}`}
-        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-      >
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-[#F3EEFF]">{children}</div>
+      <figcaption className="border-t-2 border-[#1C1917] bg-white px-3 py-2 text-left text-[14px] font-black text-[#1C1917]">
         {label}
       </figcaption>
     </figure>
   </div>
 );
+
+/** Word Blitz, Word Tower and Crater Blast, one after another, on repeat. */
+const HERO_STUDY_GAMES_PLAYLIST = [
+  '/hero-word-blitz-hq.mp4',
+  '/hero-word-tower-hq.mp4',
+  '/writescholar-crater-blast-demo.mp4',
+] as const;
 
 const HeroStudyGamesVideo = () => {
   const [idx, setIdx] = useState(0);
@@ -605,12 +602,76 @@ const HeroStudyGamesVideo = () => {
       playsInline
       preload="metadata"
       onEnded={() => setIdx((i) => (i + 1) % HERO_STUDY_GAMES_PLAYLIST.length)}
-      className="absolute inset-0 w-full h-full object-cover"
+      className="absolute inset-0 h-full w-full object-cover"
     />
   );
 };
 
-const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
+/** The two lower hero tiles (study games, flashcards). Off while we try a cleaner hero; set true to bring them back. */
+const SHOW_HERO_STUDY_TILES = false;
+
+/** True at 1280px and up, where the hero has room for the corner tiles and the mascot. */
+const useWideHero = () => {
+  const query = '(min-width: 1280px)';
+  const [wide, setWide] = useState(() => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false));
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = (e: MediaQueryListEvent) => setWide(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return wide;
+};
+
+const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
+  // ─── Free first grade: paste box in the hero, one-field gate, then the report ───
+  const [gateOpen, setGateOpen] = useState(false);
+  const [pendingMeta, setPendingMeta] = useState<{ text: string; facts: EssayFacts } | null>(null);
+  /** Bumped when the gate closes so the paste box returns to its editable state. */
+  const [gateResetSignal, setGateResetSignal] = useState(0);
+  const [restoredEssay] = useState(() => readPendingEssay()?.text ?? '');
+  const wideHero = useWideHero();
+  useEffect(() => {
+    trackEvent('landing_view');
+  }, []);
+  /** Hand the essay to the analysis page and go there. */
+  const startGrade = (text: string) => {
+    try {
+      localStorage.setItem('textAnalysisContent', text);
+      localStorage.removeItem('viewAnalysisDocumentId');
+      localStorage.removeItem('viewAnalysisType');
+      localStorage.removeItem('freshUploadDocumentId');
+      localStorage.removeItem('selectedDocumentId');
+      sessionStorage.setItem(FREE_GRADE_FLOW_KEY, '1');
+    } catch { /* ignore */ }
+    clearPendingEssay();
+    onNavigate('analysis');
+  };
+  const handleHeroSubmit = (text: string, facts: EssayFacts) => {
+    stashPendingEssay(text, { words: facts.words, fileName: facts.fileName });
+    if (user?.id) {
+      startGrade(text);
+      return;
+    }
+    setPendingMeta({ text, facts });
+    setGateOpen(true);
+  };
+  const closeGate = () => {
+    setGateOpen(false);
+    setGateResetSignal((n) => n + 1);
+  };
+  const handleGateAuthed = (gateUser: GateUser) => {
+    setGateOpen(false);
+    onAuth?.(gateUser);
+    if (pendingMeta) startGrade(pendingMeta.text);
+  };
+  const scrollToHeroGrader = () => {
+    const el = document.getElementById('hero-essay');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      window.setTimeout(() => el.focus({ preventScroll: true }), 450);
+    }
+  };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
   // Active slide of the hero product showcase — lifted here so the
@@ -1281,357 +1342,120 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         }
       `}</style>
       <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
-      {/* HERO: formal, conversion-focused. Section base is cream so
-          everything below the hero (analyzer demo, before/after, etc.)
-          sits on the standard light-theme background. The purple hero
-          area is now scoped to a fixed-height wrapper at the top. */}
-      <section className="landing-hero-zoom relative flex flex-col overflow-x-clip overflow-hidden xl:overflow-visible bg-[#E7D6F3] dark:bg-[#2B123C]">
-        {/* ─── HERO BACKGROUND — SINGLE-COLOUR PURPLE (BOUNDED) ─────
-            Per user brief: the purple background only spans the hero
-            portion (H1 + CTA + tiles + feature-icons row). After that
-            point, the section reverts to the site's cream off-white so
-            the analyzer demo and downstream content read like any
-            other body section.
-
-            Implementation: all purple background artwork is wrapped in
-            a fixed-height absolute container with overflow-hidden so
-            it clips cleanly at the bottom edge of the feature-icons
-            row. Heights are responsive — taller on mobile because the
-            phone hero stacks H1, CTA/Login, mobile tile grid, and the
-            wrapping feature-icons row vertically. */}
-        <div
-          className="absolute inset-0 overflow-hidden pointer-events-none"
-          aria-hidden
-        >
-          {/* Base — purple gradient, light at the top to deep at the
-              bottom. Two flat circles, anchored on the CTA below, sit
-              in between shades behind Scholar: three purples in all. */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#A863EA] via-[#8E48CF] via-[38%] to-[#5E1F96] dark:from-[#4A1B70] dark:via-[#3A1457] dark:to-[#2A0E40]" />
-          {/* Clipped by this layer, so each disc reads as a semicircle
-              that ends with the hero instead of spilling onto the next section. */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-[400px] md:top-[310px] lg:top-[340px] h-[1100px] w-[1100px] rounded-full bg-[#8A45C8] dark:bg-[#3E1660]" />
-          <div className="absolute left-1/2 -translate-x-1/2 top-[520px] md:top-[430px] lg:top-[460px] h-[760px] w-[760px] rounded-full bg-[#9652D3] dark:bg-[#47196E]" />
-
-          {/* ─── FADE INTO THE NEXT SECTION ─────────────────────────
-              Eases the purple into #E7D6F3, the exact lilac the
-              universities section starts with (its cream base under a
-              25% brand-purple wash; dark: #2B123C), so there is no
-              cream band or border line at the seam. */}
-          <div
-            className="absolute inset-x-0 bottom-0 h-24 sm:h-28 lg:h-32 pointer-events-none bg-[linear-gradient(to_bottom,rgba(231,214,243,0)_0%,rgba(231,214,243,0)_40%,rgba(231,214,243,0.18)_62%,rgba(231,214,243,0.55)_82%,#E7D6F3_100%)] dark:bg-[linear-gradient(to_bottom,rgba(43,18,60,0)_0%,rgba(43,18,60,0)_40%,rgba(43,18,60,0.35)_75%,#2B123C_100%)]"
-            aria-hidden
-          />
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-4 sm:pb-0 min-w-0">
-          {/* Absolutely placed so it sits in the top padding and does
-              not push the headline, tiles, or CTA down. */}
-          <div className="absolute left-1/2 top-8 sm:top-10 lg:top-12 z-20 -translate-x-1/2 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-b-[3px] border-stone-300 bg-white pl-1 pr-2.5 sm:pr-3 py-0.5 sm:py-1 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.32)]">
-            <span
-              className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full border-2 border-b-[3px] border-[#46A302] bg-[#58CC02] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
-              aria-hidden
+      {/* HERO (design E): one centred column. Big promise, then the
+          paste box as the centrepiece. Four real screenshots float in
+          the corners on wide screens only; phones and tablets get the
+          title and the box with nothing competing. Lavender ground,
+          ink outlines and hard purple offset shadows, no blur. */}
+      <section
+        className="landing-hero-zoom relative overflow-hidden bg-[#FAF7FF] dark:bg-stone-950"
+        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+      >
+        {wideHero && (
+          <div aria-hidden className="pointer-events-none">
+            <HeroCornerTile label="Grade and rubric" tilt="-rotate-[5deg]" position="left-[3.5%] top-20 2xl:left-[4.5%]" delay="0s">
+              <video src="/hero-tiles/grade-rubric.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover object-top" />
+            </HeroCornerTile>
+            <HeroCornerTile label="Every sentence marked" tilt="rotate-[5deg]" position="right-[3.5%] top-16 2xl:right-[4.5%]" delay="1.2s">
+              <img src="/hero-tiles/sentence-notes.webp" alt="" loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-cover object-right-top" />
+            </HeroCornerTile>
+            {/* The real rubric card from a report, as its own sticker. */}
+            <div
+              className="absolute bottom-20 left-[3.5%] w-[220px] 2xl:bottom-16 motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite] 2xl:left-[4.5%] 2xl:w-[255px]"
+              style={{ animationDelay: '2.4s' }}
             >
-              <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-              </svg>
-            </span>
-            <span
-              className="text-[10.5px] sm:text-[12px] font-extrabold text-stone-800 whitespace-nowrap tracking-tight"
-              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-            >
-              Trusted by <span className="text-[#58CC02] tabular-nums">50,000+</span> students worldwide
-            </span>
-          </div>
-          <div className="w-full min-w-0 max-w-[1400px] xl:mx-auto">
-            {/* ─── REDESIGNED HERO ──────────────────────────────────
-                Knowunity-style centered layout: single H1 + CTA in the
-                middle, six feature tiles (videos + screenshots) hovering
-                around the perimeter, gently floating in place. Replaces
-                the previous 3-column grid (BEFORE/AFTER asides + mascots
-                + typewriter H1 + B→A pill + subheadline + mobile video
-                + login link + risk reversal + 50,000+ trust pill) which
-                stacked too many competing elements above the fold. The
-                tiles do the social proof + product preview job that those
-                elements collectively used to handle.
-                The outer `flex flex-col items-stretch` wrapper is kept
-                so the section's downstream closing tags stay balanced
-                — that wrapper used to host the lg:grid. */}
-            <div className="flex flex-col items-stretch w-full">
-            <div className="relative w-full mx-auto px-0 sm:px-2 pt-0 pb-2 sm:pb-3">
-
-              {/* Four feature tiles sit in the corners so they don't
-                  stretch the hero. Phones use the 2×2 grid under Scholar. */}
-              <div className="hidden md:block pointer-events-none" aria-hidden>
-                <div className="absolute left-0 lg:left-2 -top-10 lg:-top-12 w-[13rem] lg:w-[15rem]">
-                  <HeroTile label="Essay Analyzer" tilt="left">
-                    <img src="/WriterPic.png" alt="" loading="eager" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
-                  </HeroTile>
-                </div>
-                <div className="absolute left-4 lg:left-8 top-[34%] lg:top-[36%] w-[13rem] lg:w-[15rem]">
-                  <HeroTile label="Fun Study Games" tilt="right" delay="2.4s">
-                    <HeroStudyGamesVideo />
-                  </HeroTile>
-                </div>
-                <div className="absolute right-0 lg:right-2 -top-10 lg:-top-12 w-[13rem] lg:w-[15rem]">
-                  <HeroTile label="Notes to Quiz" tilt="right" delay="1.6s">
-                    <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                  </HeroTile>
-                </div>
-                <div className="absolute right-4 lg:right-8 top-[34%] lg:top-[36%] w-[13rem] lg:w-[15rem]">
-                  <HeroTile label="Notes to Flashcards" tilt="left" delay="0.8s">
-                    <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                  </HeroTile>
-                </div>
-              </div>
-
-              {/* Headline sits above the tiles so it can be large.
-                  The centre column is too narrow for this title. */}
-              <div className="relative z-10 flex flex-col items-center text-center w-full pt-1 sm:pt-2 md:pt-0 opacity-0 animate-hero-card-enter">
-                {/* Two lines. Line 1 stays one line; line 2 is the grade. */}
-                <h1
-                  className="w-full font-black tracking-[-0.035em] leading-[0.98] text-white"
-                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                >
-                  <span className="block whitespace-nowrap text-[1.85rem] min-[390px]:text-[2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.55rem] xl:text-[4.15rem]">
-                    Turn your grades from
-                  </span>
-                  <span className="relative mt-1 sm:mt-2 inline-block whitespace-nowrap text-[#FFD84D] text-[2.55rem] min-[390px]:text-[2.8rem] sm:text-[3.7rem] md:text-[4rem] lg:text-[4.7rem] xl:text-[5.4rem]">
-                    B to{' '}
-                    <span
-                      className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/20"
-                      style={{ verticalAlign: '-0.06em' }}
-                      aria-hidden
-                    >
-                      A
-                      <span className="absolute -top-1.5 -right-1.5 text-[0.28em] text-[#FFC800] motion-safe:animate-pulse" aria-hidden>
-                        ✦
-                      </span>
-                    </span>
-                    <span className="sr-only">A with WriteScholar</span>
-                    <svg
-                      className="absolute left-0 -bottom-2 sm:-bottom-3 w-full h-3 sm:h-5 text-[#FFC800]"
-                      viewBox="0 0 300 18"
-                      preserveAspectRatio="none"
-                      aria-hidden
-                    >
-                      <path d="M4 12 C 80 2, 200 2, 296 10" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                </h1>
-                <h2
-                  className="mt-8 sm:mt-10 max-w-[38rem] text-base sm:text-lg lg:text-[1.15rem] font-semibold text-white/90 leading-snug"
-                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                >
-                  <span className="font-extrabold text-[#FFC800]">WriteScholar</span> the all-in-one AI study system to{' '}
-                  <span className="font-extrabold text-white">write better essays</span>,{' '}
-                  <span className="font-extrabold text-white">study smarter</span>, and{' '}
-                  <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
-                </h2>
-              </div>
-
-              {/* ─── CENTRE: CTA, Scholar, stats ─── */}
-              <div className="relative z-10 flex flex-col items-center text-center w-full mx-auto pb-1 opacity-0 animate-hero-card-enter">
-                  {/* ─── CTA + LOGIN ROW — green trial button pops on the
-                      purple; white "Log in" keeps the Duolingo lip. */}
-                  <div className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('signup')}
-                      aria-label="Grade my essay free"
-                      className="group/btn inline-flex items-center justify-center px-10 py-5 sm:px-12 sm:py-[22px] lg:px-14 lg:py-6 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-[19px] sm:text-[22px] lg:text-[24px] border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      Grade my essay free
-                      <svg className="ml-2.5 w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('login')}
-                      aria-label="Log in to WriteScholar"
-                      className="inline-flex items-center justify-center px-6 py-3 sm:px-9 sm:py-[18px] lg:px-10 lg:py-5 rounded-2xl bg-white text-[#6B27A3] font-extrabold text-[15px] sm:text-[19px] lg:text-[20px] border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      Log in
-                    </button>
-                  </div>
-
-                  <p className="mt-3 sm:mt-3.5 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
-                    About 30 seconds to get started. No payment today.
-                  </p>
-
-                  {/* ─── STATS STRIP — under the CTA. Phones wrap to
-                      two lines (50k + 91% on top, 60 sec below) so
-                      nothing is clipped; sm+ stays one row. */}
-                  <div className="relative z-10 mt-6 sm:mt-8 flex w-full flex-col items-center gap-y-1 sm:w-max sm:flex-row sm:justify-center sm:gap-x-5 sm:gap-y-0">
-                    <div className="flex items-center justify-center gap-x-2.5 min-[380px]:gap-x-3 sm:gap-x-5">
-                      {[
-                        { value: '50,000+', label: 'students worldwide' },
-                        { value: '91%', label: 'report better grades' },
-                      ].map((s, i) => (
-                        <div key={s.value} className={`flex shrink-0 items-baseline gap-1 sm:gap-1.5 whitespace-nowrap ${i > 0 ? 'border-l-2 border-white/25 pl-2.5 min-[380px]:pl-3 sm:pl-5' : ''}`}>
-                          <span
-                            className="text-[15px] sm:text-[1.15rem] font-black text-white tabular-nums tracking-tight"
-                            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                          >
-                            {s.value}
-                          </span>
-                          <span className="text-[10px] sm:text-[11.5px] font-bold text-[#EBDDFB] whitespace-nowrap">{s.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex shrink-0 items-baseline justify-center gap-1 sm:gap-1.5 whitespace-nowrap sm:border-l-2 sm:border-white/25 sm:pl-5">
-                      <span
-                        className="text-[15px] sm:text-[1.15rem] font-black text-white tabular-nums tracking-tight"
-                        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                      >
-                        60 sec
-                      </span>
-                      <span className="text-[10px] sm:text-[11.5px] font-bold text-[#EBDDFB] whitespace-nowrap">to your first grade</span>
-                    </div>
-                  </div>
-
-                  {/* ─── MOBILE TILE GRID — the same four tiles, 2×2. */}
-                  <div className="md:hidden mt-4 grid grid-cols-2 gap-3 w-full max-w-[22rem] mx-auto" aria-hidden>
-                    <HeroTile label="Essay Analyzer" tilt="left" compact>
-                      <img src="/WriterPic.png" alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
-                    </HeroTile>
-                    <HeroTile label="Notes to Quiz" tilt="right" compact delay="1.2s">
-                      <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                    </HeroTile>
-                    <HeroTile label="Fun Study Games" tilt="right" compact delay="2.4s">
-                      <HeroStudyGamesVideo />
-                    </HeroTile>
-                    <HeroTile label="Notes to Flashcards" tilt="left" compact delay="3.6s">
-                      <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                    </HeroTile>
-                  </div>
-              </div>
-
-              {/* ─── FEATURE ICONS ROW — bottom of hero (Knowunity-style)
-                  Each entry is a custom SVG illustration (NOT a generic
-                  emoji) with the label sitting directly underneath. No
-                  border, no background — pure icon + text floating on
-                  the purple field. Custom-drawn so the hero feels unique
-                  to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-6 sm:mt-8 pb-16 sm:pb-20 lg:pb-24 px-4">
-                <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
-                  {[
-                    {
-                      label: 'Essay Analyzer',
-                      svg: (
-                        // FLAT-SOLID: RED document silhouette with folded
-                        // corner + crisp white ruled lines + bold white check
-                        // mark (Knowunity-standard: one solid colour shape,
-                        // simple white interior details, no outlines).
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <path d="M14 6 Q12 6 12 8 L12 56 Q12 58 14 58 L50 58 Q52 58 52 56 L52 22 L36 6 Z" fill="#FF4B4B" />
-                          <path d="M36 6 L52 22 L38 22 Q36 22 36 20 Z" fill="#C13030" />
-                          <rect x="20" y="30" width="22" height="3" rx="1.5" fill="white" />
-                          <rect x="20" y="37" width="18" height="3" rx="1.5" fill="white" opacity="0.7" />
-                          <path d="M22 48 L28 54 L40 41" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Study Pack',
-                      svg: (
-                        // FLAT-SOLID: three orange books stacked, white spine
-                        // lines as the only inner detail.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <rect x="6" y="44" width="52" height="14" rx="3" fill="#FF9600" />
-                          <rect x="14" y="44" width="3" height="14" fill="white" opacity="0.65" />
-                          <rect x="10" y="28" width="44" height="14" rx="3" fill="#FF9600" />
-                          <rect x="18" y="28" width="3" height="14" fill="white" opacity="0.65" />
-                          <rect x="14" y="12" width="36" height="14" rx="3" fill="#FF9600" />
-                          <rect x="22" y="12" width="3" height="14" fill="white" opacity="0.65" />
-                          <path d="M44 8 L45 11 L48 12 L45 13 L44 16 L43 13 L40 12 L43 11 Z" fill="#FFC800" />
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Citations',
-                      svg: (
-                        // FLAT-SOLID: two BLUE quotation-mark blobs — the
-                        // universal "this is a cited source" pictogram.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#1CB0F6" />
-                          <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#1CB0F6" />
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Quizzes',
-                      svg: (
-                        // FLAT-SOLID: chunky pink question mark — silhouette
-                        // only, no outline, no badge. The single sparkle
-                        // accent stays as a tiny gold flourish.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <path d="M20 22 Q20 8 32 8 Q44 8 44 22 Q44 30 32 34 L32 44" stroke="#FF4B82" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                          <circle cx="32" cy="55" r="5.5" fill="#FF4B82" />
-                          <path d="M52 10 L53.5 13 L56.5 14.5 L53.5 16 L52 19 L50.5 16 L47.5 14.5 L50.5 13 Z" fill="#FFC800" />
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Flashcards',
-                      svg: (
-                        // FLAT-SOLID: two YELLOW cards (back tilted, front
-                        // bold) with white text bars. No outlines.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <rect x="20" y="14" width="34" height="42" rx="5" fill="#FFC800" opacity="0.55" transform="rotate(10 37 35)" />
-                          <rect x="10" y="10" width="34" height="42" rx="5" fill="#FFC800" />
-                          <rect x="16" y="20" width="22" height="3.5" rx="1.5" fill="white" />
-                          <rect x="16" y="28" width="18" height="3" rx="1.5" fill="white" opacity="0.75" />
-                          <rect x="16" y="35" width="20" height="3" rx="1.5" fill="white" opacity="0.75" />
-                          <rect x="16" y="42" width="14" height="3" rx="1.5" fill="white" opacity="0.75" />
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Games',
-                      svg: (
-                        // FLAT-SOLID: green gamepad silhouette. Top now has
-                        // two raised shoulder humps (where L/R bumpers sit
-                        // on a real controller) with a gentle center dip
-                        // between them — replaces the previous flat top.
-                        // D-pad + 4 white buttons stay the same.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <path d="M14 22 Q6 22 6 30 L6 44 Q6 56 18 56 Q23 56 26 50 L28 46 L36 46 L38 50 Q41 56 46 56 Q58 56 58 44 L58 30 Q58 22 50 22 Q46 17 40 21 Q36 24 32 24 Q28 24 24 21 Q18 17 14 22 Z" fill="#58CC02" />
-                          <rect x="14" y="32" width="12" height="3.5" rx="1.5" fill="white" />
-                          <rect x="18.25" y="27.75" width="3.5" height="12" rx="1.5" fill="white" />
-                          <circle cx="46" cy="30" r="3.2" fill="white" />
-                          <circle cx="52" cy="36" r="3.2" fill="white" />
-                          <circle cx="40" cy="36" r="3.2" fill="white" />
-                          <circle cx="46" cy="42" r="3.2" fill="white" />
-                        </svg>
-                      ),
-                    },
-                  ].map((f) => (
-                    <button
-                      key={f.label}
-                      type="button"
-                      onClick={() => onNavigate('signup')}
-                      className="group flex flex-col items-center gap-1.5 sm:gap-2 px-1 py-1 hover:-translate-y-1 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-md"
-                    >
-                      <span
-                        aria-hidden
-                        className="block w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 [filter:drop-shadow(0_6px_14px_rgba(0,0,0,0.30))] group-hover:[filter:drop-shadow(0_10px_18px_rgba(255,200,0,0.55))] transition-[filter] duration-300"
-                      >
-                        {f.svg}
-                      </span>
-                      <span className="text-[11px] sm:text-xs lg:text-sm font-bold text-white/90 group-hover:text-white whitespace-nowrap tracking-wide">
-                        {f.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <figure
+                className="m-0 rotate-[4deg] overflow-hidden rounded-2xl border-2 border-[#1C1917] bg-white"
+                style={{ boxShadow: '6px 6px 0 #7733B5' }}
+              >
+                <figcaption className="border-b-2 border-[#1C1917] bg-white px-3 py-2 text-left text-[14px] font-black text-[#1C1917]">Rubric breakdown</figcaption>
+                <img src="/hero-tiles/rubric-card.webp" alt="" width={520} height={908} loading="eager" decoding="async" className="block h-auto w-full" />
+              </figure>
             </div>
+                        {/* Two real comments from a report, each with its revision button. */}
+            <div
+              className="absolute bottom-20 right-[3.5%] w-[220px] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite] 2xl:bottom-16 2xl:right-[4.5%] 2xl:w-[255px]"
+              style={{ animationDelay: '3.4s' }}
+            >
+              <figure
+                className="m-0 -rotate-[4deg] overflow-hidden rounded-2xl border-2 border-[#1C1917] bg-white"
+                style={{ boxShadow: '6px 6px 0 #7733B5' }}
+              >
+                <figcaption className="border-b-2 border-[#1C1917] bg-white px-3 py-2 text-left text-[14px] font-black text-[#1C1917]">One-click fixes</figcaption>
+                <img src="/hero-tiles/feedback-card.webp" alt="" width={520} height={794} loading="eager" decoding="async" className="block h-auto w-full" />
+              </figure>
+            </div>
+            {SHOW_HERO_STUDY_TILES && (
+            <>
+            <HeroCornerTile label="Fun study games" tilt="rotate-[4deg]" position="left-[2%] bottom-72 2xl:bottom-80" delay="2.4s">
+              <HeroStudyGamesVideo />
+            </HeroCornerTile>
+            <HeroCornerTile label="Notes to flashcards" tilt="-rotate-[4deg]" position="right-[2%] bottom-64 2xl:bottom-72" delay="3.4s">
+              <video src="/hero-flashcards-hq.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover object-left-top" />
+            </HeroCornerTile>
+            </>
+            )}
           </div>
+        )}
+
+        <div className="relative z-10 mx-auto flex w-full max-w-[860px] flex-col items-center gap-4 px-4 pt-9 pb-12 text-center opacity-0 animate-hero-card-enter sm:gap-5 sm:px-6 sm:pt-12 sm:pb-16 lg:pt-14 lg:pb-20">
+          <p className="m-0 inline-flex items-center gap-2 whitespace-nowrap rounded-full border-2 border-[#1C1917] bg-white px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.06em] min-[390px]:text-[12px] sm:tracking-[0.08em] text-[#1C1917] sm:text-[13px]">
+            <span className="inline-block h-2 w-2 rounded-full bg-[#58CC02]" aria-hidden />
+            <span>Trusted by <span className="tabular-nums text-[#7733B5]">50,000+</span> students worldwide</span>
+          </p>
+
+          <h1 className="m-0 text-[2.6rem] font-black leading-[0.98] [text-wrap:balance] tracking-[-0.025em] text-[#1C1917] dark:text-stone-50 min-[390px]:text-[2.85rem] sm:text-[3.75rem] lg:text-[4.75rem]">
+            Know your grade{' '}
+            <span
+              className="inline-block -rotate-[1.5deg] rounded-[12px] border-2 border-[#1C1917] bg-[#A560E8] px-2.5 text-white sm:rounded-[16px] sm:px-3.5"
+              style={{ boxShadow: '4px 4px 0 #1C1917' }}
+            >
+              before
+            </span>{' '}
+            your professor does.
+          </h1>
+
+          <p className="m-0 max-w-[50rem] text-[17px] font-bold leading-[1.45] text-[#44403C] dark:text-stone-300 sm:text-[19px] lg:text-[20px]">
+            Paste any essay. In about a minute you get the estimated grade, a five-part rubric score and a comment on every sentence that needs work.
+          </p>
+
+          <div className="relative mt-1 w-full sm:mt-2">
+            {wideHero && (
+              <img
+                src="/hero-tiles/mascot-paper.webp"
+                alt=""
+                aria-hidden
+                width={260}
+                height={260}
+                decoding="async"
+                className="pointer-events-none absolute -right-[150px] -top-[140px] z-20 h-[150px] w-[150px] rotate-[10deg] object-contain 2xl:-right-[170px] 2xl:-top-[160px] 2xl:h-[170px] 2xl:w-[170px]"
+              />
+            )}
+            <HeroEssayGrader onSubmit={handleHeroSubmit} initialText={restoredEssay} resetSignal={gateResetSignal} />
+          </div>
+
+          <p className="m-0 mt-1 text-[13.5px] font-bold text-[#57534E] dark:text-stone-400">
+            Already have an account?{' '}
+            <button
+              type="button"
+              onClick={() => onNavigate('login')}
+              className="font-extrabold text-[#7733B5] underline decoration-2 underline-offset-[3px] hover:text-[#5F2594]"
+            >
+              Log in
+            </button>
+          </p>
         </div>
+
+        {/* Rubric strip: what every free report scores. */}
+        <div className="relative z-10 border-y-2 border-[#1C1917] bg-[#7733B5] py-3 text-white">
+          <p className="m-0 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 text-center text-[13.5px] font-black tracking-wide sm:gap-x-5 sm:text-[15px]">
+            <span>Thesis</span><span aria-hidden>·</span>
+            <span>Evidence</span><span aria-hidden>·</span>
+            <span>Analysis</span><span aria-hidden>·</span>
+            <span>Structure</span><span aria-hidden>·</span>
+            <span>Style</span><span aria-hidden>·</span>
+            <span>Every sentence commented</span>
+          </p>
         </div>
       </section>
 
@@ -2039,9 +1863,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </div>
 
-      <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
-        <LandingMotivationSection onNavigate={onNavigate} />
-      </Suspense>
+      {/* "Studying that actually sticks" (LandingMotivationSection) is hidden
+          from the landing page. To bring it back, render:
+            <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
+              <LandingMotivationSection onNavigate={onNavigate} />
+            </Suspense> */}
       {/* (Citations showcase — "Find academic sources in seconds" —
           removed from the landing flow. The essay-feedback section
           now carries that conversion job with two stacked arrow-
@@ -2405,7 +2231,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Stop losing marks you could have kept
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Try everything for $1: 7 days and 5 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
+              One essay grade a month is free, with the score, every rubric score and full feedback on the first quarter of your essay. Pro opens the whole essay, the rewrites and one-click fixes at the student launch price: $19.99 a month, not $39.99.
             </p>
           </div>
 
@@ -2554,7 +2380,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            Try everything for $1 for 7 days. Pro and Premium available with monthly or yearly billing.{' '}
+            Your first grade each month is free, no card. Pro and Premium are at the student launch price with monthly or yearly billing.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
@@ -2853,7 +2679,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
                 <div>
                   <p className="text-amber-800 font-semibold text-sm">{FREE_PLAN_STUDY_PACK_LINE}</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Try it on your own notes for $1</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Part of Pro, $19.99/mo at the launch price</p>
                 </div>
               </div>
             </div>
@@ -3002,6 +2828,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       )}
 
+      <FreeGradeGate
+        open={gateOpen}
+        words={pendingMeta?.facts.words ?? 0}
+        fileName={pendingMeta?.facts.fileName ?? null}
+        facts={pendingMeta?.facts ?? null}
+        onClose={closeGate}
+        onAuthed={handleGateAuthed}
+      />
+
       {/* ─── STICKY MOBILE CTA BAR ─────────────────────────────────────
           Slides up from the bottom on phones after the visitor scrolls
           past the hero (see stickyCtaVisible). Mirrors the hero CTA copy
@@ -3018,7 +2853,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="mx-3 mb-3 flex items-center gap-2 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white/95 dark:bg-stone-900/95 backdrop-blur px-3 py-2.5 shadow-[0_-10px_34px_-8px_rgba(0,0,0,0.3)]">
             <button
               type="button"
-              onClick={() => onNavigate('signup')}
+              onClick={scrollToHeroGrader}
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#58CC02] hover:bg-[#61E002] px-4 py-3 text-white font-extrabold text-[15px] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >

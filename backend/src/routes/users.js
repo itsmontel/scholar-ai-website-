@@ -166,6 +166,9 @@ router.post('/onboarding-survey', authenticateToken, async (req, res) => {
       target: ['A', 'Aminus', 'B', 'pass'],
       confidence: ['1', '2', '3', '4', '5'],
       deadline: ['week', 'twoweeks', 'month', 'none'],
+      // The two questions asked while the first free grade runs.
+      purpose: ['assignment', 'application', 'exam', 'curious'],
+      due: ['today', 'tomorrow', 'week', 'none'],
     };
     const ANSWER_MULTI = {
       struggles: ['marker', 'structure', 'start', 'refs', 'remember', 'time'],

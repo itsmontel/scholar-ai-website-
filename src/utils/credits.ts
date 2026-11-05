@@ -24,10 +24,12 @@ export interface CreditState {
   daysUntilReset: number | null;
   trialCredits: number;
   trialDays: number;
-  /** Free accounts: credits granted for the free week (0 once they have had a trial or plan). */
+  /** Free accounts: essay grades granted per calendar month (3). */
   freeCredits: number;
   freeCreditDays: number;
-  /** When the free credits stop working. null when there are none. */
+  /** Free accounts: when the monthly grades reset (the 1st). */
+  freeResetsAt: string | null;
+  /** Legacy free week: when the free credits stopped working. Always null now. */
   freeExpiresAt: string | null;
   freeDaysLeft: number | null;
   freeExpired: boolean;
@@ -66,7 +68,8 @@ export function parseCreditState(raw: unknown): CreditState | null {
     trialCredits: num(c.trialCredits, 3),
     trialDays: num(c.trialDays, 3),
     freeCredits: num(c.freeCredits),
-    freeCreditDays: num(c.freeCreditDays, 7),
+    freeCreditDays: num(c.freeCreditDays, 0),
+    freeResetsAt: typeof c.freeResetsAt === 'string' ? c.freeResetsAt : null,
     freeExpiresAt: typeof c.freeExpiresAt === 'string' ? c.freeExpiresAt : null,
     freeDaysLeft: typeof c.freeDaysLeft === 'number' ? c.freeDaysLeft : null,
     freeExpired: c.freeExpired === true,

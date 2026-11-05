@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, type ReactNode } from 'react';
 import DOMPurify from 'dompurify';
 import { diffWordsWithSpace } from 'diff';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
@@ -10,6 +10,8 @@ import { trackAction, getStats } from '../../data/achievements';
 import { trackEvent, trackFunnelStep } from '../../utils/analytics';
 import ActivationAnalysisCoach from '../common/ActivationAnalysisCoach';
 import SoftPaywall from '../common/SoftPaywall';
+import GradingQuestions from '../common/GradingQuestions';
+import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
 import {
   ACTIVATION_MOCK_ANALYSIS_MARKDOWN,
   ACTIVATION_OVERALL_SCORE,
@@ -27,6 +29,8 @@ import {
 } from '../../data/activationTutorialMock';
 import { persistTutorialToServer } from '../../utils/onboarding';
 import { POST_ACTIVATION_PAYWALL_PENDING_KEY } from '../../constants/paywallSession';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
+import FreePreviewDivider, { readFreePreview, type FreePreviewInfo } from '../common/FreePreviewDivider';
 
 /** Supabase/JSON occasionally returns analysis_results as a string — normalize for library reloads. */
 function normalizeSavedAnalysisResults(raw: unknown): Record<string, unknown> | null {
@@ -576,6 +580,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const [analysisTypes, setAnalysisTypes] = useState<AnalysisType[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<string>('');
   const [selectedAnalysisType, setSelectedAnalysisType] = useState<string>('comprehensive');
+  /** First free grade from the landing page: auto-run, two questions while it grades. */
+  const [freeGradeFlow, setFreeGradeFlow] = useState<boolean>(() => {
+    try { return sessionStorage.getItem(FREE_GRADE_FLOW_KEY) === '1'; } catch { return false; }
+  });
+  const freeGradeAutoRunRef = useRef(false);
+  /** Paywall opened from a locked rewrite / fix / export on a free report. */
+  const [showFixPaywall, setShowFixPaywall] = useState(false);
+  const openFixPaywall = (trigger: string) => {
+    trackEvent('paywall_view', { trigger });
+    setShowFixPaywall(true);
+  };
   const [selectedCitationStyle, setSelectedCitationStyle] = useState<string>('None');
   const [selectedGradingStyle, setSelectedGradingStyle] = useState<'us' | 'uk'>('us');
   const [isLoading, setIsLoading] = useState(false);
@@ -628,7 +643,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const [checkoutRedirecting, setCheckoutRedirecting] = useState(false);
   const checkoutInFlightRef = useRef(false);
   const [lockedFeatures, setLockedFeatures] = useState<string[]>([]);
-  const [gradeRubric, setGradeRubric] = useState<Record<string, { score: number; max_score: number; feedback: string }> | null>(null);
+  const [gradeRubric, setGradeRubric] = useState<Record<string, { score: number; max_score: number; feedback: string; feedbackLocked?: boolean }> | null>(null);
+  /** Free grade: where the marked-up quarter ends and what is hidden after it. */
+  const [previewInfo, setPreviewInfo] = useState<FreePreviewInfo | null>(null);
   const [specificRewrites, setSpecificRewrites] = useState<Array<{ original: string; rewritten: string; reason: string }> | null>(null);
   const [analysisSummary, setAnalysisSummary] = useState<{
     overall_score: number | null;
@@ -689,11 +706,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     return activationConcernDone && activationImproveDone;
   }, [activationConcernDone, activationImproveDone]);
 
-  /** Free plan: full paper + all highlight colors; comments stay Pro. */
-  const isFreePreview = useMemo(
-    () => currentPlan === 'free' && !isActivationTutorial,
-    [currentPlan, isActivationTutorial]
-  );
+  /**
+   * Free reports now carry every comment (2026-11-01); only the rewrites,
+   * one-click fixes, rubric check and export are locked, and those come
+   * through `lockedFeatures` from the server. The old comment-hiding
+   * preview is off for good.
+   */
+  const isFreePreview = false;
 
   /** Free plan: first ~50% of comprehensive narrative — shown as readable text; remainder is gated (all free sessions). */
   const freeComprehensiveAnalysisPreviewMd = useMemo(() => {
@@ -1093,6 +1112,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         }),
       });
       const data = await res.json();
+      if (openVerifyEmailIfNeeded(res.status, data)) { setCheckoutRedirecting(false); return; }
       if (!res.ok) throw new Error(data.message || 'Failed to start checkout');
       const url = data?.data?.checkoutUrl as string | undefined;
       if (url) {
@@ -1643,11 +1663,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           if (isCancelled?.()) return;
 
           const isPaid = plan === 'pro' || plan === 'premium';
+          // The server already cut a free report (analysisRedaction.js) and
+          // says what it locked; use that so a reopened report looks the same
+          // as the live one. Older responses without it keep the old locks.
           setLockedFeatures(
             !isPaid
-              ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
+              ? (Array.isArray(analysisResults.lockedFeatures)
+                  ? analysisResults.lockedFeatures
+                  : ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history'])
               : []
           );
+          setPreviewInfo(!isPaid ? readFreePreview(analysisResults.preview) : null);
 
           clearLibraryNavKeys();
           setError('');
@@ -1946,6 +1972,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     }
   };
 
+  // First free grade from the landing page: the essay is already in
+  // documentContent (textAnalysisContent), so the grade runs without a
+  // second click. The effect callback runs after render, so it can call
+  // handleAnalyze even though that is declared just below.
+  useEffect(() => {
+    if (!freeGradeFlow || freeGradeAutoRunRef.current) return;
+    if (!documentContent || !documentContent.trim() || isAnalyzing || analyzingRef.current) return;
+    freeGradeAutoRunRef.current = true;
+    void handleAnalyze();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [freeGradeFlow, documentContent]);
+
   const handleAnalyze = async () => {
     if (!selectedAnalysisType) {
       setError('Please select an analysis type');
@@ -2013,6 +2051,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     setAnalysisResult('');
     setAnnotations([]);
     setLockedFeatures([]);
+    setPreviewInfo(null);
+    trackEvent('grade_started', { words: content.trim().split(/\s+/).filter(Boolean).length, source: freeGradeFlow ? 'landing' : 'app' });
     setGradeRubric(null);
     setSpecificRewrites(null);
     setAnalysisSummary({ overall_score: null, grade_estimate: null, clarity_rating: null, top_suggestions: [] });
@@ -2072,16 +2112,27 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.errors?.[0]?.message || errorData.message || 'Analysis failed';
+        // Unverified email account past its first free grade: ask for the
+        // verify link instead of showing the paywall or an error banner.
+        if (openVerifyEmailIfNeeded(response.status, errorData)) {
+          setShowAnalysisPopup(false);
+          analyzingRef.current = false;
+          setIsAnalyzing(false);
+          return;
+        }
         const isLimitExceeded = response.status === 403 || response.status === 429;
         if (isLimitExceeded) {
+          trackEvent(errorData.proOnly ? 'pro_only_hit' : 'free_limit_hit', { feature: 'analysis' });
           setLimitExceededError(errorMessage);
           setError(errorMessage);
           setShowAnalysisPopup(false);
           analyzingRef.current = false;
           setIsAnalyzing(false);
           fetchDocuments();
+          if (errorData.upgrade) openFixPaywall(errorData.proOnly ? 'pro_only' : 'free_limit');
           return;
         }
+        trackEvent('grade_failed', { code: errorData.code || String(response.status) });
         throw new Error(errorMessage);
       }
 
@@ -2090,9 +2141,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         setSelectedDocument(result.data.documentId);
       }
       setAnalysisResult(result.data.result);
+      // The report is here: close the loading overlay. Without this the
+      // overlay stayed up at 96% over the finished report. Set before the
+      // free-grade flag flips below so the questions screen never hands
+      // over to the generic overlay.
+      setShowAnalysisPopup(false);
       try { localStorage.removeItem('textAnalysisContent'); } catch (_) {}
       setRubricAlignment(result.data.rubricAlignment ?? null);
       setLockedFeatures(result.data.lockedFeatures || []);
+      setPreviewInfo(readFreePreview(result.data.preview));
+      trackEvent('grade_completed', {
+        grade: typeof result.data.grade_estimate === 'string' ? result.data.grade_estimate : undefined,
+        score: typeof result.data.overall_score === 'number' ? result.data.overall_score : undefined,
+        source: freeGradeFlow ? 'landing' : 'app',
+      });
+      if (freeGradeFlow) {
+        try { sessionStorage.removeItem(FREE_GRADE_FLOW_KEY); } catch (_) {}
+        setFreeGradeFlow(false);
+      }
       const rubric = result.data.grade_rubric as Record<string, { score?: number }> | null | undefined;
       const rubricSum = rubric && typeof rubric === 'object'
         ? Object.values(rubric).reduce((sum: number, e) => sum + (e?.score ?? 0), 0)
@@ -2211,6 +2277,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     } finally {
       analyzingRef.current = false;
       setIsAnalyzing(false);
+      // Belt and braces: no path out of an analysis leaves the overlay up.
+      setShowAnalysisPopup(false);
       // Refresh documents to update analysis status
       fetchDocuments();
       // Dispatch custom event to notify other components
@@ -2802,6 +2870,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     );
   };
 
+  /** Free grade: put the "rest is locked" divider after the paragraph where the marked quarter ends. */
+  const withPreviewDivider = (rendered: ReactNode[], paragraphs: string[], starts: number[]): ReactNode[] => {
+    if (!previewInfo || previewInfo.hidden.total <= 0) return rendered;
+    const cut = previewInfo.cutoffIndex;
+    let idx = paragraphs.findIndex((p, i) => (starts[i] ?? 0) + p.length >= cut);
+    if (idx < 0) idx = paragraphs.length - 1;
+    const out = [...rendered];
+    out.splice(idx + 1, 0, (
+      <FreePreviewDivider key="free-preview-divider" info={previewInfo} onUnlock={() => openFixPaywall('preview_divider')} />
+    ));
+    return out;
+  };
+
   const renderHighlightedText = () => {
     if (!documentContent) {
       return <div className="text-stone-700 leading-relaxed">No document content available.</div>;
@@ -2857,7 +2938,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     return (
       <div className="text-stone-700 leading-relaxed">
-        {paragraphs.map((paragraph, paragraphIndex) => {
+        {withPreviewDivider(paragraphs.map((paragraph, paragraphIndex) => {
           const paragraphStart = paragraphStarts[paragraphIndex] ?? 0;
           const paragraphEnd = paragraphStart + paragraph.length;
           
@@ -2985,7 +3066,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               {parts}
             </p>
           );
-        })}
+        }), paragraphs, paragraphStarts)}
       </div>
     );
   };
@@ -3653,7 +3734,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         </>
                       ) : (
                         <button 
-                          onClick={() => onNavigate?.('pricing')}
+                          onClick={() => openFixPaywall('export')}
                           className="px-4 py-2 bg-[#A560E8]/20 hover:bg-[#A560E8]/30 rounded-lg border border-[#A560E8]/40 transition-colors flex items-center space-x-2 text-sm font-extrabold text-[#A560E8]"
                           title="Export your full report — PDF or Word (Pro)"
                         >
@@ -3744,7 +3825,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <span className="font-extrabold text-stone-800 dark:text-stone-200 capitalize">{key.replace(/_/g, ' ')}</span>
                           <span className="font-bold text-stone-900 dark:text-stone-100">{Math.round(Number(val.score))}/{val.max_score}</span>
                         </div>
-                        <p className="text-sm text-stone-600 dark:text-stone-400">{val.feedback}</p>
+                        {val.feedbackLocked ? (
+                          <button
+                            type="button"
+                            onClick={() => openFixPaywall('rubric_feedback')}
+                            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-[#7733B5] underline decoration-2 underline-offset-[3px] hover:text-[#5F2594]"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+                            See why with Pro
+                          </button>
+                        ) : (
+                          <p className="text-sm text-stone-600 dark:text-stone-400">{val.feedback}</p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -3990,9 +4082,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-5 leading-snug">
                         {lockedFeatures.includes('apply_revisions') && !isFreePreview ? (
                           <>
-                            Upgrade to <span className="font-semibold text-stone-600 dark:text-stone-300">Pro</span> to use{' '}
-                            <span className="font-semibold text-stone-600 dark:text-stone-300">Apply WriteScholar revision</span>{' '}
-                            and insert edits into your draft in one click.
+                            Every comment above is free. <span className="font-semibold text-stone-600 dark:text-stone-300">Pro</span> adds the{' '}
+                            <span className="font-semibold text-stone-600 dark:text-stone-300">rewrite for each one</span>{' '}
+                            and applies it to your draft in one click.
                           </>
                         ) : (
                           <>
@@ -4120,11 +4212,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onNavigate?.('pricing');
+                                  openFixPaywall('rewrite');
                                 }}
                                 className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#F3EAFF] dark:bg-[#A560E8]/20 hover:bg-[#A560E8]/20 text-[#A560E8] border-2 border-b-4 border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#A560E8] dark:border-[#8A48C7]/40 transition-all"
                               >
-                                Pro: apply revisions ($19.99/mo)
+                                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Unlock the rewrite for this sentence
                               </button>
                             )}
                           </div>
@@ -4215,11 +4310,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onNavigate?.('pricing');
+                                  openFixPaywall('rewrite');
                                 }}
                                 className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#F3EAFF] dark:bg-[#A560E8]/20 hover:bg-[#A560E8]/20 text-[#A560E8] border-2 border-b-4 border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#A560E8] dark:border-[#8A48C7]/40 transition-all"
                               >
-                                Pro: apply revisions ($19.99/mo)
+                                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Unlock the rewrite for this sentence
                               </button>
                             )}
                           </div>
@@ -4299,11 +4397,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
                           <button
                             type="button"
-                            onClick={startProMonthlyCheckout}
+                            onClick={() => openFixPaywall('rewrites_section')}
                             disabled={checkoutRedirecting}
                             className="px-5 py-2.5 bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
                           >
-                            {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full annotations'}
+                            {checkoutRedirecting ? 'Opening checkout…' : 'Unlock the rewrites'}
                           </button>
                           <div className="text-sm font-bold">
                             <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
@@ -4351,11 +4449,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 )}
                               </div>
                             ) : (
-                              <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400 space-y-0.5">
-                                {analysisSummary.top_suggestions.slice(0, 3).map((s, i) => (
-                                  <li key={i}>{s}</li>
-                                ))}
-                              </ul>
+                              <>
+                                <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400 space-y-0.5">
+                                  {analysisSummary.top_suggestions.slice(0, 3).map((s, i) => (
+                                    <li key={i}>{s}</li>
+                                  ))}
+                                </ul>
+                                {previewInfo && previewInfo.topSuggestionsLocked > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => openFixPaywall('top_suggestions')}
+                                    className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-extrabold text-[#7733B5] underline decoration-2 underline-offset-[3px] hover:text-[#5F2594]"
+                                  >
+                                    +{previewInfo.topSuggestionsLocked} more with Pro
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         )}
@@ -5061,8 +5170,37 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         />
       )}
 
+      {showFixPaywall && (
+        <SoftPaywall
+          variant="default"
+          canStartFreeTrial={false}
+          userName={
+            user?.firstName?.trim() ||
+            (user?.name?.trim() && !user.name.includes('@') ? user.name.trim().split(/\s+/)[0] ?? '' : '') ||
+            ''
+          }
+          essayUnlock={{
+            grade: typeof analysisSummary.grade_estimate === 'string' ? analysisSummary.grade_estimate : null,
+            notes: annotations.filter((a) => a.type !== 'strong').length,
+            sections: gradeRubric && typeof gradeRubric === 'object' ? Object.keys(gradeRubric).length : 0,
+            fixes: analysisSummary.top_suggestions.length,
+          }}
+          onStartTrial={() => trackEvent('checkout_started', { trigger: 'fix_paywall' })}
+          onDismiss={() => {
+            trackEvent('paywall_dismiss', { trigger: 'fix_paywall' });
+            setShowFixPaywall(false);
+          }}
+          onNavigate={onNavigate}
+        />
+      )}
+
       {/* Analysis Popup Animation */}
-      <GenerationOverlay open={showAnalysisPopup} variant="analyze" />
+      <GenerationOverlay open={showAnalysisPopup && !freeGradeFlow} variant="analyze" />
+      <GradingQuestions
+        open={showAnalysisPopup && freeGradeFlow}
+        words={documentContent ? documentContent.trim().split(/\s+/).filter(Boolean).length : 0}
+        email={user?.email ?? null}
+      />
     </LoggedInPageShell>
   );
 };

@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_DAYS, TRIAL_PRICE } from '../../config/pricing';
+import {
+  WELCOME_DISCOUNT_AT_SIGNUP,
+  WELCOME_PROMO_CODE,
+  TRIAL_DAYS,
+  TRIAL_PRICE,
+  LAUNCH_OFFER_ENABLED,
+  STANDARD_MONTHLY_PRICE,
+  LIST_MONTHLY_PRICE,
+  launchSavingPercent,
+} from '../../config/pricing';
 
 interface PromoBannerProps {
   /** Promo code shown in the chip (also used to scope the dismissal cookie). */
@@ -14,8 +23,9 @@ interface PromoBannerProps {
 }
 
 /**
- * Front-door offer banner. Trial mode sells the $1 trial; when the
- * welcome discount is on it shows the 50% off code instead.
+ * Front-door offer banner. Launch mode sells the student launch price
+ * (Pro $19.99 against the $39.99 list price). Trial mode and the 50%
+ * code are kept for when either is switched back on in pricing.ts.
  * Landing uses brand gold; the dashboard keeps the purple workspace strip.
  */
 export default function PromoBanner({
@@ -25,10 +35,13 @@ export default function PromoBanner({
   ctaLabel,
 }: PromoBannerProps) {
   const trialMode = !WELCOME_DISCOUNT_AT_SIGNUP && TRIAL_DAYS > 0;
-  const label = ctaLabel ?? (trialMode ? 'Claim offer' : 'Claim 50% off');
-  const storageKey = trialMode
-    ? `ws_promo_dismissed_${variant}_trial_${TRIAL_PRICE}`
-    : `ws_promo_dismissed_${variant}_${code}`;
+  const launchMode = !WELCOME_DISCOUNT_AT_SIGNUP && !trialMode && LAUNCH_OFFER_ENABLED;
+  const label = ctaLabel ?? (trialMode || launchMode ? 'Claim offer' : 'Claim 50% off');
+  const storageKey = launchMode
+    ? `ws_promo_dismissed_${variant}_launch_${STANDARD_MONTHLY_PRICE.pro}`
+    : trialMode
+      ? `ws_promo_dismissed_${variant}_trial_${TRIAL_PRICE}`
+      : `ws_promo_dismissed_${variant}_${code}`;
 
   const [dismissed, setDismissed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -39,7 +52,7 @@ export default function PromoBanner({
     }
   });
 
-  if ((!WELCOME_DISCOUNT_AT_SIGNUP && !trialMode) || dismissed) return null;
+  if ((!WELCOME_DISCOUNT_AT_SIGNUP && !trialMode && !launchMode) || dismissed) return null;
 
   const handleDismiss = () => {
     try {
@@ -51,11 +64,17 @@ export default function PromoBanner({
   };
 
   const isGold = variant === 'gold';
+  const accent = isGold ? 'text-[#5A4500]' : 'text-[#FFD84D]';
+  const regionLabel = launchMode
+    ? 'Student launch price'
+    : trialMode
+      ? `$${TRIAL_PRICE} trial`
+      : 'First month discount';
 
   return (
     <div
       role="region"
-      aria-label={trialMode ? `$${TRIAL_PRICE} trial` : 'First month discount'}
+      aria-label={regionLabel}
       className={
         isGold
           ? 'relative overflow-hidden border-b-2 border-[#D4A300] bg-[#FFC800]'
@@ -74,9 +93,21 @@ export default function PromoBanner({
             className={`text-[12px] sm:text-[13px] font-extrabold ${isGold ? 'text-[#3C3C3C]' : 'text-white'}`}
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
-            {trialMode ? (
+            {launchMode ? (
               <>
-                <span className={isGold ? 'text-[#5A4500]' : 'text-[#FFD84D]'}>New student offer:</span>
+                <span className={accent}>Student launch price:</span>{' '}
+                Pro for{' '}
+                <span className={`line-through decoration-2 ${isGold ? 'text-[#3C3C3C]/55' : 'text-white/60'}`}>
+                  ${LIST_MONTHLY_PRICE.pro}
+                </span>{' '}
+                ${STANDARD_MONTHLY_PRICE.pro}/mo
+                <span className="hidden sm:inline">
+                  {' '}· save {launchSavingPercent('pro')}% while it lasts
+                </span>
+              </>
+            ) : trialMode ? (
+              <>
+                <span className={accent}>New student offer:</span>
                 {' '}Try everything for ${TRIAL_PRICE} today
               </>
             ) : (

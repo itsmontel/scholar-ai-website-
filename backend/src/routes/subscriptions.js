@@ -24,6 +24,17 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const isEmbedded = embedded === true;
 
+    // Off by default: a card is stronger proof of a real person than an
+    // email link, and an inbox detour at the moment of paying loses sales.
+    // Free-grade abuse is handled by unverifiedGradeGuard, not here.
+    // Set REQUIRE_VERIFIED_EMAIL_FOR_CHECKOUT=true on Railway to turn it on.
+    if (process.env.REQUIRE_VERIFIED_EMAIL_FOR_CHECKOUT === 'true' && req.user.email_verified !== true) {
+      const { verifyEmailResponse } = require('../services/unverifiedGradeGuard');
+      const body = verifyEmailResponse(req.user, 'checkout');
+      body.message = `Verify your email before upgrading. We sent a link to ${req.user.email}.`;
+      return res.status(403).json(body);
+    }
+
     if (!planType || !billingCycle) {
       return res.status(400).json({
         success: false,
@@ -98,7 +109,12 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     // email, and never for an account that has subscribed before. The $1
     // is a one-off line item (createCheckoutSession); the plan then bills
     // at full price when the trial ends.
+    // creditService.TRIAL_DAYS is 0 since the free first grade replaced
+    // the trial (2026-11-01), so any trialPeriodDays an older client still
+    // sends is ignored and checkout is the plain subscription.
+    const trialsEnabled = require('../services/creditService').TRIAL_DAYS > 0;
     let trialDays =
+      trialsEnabled &&
       trialPeriodDays != null &&
       Number.isFinite(Number(trialPeriodDays)) &&
       Number(trialPeriodDays) > 0

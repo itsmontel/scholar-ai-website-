@@ -8,8 +8,9 @@ import {
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, TRIAL_PRICE, TRIAL_CREDITS, CHECKOUT_OFFER_KEY } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, TRIAL_PRICE, TRIAL_CREDITS, CHECKOUT_OFFER_KEY, LAUNCH_OFFER_ENABLED, LAUNCH_OFFER_LABEL, LAUNCH_OFFER_FOOTNOTE, LIST_MONTHLY_PRICE, launchSaving } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -141,7 +142,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            // New customers start with the $1 trial (7 days, 5 credits). The
+            // Trials are retired (TRIAL_DAYS = 0); the spread below is a no-op. The
             // backend drops it for anyone who has trialed or paid before.
             ...(newCustomer && TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
             // Trial checkout is list price after the trial. Campaign
@@ -155,6 +156,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         });
 
         const data = await response.json();
+        if (openVerifyEmailIfNeeded(response.status, data)) { setProcessingPlan(null); return; }
         if (data.success && data.data?.checkoutUrl) {
           try {
             sessionStorage.setItem(
@@ -232,8 +234,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
-        'Know exactly what’s costing you marks: every comment, rewrite, and one-click fix',
-        'See your score and rubric breakdown before your professor does',
+        'A rewrite for every comment, applied to your draft in one click',
+        'Check any essay against your professor’s rubric',
         'Walk into exams ready with full flashcards, quizzes, crossword, and Crater Blast',
         'References done right in every citation style, plus PDF/Word export',
         'Get through any reading in minutes with the Paper Summarizer',
@@ -243,9 +245,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: true,
       buttonText: !user
-        ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}`
+        ? TRIAL_DAYS > 0 ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : 'Start Pro'
         : currentPlan === 'free'
-          ? newCustomer && TRIAL_DAYS > 0 ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : 'Upgrade to Pro'
+          ? newCustomer && TRIAL_DAYS > 0 ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : 'Start Pro'
           : 'Switch to Pro',
       buttonAction: () => handlePlanAction('pro'),
     },
@@ -265,9 +267,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: false,
       buttonText: !user
-        ? `Try Premium for $${TRIAL_PRICE}`
+        ? TRIAL_DAYS > 0 ? `Try Premium for $${TRIAL_PRICE}` : 'Start Premium'
         : currentPlan === 'free'
-          ? newCustomer && TRIAL_DAYS > 0 ? `Try Premium for $${TRIAL_PRICE}` : 'Upgrade to Premium'
+          ? newCustomer && TRIAL_DAYS > 0 ? `Try Premium for $${TRIAL_PRICE}` : 'Start Premium'
           : 'Switch to Premium',
       buttonAction: () => handlePlanAction('premium'),
     }
@@ -295,8 +297,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       answer: "We accept Visa and Mastercard payments processed securely through Stripe. All transactions are encrypted and secure."
     },
     {
-      question: "Do you offer student discounts?",
-      answer: "No, we do not offer any discounts or special pricing. All plans are priced as shown with no exceptions."
+      question: "Is the launch price really a discount?",
+      answer: "Yes. Pro is $19.99 a month and Premium $39.99 a month at the student launch price. The list prices are $39.99 and $59.99, and that is what the plans move to after launch. Subscribe now and your price stays where it is for as long as you keep the plan."
     },
     {
       question: "Is there a money-back guarantee?",
@@ -358,7 +360,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              Try everything for $1: 7 days and 5 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
+              One essay grade a month is free, with the score, every rubric score and full feedback on the first quarter of your essay. Pro opens the whole essay, the rewrites and one-click fixes at the student launch price: $19.99 a month, not $39.99.
             </p>
           </div>
 
@@ -482,8 +484,25 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                           </span>
                         )}
                       </div>
+                    ) : LAUNCH_OFFER_ENABLED && (plan.id === 'pro' || plan.id === 'premium') ? (
+                      /* Student launch price against the list price it moves to after launch. */
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-2xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2 decoration-[#FF4B4B]">
+                          ${LIST_MONTHLY_PRICE[plan.id].toFixed(2)}
+                        </span>
+                        <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
+                          ${plan.monthlyPrice.toFixed(2)}
+                          <span className="ml-1 text-base font-bold text-stone-500 dark:text-stone-400">/mo</span>
+                        </span>
+                        <span className="inline-flex items-center rounded-lg bg-[#FFC800] px-2 py-0.5 text-xs font-extrabold text-[#5A4500] border-2 border-[#D4A300]">
+                          {LAUNCH_OFFER_LABEL} · save ${launchSaving(plan.id as 'pro' | 'premium')}/mo
+                        </span>
+                        <span className="text-stone-500 dark:text-stone-400 text-xs">
+                          {LAUNCH_OFFER_FOOTNOTE}
+                        </span>
+                      </div>
                     ) : newCustomer && TRIAL_DAYS > 0 && (plan.id === 'pro' || plan.id === 'premium') ? (
-                      /* New customers: the $1 trial leads, then the real price. */
+                      /* Legacy trial display, unreachable while TRIAL_DAYS = 0. */
                       <div className="flex flex-col items-center gap-1">
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
                           ${TRIAL_PRICE}
@@ -670,7 +689,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
-                : 'Try everything for $1 for 7 days. Cancel anytime.'}
+                : 'Your first grade each month is free, no card. Pro is $19.99 a month at the launch price. Cancel anytime.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

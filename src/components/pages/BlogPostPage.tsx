@@ -537,7 +537,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
               </div>
             </div>
 
-            <BlogPostCta onNavigate={onNavigate} primaryPage="signup" primaryLabel="Try it for $1 →" />
+            <BlogPostCta onNavigate={onNavigate} primaryPage="signup" primaryLabel="Grade my essay free →" />
 
             <div className="mt-10">
               <NewsletterSubscription variant="blog" />

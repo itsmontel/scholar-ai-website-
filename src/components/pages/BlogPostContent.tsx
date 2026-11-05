@@ -187,7 +187,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Turn your notes into a finals study pack</h2>
           <p className={p}>
-            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days, which covers finals week.
+            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>get Pro</a> at the student launch price, $19.99 a month, which covers finals week.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Make my finals study pack →
@@ -352,7 +352,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Get feedback on your own draft</h2>
           <p className={p}>
-            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives professor-style feedback on writing you did yourself: an estimated grade, a rubric breakdown, and every line marked green, amber or red, so you can see where the argument is weak and fix it in your own words. Your essays stay private to your account and are never used to train AI. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives professor-style feedback on writing you did yourself: an estimated grade, a rubric breakdown, and every line marked green, amber or red, so you can see where the argument is weak and fix it in your own words. Your essays stay private to your account and are never used to train AI. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>grade three essays a month free</a>, no card.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my essay before I submit →
@@ -1869,7 +1869,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
               {
                 question: 'Can I check my grade more than once?',
                 answer:
-                  'Yes — and you should. The grade-check → revise → re-check loop is the whole point. On WriteScholar, the $1 trial gives you 5 credits (1 per analysis) to try it on your own writing, and Pro gives you 99 a month for weekly papers, with unused credits rolling over.',
+                  'Yes — and you should. The grade-check → revise → re-check loop is the whole point. On WriteScholar, your first grade each month is free, so you can try it on your own writing, and Pro gives you 99 credits a month plus the rewrites for weekly papers, with unused credits rolling over.',
               },
               {
                 question: 'Does it work for research papers and longer essays?',
@@ -2034,7 +2034,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The biggest mistake students make is turning in first drafts. A single pass with an AI essay checker catches issues you would have missed. Weak thesis. Flabby transitions. Missing evidence. Citation errors. The fixes are usually quick. A stronger draft goes in. Better feedback comes back from your professor. Need to stay focused while you revise? <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> blocks distracting sites until you study or solve a puzzle. Fewer tabs, fewer rabbit holes.
           </p>
           <p className={p}>
-            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. You can try it for $1 for 7 days.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Your first grade each month is free, no card.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check your essay free →
@@ -2536,7 +2536,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             For flashcards, you can study them directly in the browser with a flip-card interface, or export them for offline use. Quizzes give you immediate feedback on each question, with explanations for correct answers. Crosswords can be solved interactively online or printed for pencil-and-paper solving. All your generated materials are saved to your account, so you can return to them anytime.
           </p>
           <p className={p}>
-            The best part? You can try all of these tools for free. WriteScholar's $1 trial gives you 7 days and 5 credits to build study packs from your own notes before committing to a subscription. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
+            The best part? You can start for free. WriteScholar grades three essays a month at no cost, and Pro ($19.99/mo at the student launch price) adds study packs built from your own notes. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
           </p>
 
           <ExpandedAiStudyTools handleNavigate={handleNavigate} />

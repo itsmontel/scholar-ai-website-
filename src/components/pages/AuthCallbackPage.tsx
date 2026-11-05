@@ -1,4 +1,47 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { clearPendingEssay, readPendingEssay } from '../common/FreeGradeGate';
+import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
+import { ONBOARDING_ENABLED } from '../../config/featureFlags';
+
+/**
+ * An essay pasted on the landing page before "Continue with Google"
+ * is waiting in localStorage. Hand it to the analysis page instead of
+ * dropping the person on the dashboard. Returns true when it did.
+ */
+function resumePendingGrade(onNavigate: (page: string) => void): boolean {
+  const pending = readPendingEssay();
+  if (!pending) return false;
+  try {
+    localStorage.setItem('textAnalysisContent', pending.text);
+    localStorage.removeItem('viewAnalysisDocumentId');
+    localStorage.removeItem('viewAnalysisType');
+    localStorage.removeItem('freshUploadDocumentId');
+    localStorage.removeItem('selectedDocumentId');
+    sessionStorage.setItem(FREE_GRADE_FLOW_KEY, '1');
+  } catch { /* ignore */ }
+  clearPendingEssay();
+  onNavigate('analysis');
+  return true;
+}
+
+/**
+ * A Google sign-up from the landing page's sign-up box skips the long
+ * onboarding, the same as an email sign-up from that box (which the
+ * server marks done when it creates the account). Without this, the
+ * first refresh after the grade dropped them into the full onboarding.
+ */
+async function markFreeGradeOnboarded(token: string): Promise<boolean> {
+  if (!readPendingEssay()) return false;
+  try {
+    const res = await fetch(
+      `${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/users/complete-onboarding`,
+      { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 interface AuthCallbackPageProps {
   onNavigate: (page: string) => void;
@@ -67,11 +110,18 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             // Network error — use OAuth payload values
           }
 
+          if (!onboardingCompleted && (await markFreeGradeOnboarded(token))) {
+            onboardingCompleted = true;
+          }
+
           const finalUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
           localStorage.setItem('user', JSON.stringify(finalUser));
           onLogin(finalUser);
 
-          setTimeout(() => onNavigate(onboardingCompleted ? 'dashboard' : 'onboarding'), 800);
+          setTimeout(() => {
+            if (resumePendingGrade(onNavigate)) return;
+            onNavigate(onboardingCompleted || !ONBOARDING_ENABLED ? 'dashboard' : 'onboarding');
+          }, 800);
           return;
         }
 
@@ -84,10 +134,13 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           if (storedUser) {
             try {
               const p = JSON.parse(storedUser);
-              nextPage = p.onboardingCompleted === true ? 'dashboard' : 'onboarding';
+              nextPage = p.onboardingCompleted === true || !ONBOARDING_ENABLED ? 'dashboard' : 'onboarding';
             } catch (_) {}
           }
-          setTimeout(() => onNavigate(nextPage), 300);
+          setTimeout(() => {
+            if (resumePendingGrade(onNavigate)) return;
+            onNavigate(nextPage);
+          }, 300);
           return;
         }
 

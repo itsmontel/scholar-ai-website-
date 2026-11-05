@@ -17,6 +17,7 @@ const { parseDeviceFromUserAgent } = require('../utils/deviceParser');
 const userService = require('../services/userService');
 const streakService = require('../services/streakService');
 const appleAuthService = require('../services/appleAuthService');
+const { isDisposableEmail } = require('../utils/disposableEmailDomains');
 
 const router = express.Router();
 
@@ -73,19 +74,150 @@ const verifyAppleIdentityToken = async (identityToken) => {
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
+/**
+ * One account per inbox, and no throwaway inboxes. Shared by /register
+ * and /quick-register. Returns a response payload when sign-up must stop,
+ * null when it may go ahead.
+ */
+const signupBlocker = async (email) => {
+  if (isDisposableEmail(email)) {
+    return {
+      status: 400,
+      body: {
+        success: false,
+        code: 'DISPOSABLE_EMAIL',
+        message: 'Please use your school or personal email. Temporary inboxes cannot be used for a free account.',
+      },
+    };
+  }
+  const existingUser = await userService.findUserByInbox(email);
+  if (existingUser) {
+    return {
+      status: 409,
+      body: {
+        success: false,
+        code: 'ACCOUNT_EXISTS',
+        message: 'You already have an account with this email. Log in to keep going.',
+        email: existingUser.email,
+        hasPassword: !!existingUser.password_hash,
+        hasGoogle: !!existingUser.google_id,
+      },
+    };
+  }
+  return null;
+};
+
+/** Add a new account to the marketing list unless that address opted out before. */
+const addToMarketingList = async (email, userId) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    if (await isMarketingEmailBlocked(normalizedEmail)) return;
+    const unsubscribeCheck = await query(
+      'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
+      [normalizedEmail]
+    );
+    if (unsubscribeCheck.rows.length === 0) {
+      await query(
+        `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
+         VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+         ON CONFLICT (email) DO UPDATE SET user_id = $2, updated_at = CURRENT_TIMESTAMP`,
+        [normalizedEmail, userId]
+      );
+    } else if (unsubscribeCheck.rows[0].is_subscribed) {
+      await query(
+        'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+        [userId, normalizedEmail]
+      );
+    }
+  } catch (emailSubError) {
+    console.error('Error adding user to email subscription list:', emailSubError);
+  }
+};
+
+const publicUser = (user) => ({
+  id: user.id,
+  email: user.email,
+  username: user.username,
+  firstName: user.first_name,
+  lastName: user.last_name,
+  subscriptionPlan: user.subscription_plan,
+  subscriptionStatus: user.subscription_status,
+  emailVerified: user.email_verified === true,
+  onboardingCompleted: user.onboarding_completed || false,
+  welcomeTutorialCompleted: user.welcome_tutorial_completed || false,
+});
+
+// @route   POST /api/auth/quick-register
+// @desc    The free-grade gate: an email is enough to start. The account
+//          is created with a random password and signed in at once, so
+//          the grade runs without waiting for an email. The welcome email
+//          carries a set-password link (which also verifies the address)
+//          for coming back later. Onboarding is marked complete: the
+//          report is the onboarding.
+// @access  Public
+router.post('/quick-register', async (req, res) => {
+  try {
+    const rawEmail = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(rawEmail) || rawEmail.length > 255) {
+      return res.status(400).json({ success: false, code: 'INVALID_EMAIL', message: 'That email does not look right. Check it and try again.' });
+    }
+    const email = rawEmail.toLowerCase();
+
+    // The gate asks for a password so the account is a real login from
+    // the start. Older clients that send none still get an account; they
+    // can set a password later through "forgot password".
+    const rawPassword = typeof req.body?.password === 'string' ? req.body.password : '';
+    if (rawPassword && (rawPassword.length < 8 || rawPassword.length > 128)) {
+      return res.status(400).json({ success: false, code: 'WEAK_PASSWORD', message: 'Use at least 8 characters for your password.' });
+    }
+
+    const blocked = await signupBlocker(email);
+    if (blocked) return res.status(blocked.status).json(blocked.body);
+
+    const passwordHash = await bcrypt.hash(rawPassword || crypto.randomBytes(32).toString('hex'), 12);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+    const user = await userService.createUser({
+      email,
+      password_hash: passwordHash,
+      institution: null,
+      research_field: null,
+      subscription_plan: 'free',
+      subscription_status: 'active',
+      is_active: true,
+      email_verified: false,
+      email_verification_token: verificationToken,
+      onboarding_completed: true,
+      signup_device: parseDeviceFromUserAgent(req.headers['user-agent']),
+    });
+
+    await addToMarketingList(email, user.id);
+    streakService.recordLogin(user.id).catch(() => {});
+
+    // The first grade runs without waiting for this; the link unlocks
+    // the rest of the month's free grades. Never blocks the response.
+    emailService.sendFreeGradeWelcomeEmail(email, verificationToken).catch((err) => {
+      console.error('Free grade welcome email failed:', err?.message || err);
+    });
+
+    const token = generateToken(user.id);
+    res.status(201).json({
+      success: true,
+      message: 'Account created',
+      data: { user: publicUser(user), token },
+    });
+  } catch (error) {
+    console.error('Quick registration error:', error);
+    res.status(500).json({ success: false, message: 'We could not create your account. Please try again.' });
+  }
+});
+
 router.post('/register', validateRegister, async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await userService.findUserByEmail(email);
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User with this email already exists'
-      });
-    }
+    const blocked = await signupBlocker(email);
+    if (blocked) return res.status(blocked.status).json(blocked.body);
 
     // Hash password
     const saltRounds = 12;
@@ -113,40 +245,7 @@ router.post('/register', validateRegister, async (req, res) => {
 
     const user = await userService.createUser(userData);
 
-    // Add user to email subscription list (only if they haven't unsubscribed)
-    try {
-      const normalizedEmail = email.toLowerCase().trim();
-
-      if (await isMarketingEmailBlocked(normalizedEmail)) {
-        // Permanent blocklist — never re-add for marketing.
-      } else {
-      // Check if email is already unsubscribed
-      const unsubscribeCheck = await query(
-        'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
-        [normalizedEmail]
-      );
-
-      if (unsubscribeCheck.rows.length === 0) {
-        // Email not in list, add it
-        await query(
-          `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
-           VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-           ON CONFLICT (email) DO UPDATE SET user_id = $2, updated_at = CURRENT_TIMESTAMP`,
-          [normalizedEmail, user.id]
-        );
-      } else if (unsubscribeCheck.rows[0].is_subscribed) {
-        // Email exists and is subscribed, update user_id if needed
-        await query(
-          'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
-          [user.id, normalizedEmail]
-        );
-      }
-      // If email is unsubscribed, don't add them back
-      }
-    } catch (emailSubError) {
-      console.error('Error adding user to email subscription list:', emailSubError);
-      // Don't fail registration if email subscription fails
-    }
+    await addToMarketingList(email, user.id);
 
     // Send verification email
     const emailResult = await emailService.sendVerificationEmail(email, emailVerificationToken);
@@ -214,14 +313,11 @@ router.post('/login', validateLogin, async (req, res) => {
       });
     }
 
-    // Check if email is verified
-    if (!user.email_verified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Please verify your email address before logging in. Check your inbox for a verification link.',
-        requiresEmailVerification: true
-      });
-    }
+    // Unverified accounts may log in: an email sign-up from the free
+    // grade gate has to be able to come back to its report. What an
+    // unverified account cannot do is spend more than its first free
+    // grade (see services/unverifiedGradeGuard.js); the client reads
+    // emailVerified from the user below.
 
     // Update last login
     const now = new Date().toISOString();
@@ -636,7 +732,7 @@ router.post('/reset-password', async (req, res) => {
 
     // Update password and clear reset token
     await query(
-      'UPDATE users SET password_hash = $1, password_reset_token = NULL, password_reset_expires = NULL WHERE id = $2',
+      'UPDATE users SET password_hash = $1, password_reset_token = NULL, password_reset_expires = NULL, email_verified = true, email_verification_token = NULL WHERE id = $2',
       [passwordHash, result.rows[0].id]
     );
 

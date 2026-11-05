@@ -179,7 +179,7 @@ const FAQS = [
   },
   {
     q: 'How much does the essay grader cost?',
-    a: '$1 gets you a 7-day trial with 5 credits, and each essay analysis uses 1, so you can grade your own essays with the full rubric, every comment and one-click fixes. After that, Pro is $19.99/mo for 99 credits, and unused credits roll over. Cancel anytime.',
+    a: 'One essay grade a month is free, with the score, every rubric score and full feedback on the first quarter of the essay, and no card. Pro is $19.99/mo at the student launch price (list $39.99) for 99 credits, feedback on the whole essay, the rewrite behind every comment and one-click fixes, and unused credits roll over. Cancel anytime.',
   },
   {
     q: 'What kinds of essays can it grade?',
@@ -246,7 +246,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
       className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold px-8 sm:px-10 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_34px_-14px_rgba(165,96,232,0.6)]"
     >
       Grade my essay
-      <span className="font-semibold text-white/75">$1 for 7 days</span>
+      <span className="font-semibold text-white/75">Free, no card</span>
       <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
       </svg>
@@ -277,7 +277,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
             <div className="mt-8 flex flex-col items-center gap-3">
               {cta}
               <p className="text-[12px] sm:text-sm font-bold text-stone-500 dark:text-stone-400">
-                $1 for 7 days · cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
+                1 free grade a month · no card. The grade is an estimate to sharpen your draft, not a guarantee.
               </p>
             </div>
           </div>
@@ -314,15 +314,15 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
           </div>
           <Frame title="WriteScholar — AI essay checker">
             <video
-              src="/writescholar-essay-checker-demo.mp4"
-              poster="/hero-vid-poster.jpg"
+              src="/CapstoneVidKenzie.mp4"
+              poster="/essay-grader-report-poster.jpg"
               autoPlay
               muted
               loop
               playsInline
               preload="metadata"
               className="w-full h-auto block bg-stone-950"
-              aria-label="Screen recording of WriteScholar grading an essay and applying fixes"
+              aria-label="Screen recording of a WriteScholar report: the estimated grade, the rubric breakdown and a comment on every highlighted sentence"
             />
           </Frame>
         </div>

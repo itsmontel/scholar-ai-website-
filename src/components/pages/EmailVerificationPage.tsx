@@ -8,6 +8,12 @@ interface EmailVerificationPageProps {
 const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
   const [countdown, setCountdown] = useState(3);
   const [verificationStatus, setVerificationStatus] = useState<'success' | 'error' | 'loading'>('loading');
+  // Students from the free-grade gate are usually still signed in on this
+  // device: take them back to the app, not to a login form.
+  const [signedIn] = useState(() => {
+    try { return !!localStorage.getItem('authToken'); } catch { return false; }
+  });
+  const nextPage = signedIn ? 'dashboard' : 'login';
 
   useEffect(() => {
     // Check URL parameters to determine verification status
@@ -17,6 +23,10 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
     if (verified === 'true') {
       setVerificationStatus('success');
+      try {
+        const stored = JSON.parse(localStorage.getItem('user') || 'null');
+        if (stored) localStorage.setItem('user', JSON.stringify({ ...stored, emailVerified: true }));
+      } catch { /* ignore */ }
     } else if (error) {
       setVerificationStatus('error');
     } else {
@@ -30,7 +40,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            onNavigate('login');
+            onNavigate(nextPage);
             return 0;
           }
           return prev - 1;
@@ -39,7 +49,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
       return () => clearInterval(timer);
     }
-  }, [onNavigate, verificationStatus]);
+  }, [onNavigate, verificationStatus, nextPage]);
 
   if (verificationStatus === 'loading') {
     return (
@@ -131,25 +141,29 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
           </h1>
 
           <p className="text-stone-600 dark:text-stone-400 font-medium mb-2">
-            Your email has been verified. Welcome to WriteScholar!
+            {signedIn
+              ? 'Your account is confirmed. Your free grade each month is yours to keep.'
+              : 'Your email has been verified. Welcome to WriteScholar!'}
           </p>
           <p className="text-stone-500 dark:text-stone-500 text-sm mb-6">
-            Please log in to continue. You&apos;ll then complete a quick onboarding to set up your account.
+            {signedIn
+              ? 'Paste your next draft and see how the grade moves.'
+              : 'Log in with your email and password to continue.'}
           </p>
 
           {/* Countdown */}
           <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 dark:border-[#A560E8]/30 rounded-2xl p-4 mb-6">
             <p className="text-[#7733B5] dark:text-[#C9A0F0] text-sm font-bold">
-              Redirecting to login in {countdown} second{countdown === 1 ? '' : 's'}…
+              {signedIn ? 'Taking you back' : 'Redirecting to login'} in {countdown} second{countdown === 1 ? '' : 's'}…
             </p>
           </div>
 
           {/* Manual redirect button */}
           <button
-            onClick={() => onNavigate('login')}
+            onClick={() => onNavigate(nextPage)}
             className="w-full inline-flex items-center justify-center rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white py-3.5 font-extrabold border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
           >
-            Continue to login
+            {signedIn ? 'Grade my next essay' : 'Continue to login'}
           </button>
         </div>
       </div>

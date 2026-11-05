@@ -2,15 +2,17 @@
  * Credits
  *
  * Every essay analysis, study pack and citation search costs 1 credit.
- *   Free     FREE_CREDITS within 7 days (never-paid accounts; 0 = off, current)
- *   Trial    5 credits ($1, 7-day trial)
+ *   Free     FREE_CREDITS essay grades per calendar month (current: 3)
+ *   Trial    retired 2026-11-01 (TRIAL_DAYS = 0); constants kept for old copy
  *   Pro      99 credits per billing period
  *   Premium  199 credits per billing period
  *
- * Free credits buy the preview: essay grades come back with the
- * highlights and the overall grade but no comments or rubric (see
- * analysisRedaction.js), and study packs open the lesson and quiz.
- * Accounts that have ever had a trial or a paid plan get no free credits.
+ * Free credits buy essay grades only: the grade, score, rubric and every
+ * comment come back in full, and the rewrites, one-click fixes, rubric
+ * check and export stay locked (see analysisRedaction.js). Study packs
+ * and citation searches are Pro, so a free account cannot spend a credit
+ * on them. Free grades are 200 to 10,000 words (FREE_GRADE_MIN_WORDS /
+ * FREE_GRADE_MAX_WORDS) and reset on the 1st of each month (UTC).
  *
  * Unused credits roll into the next period, up to CREDIT_CAP in total.
  * Trial credits roll into the first paid month. A period that starts
@@ -33,16 +35,24 @@ const supabaseServiceRole = createClient(
 
 const CREDIT_CAP = 499;
 const TRIAL_CREDITS = 5;
-const TRIAL_DAYS = 7;
+// The $1 trial is retired: the front door is now a free first grade
+// (FREE_CREDITS a month, no card). 0 makes checkout ignore any
+// trialPeriodDays a client still sends.
+const TRIAL_DAYS = 0;
 const MONTHLY_CREDITS = { pro: 99, premium: 199 };
-// Free week for never-paid accounts. Off since the $1 trial became the
-// way in (2026-10-27); set FREE_CREDITS=3 to bring it back.
+// Free essay grades per calendar month for accounts without a paid plan.
+// FREE_CREDITS=0 in the environment turns the free tier off.
 const FREE_CREDITS = process.env.FREE_CREDITS != null && process.env.FREE_CREDITS !== '' && Number.isFinite(Number(process.env.FREE_CREDITS))
   ? Math.max(0, Math.floor(Number(process.env.FREE_CREDITS)))
-  : 0;
-const FREE_CREDIT_DAYS = 7;
+  : 1;
+// Kept for the credit-state shape older clients read; the free tier no
+// longer expires after a week.
+const FREE_CREDIT_DAYS = 0;
+// Free grades: shorter than a real essay is not worth a model call,
+// longer than this is a dissertation chapter. Paid plans go to 15,000.
+const FREE_GRADE_MIN_WORDS = 200;
+const FREE_GRADE_MAX_WORDS = 10000;
 const DAY_MS = 24 * 60 * 60 * 1000;
-const FREE_CREDITS_STAT_KEY = 'free_credits_started_at';
 
 // Stripe can report the same period start a few ms apart between calls.
 const PERIOD_TOLERANCE_MS = 60 * 1000;
@@ -210,93 +220,58 @@ function freeState() {
     trialDays: TRIAL_DAYS,
     freeCredits: 0,
     freeCreditDays: FREE_CREDIT_DAYS,
+    freeResetsAt: null,
     freeExpiresAt: null,
     freeDaysLeft: null,
     freeExpired: false,
   };
 }
 
-/**
- * When the user's free-credit week began. Stamped once on the
- * achievements row; mergeStats in achievementsService copies the
- * existing stats first, so badge syncs keep it and clients cannot set it.
- * The week starts the first time we see the account after signup, which
- * also gives older never-paid accounts a full week when they come back.
- */
-async function freeCreditsStartedAt(userId) {
-  const { data: existing, error: readErr } = await supabaseServiceRole
-    .from('user_achievements')
-    .select('stats')
+/** Start and end (exclusive) of the current calendar month, UTC. */
+function currentMonthWindow(now = new Date()) {
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+/** Essay grades run in [fromIso, toIso). Study packs and citations are Pro, so only analyses count here. */
+async function countFreeGradesUsed(userId, fromIso, toIso) {
+  const { count, error } = await supabaseServiceRole
+    .from('document_analyses')
+    .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
-    .maybeSingle();
-  if (readErr) throw readErr;
-  const stats = existing?.stats && typeof existing.stats === 'object' ? existing.stats : {};
-  const stamped = stats[FREE_CREDITS_STAT_KEY];
-  if (typeof stamped === 'string' && !Number.isNaN(Date.parse(stamped))) return stamped;
-
-  const now = new Date().toISOString();
-  const nextStats = { ...stats, [FREE_CREDITS_STAT_KEY]: now };
-  const { error: writeErr } = existing
-    ? await supabaseServiceRole
-        .from('user_achievements')
-        .update({ stats: nextStats, updated_at: now })
-        .eq('user_id', userId)
-    : await supabaseServiceRole
-        .from('user_achievements')
-        .insert({ user_id: userId, stats: nextStats, unlocked_badges: {}, updated_at: now });
-  if (writeErr) {
-    // Another request created the row first: use its stamp.
-    const { data: again } = await supabaseServiceRole
-      .from('user_achievements')
-      .select('stats')
-      .eq('user_id', userId)
-      .maybeSingle();
-    const raced = again?.stats?.[FREE_CREDITS_STAT_KEY];
-    if (typeof raced === 'string' && !Number.isNaN(Date.parse(raced))) return raced;
-    throw writeErr;
-  }
-  return now;
+    .gte('created_at', fromIso)
+    .lt('created_at', toIso);
+  if (error) throw error;
+  return count || 0;
 }
 
-/** Signup time, used when the stamp cannot be read so old accounts fail closed. */
-async function signupTime(userId) {
-  const { data } = await supabaseServiceRole.from('users').select('created_at').eq('id', userId).maybeSingle();
-  return toIso(data?.created_at);
-}
-
-/** Free accounts: FREE_CREDITS to spend within FREE_CREDIT_DAYS. */
+/**
+ * Accounts without a paid plan: FREE_CREDITS essay grades per calendar
+ * month. Lapsed subscribers get the same allowance as anyone else, so
+ * there is always a reason to come back.
+ */
 async function freeCreditState(userId) {
-  const subscriptionService = require('./subscriptionService');
   const base = freeState();
   if (FREE_CREDITS <= 0) return base;
-  if (await subscriptionService.hasEverHadPaidPlan(userId)) return base;
 
-  let start;
-  try {
-    start = await freeCreditsStartedAt(userId);
-  } catch (err) {
-    console.error('credits: free credit stamp failed, using signup time:', err);
-    start = await signupTime(userId);
-  }
-  const startMs = start ? Date.parse(start) : NaN;
-  if (Number.isNaN(startMs)) return base;
-
-  const endMs = startMs + FREE_CREDIT_DAYS * DAY_MS;
-  const end = new Date(endMs).toISOString();
-  const expired = Date.now() >= endMs;
-  const used = await countCreditsUsed(userId, new Date(startMs).toISOString(), end);
+  const { start, end } = currentMonthWindow();
+  const used = await countFreeGradesUsed(userId, start, end);
+  const daysUntilReset = Math.max(1, Math.ceil((Date.parse(end) - Date.now()) / DAY_MS));
   return {
     ...base,
     allowance: FREE_CREDITS,
     total: FREE_CREDITS,
     used: Math.min(used, FREE_CREDITS),
-    remaining: expired ? 0 : Math.max(0, FREE_CREDITS - used),
-    periodStart: new Date(startMs).toISOString(),
+    remaining: Math.max(0, FREE_CREDITS - used),
+    periodStart: start,
     periodEnd: end,
+    daysUntilReset,
     freeCredits: FREE_CREDITS,
-    freeExpiresAt: end,
-    freeDaysLeft: expired ? 0 : Math.max(1, Math.ceil((endMs - Date.now()) / DAY_MS)),
-    freeExpired: expired,
+    freeResetsAt: end,
+    freeExpiresAt: null,
+    freeDaysLeft: null,
+    freeExpired: false,
   };
 }
 
@@ -414,6 +389,9 @@ module.exports = {
   MONTHLY_CREDITS,
   FREE_CREDITS,
   FREE_CREDIT_DAYS,
+  FREE_GRADE_MIN_WORDS,
+  FREE_GRADE_MAX_WORDS,
+  currentMonthWindow,
   getCreditState,
   countCreditsUsed,
   resetCredits,

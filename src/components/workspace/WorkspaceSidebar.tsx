@@ -87,7 +87,8 @@ export function WorkspaceSidebar({
     icon,
     label,
     onClick,
-  }: { active: boolean; icon: ReactNode; label: string; onClick: () => void }) => (
+    highlight = false,
+  }: { active: boolean; icon: ReactNode; label: string; onClick: () => void; highlight?: boolean }) => (
     <button
       type="button"
       onClick={onClick}
@@ -98,21 +99,26 @@ export function WorkspaceSidebar({
       } ${
         active
           ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0]'
-          : 'text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/70'
-      }`}
+          : highlight
+            ? 'bg-[#F3EAFF]/80 dark:bg-[#A560E8]/15 text-[#7733B5] dark:text-[#C9A0F0] hover:bg-[#F3EAFF]'
+            : 'text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/70'
+      } ${highlight ? 'ws-tool-glow ring-2 ring-[#A560E8]/60' : ''}`}
     >
       <span
         className={`shrink-0 flex items-center justify-center transition-colors ${
-          active ? 'text-[#A560E8] dark:text-[#C9A0F0]' : 'text-stone-400 dark:text-stone-500 group-hover:text-stone-500 dark:group-hover:text-stone-400'
+          active || highlight ? 'text-[#A560E8] dark:text-[#C9A0F0]' : 'text-stone-400 dark:text-stone-500 group-hover:text-stone-500 dark:group-hover:text-stone-400'
         }`}
         aria-hidden
       >
         {icon}
       </span>
       {!collapsed && (
-        <span className={`min-w-0 flex-1 truncate text-[14.5px] leading-tight ${active ? 'font-extrabold' : 'font-bold'}`}>
+        <span className={`min-w-0 flex-1 truncate text-[14.5px] leading-tight ${active || highlight ? 'font-extrabold' : 'font-bold'}`}>
           {label}
         </span>
+      )}
+      {!collapsed && highlight && (
+        <span className="shrink-0 rounded-full bg-[#58CC02] px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-white">Free</span>
       )}
     </button>
   );
@@ -196,7 +202,14 @@ export function WorkspaceSidebar({
       <SectionLabel>Study tools</SectionLabel>
       <div className="flex flex-col gap-0.5 w-full">
         {SIDEBAR_TOOLS.map((t) => (
-          <Item key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} onClick={() => onSelect(t.view)} />
+          <Item
+            key={t.view}
+            active={activeView === t.view}
+            icon={t.icon}
+            label={t.label}
+            onClick={() => onSelect(t.view)}
+            highlight={t.view === 'analyze' && !planLabelOf(user, usage).paid}
+          />
         ))}
       </div>
 

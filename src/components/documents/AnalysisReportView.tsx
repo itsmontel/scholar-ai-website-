@@ -313,8 +313,11 @@ export default function AnalysisReportView({
 
   // Free preview: every section score is locked (the server sends none).
   const rubricRows = result.rubric ?? [];
-  const unlockedRubric = revisionsLocked ? [] : rubricRows;
-  const lockedRubric = revisionsLocked ? rubricRows : [];
+  // Free reports arrive cut by the server: every score, written feedback on
+  // the first sections only. Show those sections open and lock the rest,
+  // keeping their real score.
+  const unlockedRubric = revisionsLocked ? rubricRows.filter((r) => !!r.feedback) : rubricRows;
+  const lockedRubric = revisionsLocked ? rubricRows.filter((r) => !r.feedback) : [];
 
   const handleAnnotationHover = (e: React.MouseEvent, annotationId: string) => {
     cancelHide();
@@ -622,7 +625,7 @@ export default function AnalysisReportView({
                   >
                     <div className="flex justify-between items-start gap-2 mb-1.5">
                       <span className="text-[13px] font-extrabold text-stone-800 dark:text-stone-100 leading-snug">{humanizeLabel(r.category)}</span>
-                      <span className="tabular-nums text-[13px] font-extrabold text-stone-400 shrink-0">?/{r.maxScore || 100}</span>
+                      <span className="tabular-nums text-[13px] font-extrabold text-stone-500 dark:text-stone-400 shrink-0">{typeof r.score === 'number' ? r.score : '?'}/{r.maxScore || 100}</span>
                     </div>
                     <div className="mb-2 h-2 rounded-full bg-stone-100 dark:bg-stone-700 overflow-hidden" aria-hidden>
                       {typeof r.bar === 'number' && (

@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 // the race condition where a conversion event could be queued in dataLayer
 // but lost if the user navigated away before gtag.js finished loading.
 import { trackSignupConversion, trackPaidConversion } from '../utils/gtag';
-import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES, FREEMIUM_PREVIEW } from '../config/featureFlags';
+import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES, FREEMIUM_PREVIEW, ONBOARDING_ENABLED } from '../config/featureFlags';
 import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
 import type { EssayUnlockSummary } from '../utils/paywall';
@@ -135,6 +135,7 @@ import {
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
+import VerifyEmailPrompt from './common/VerifyEmailPrompt';
 import LoggedInWorkspaceLayout from './workspace/LoggedInWorkspaceLayout';
 import { navigateWorkspaceView } from './workspace/workspaceNavigate';
 import { shouldUseWorkspaceChromeApp } from './workspace/workspaceChrome';
@@ -276,6 +277,14 @@ const DAILY_REVIEW_PROMPT_EXCLUDED_PAGES = new Set([
 ]);
 
 // Main Application Component
+/** Renders nothing and sends the app to another page once mounted. */
+function RedirectTo({ page, onNavigate }: { page: string; onNavigate: (page: string) => void }) {
+  useEffect(() => {
+    onNavigate(page);
+  }, [page, onNavigate]);
+  return null;
+}
+
 const AcademicAIApp = () => {
   const initialAuth = readInitialAuthSession();
   const [currentPage, setCurrentPage] = useState(() =>
@@ -452,7 +461,7 @@ const AcademicAIApp = () => {
     'study-pack': TOOL_SEO_META['study-pack'],
     features: { title: 'Features — Essay Feedback & Study Tools | WriteScholar', description: 'Write in a real editor and get a professor-style grade with a full rubric and one-click line-by-line fixes. Plus citations, summarizer, and study tools in one workspace.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
-    pricing: { title: 'Pricing — Try It for $1, Then $19.99/mo | WriteScholar', description: 'Try everything for $1: 7 days and 5 credits. Then Pro is $19.99/mo for 99 credits; Premium $39.99/mo for 199. 1 credit = 1 essay, pack or search.' },
+    pricing: { title: 'Pricing — Free Essay Grade, Pro $19.99/mo | WriteScholar', description: 'Grade 1 essay a month free with the score and every rubric score. Pro is $19.99/mo at the student launch price (list $39.99) for 99 credits, every rewrite and one-click fixes.' },
     about: { title: 'About WriteScholar | Study & Writing Help for Students', description: 'WriteScholar helps students improve drafts before deadlines: professor-style essay feedback, citations, quizzes, flashcards, and distraction blocking in one app.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot for College Writing | 2026', description: 'Honest comparison: essay feedback and rubrics vs grammar-only tools. See which fits research papers and coursework.' },
     'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt — College Study Tools | 2026', description: 'Why students add WriteScholar for essay feedback and rubrics, not just flashcards. Side-by-side features vs Quizlet and Knowt.' },
@@ -462,7 +471,7 @@ const AcademicAIApp = () => {
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
     terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
     login: { title: 'Log In | WriteScholar', description: 'Log in for college essay feedback, study packs, summarizer, citations, and more.' },
-    signup: { title: 'Sign Up — Try Everything for $1 | WriteScholar', description: 'Create your account and try essay feedback, study packs and citations for $1: 7 days, 5 credits, everything unlocked.' },
+    signup: { title: 'Sign Up — Free Essay Grade | WriteScholar', description: 'Create a free account and grade 1 essay a month: estimated grade, every rubric score and line-by-line feedback. No card.' },
     blog: { title: 'College Study Tips & Writing Guides | WriteScholar Blog', description: 'Practical guides: essays, citations, study strategies, and academic writing—without the fluff.' },
     'word-counter': TOOL_SEO_META['word-counter'],
     'citation-generator-tool': TOOL_SEO_META['citation-generator-tool'],
@@ -1255,9 +1264,9 @@ const AcademicAIApp = () => {
   const [showPostCheckoutWelcome, setShowPostCheckoutWelcome] = useState<boolean>(sawStripeSuccessOnLoad);
   const [showDailyReviewPrompt, setShowDailyReviewPrompt] = useState(false);
 
-  // ─── Mandatory 7-day trial gate ───
+  // ─── Mandatory trial gate (off: FREEMIUM_PREVIEW) ───
   // The product has no permanently-free tier for brand-new accounts: to
-  // use the app you must start the 7-day trial first. Once you've used
+  // use the app you must start the trial first. Once you've used
   // the trial (even after it ends / you cancel) you can stay on as a
   // free user. `trialEligible === true` means this email has NEVER
   // started a trial (authoritative `trial_usage` check on the backend),
@@ -1320,7 +1329,7 @@ const AcademicAIApp = () => {
   }, [isLoggedIn, user?.id, user?.plan, user?.subscription_plan]);
 
   const needsOnboarding =
-    isLoggedIn && user?.id && !user.onboardingCompleted && !sawStripeSuccessOnLoad;
+    ONBOARDING_ENABLED && isLoggedIn && user?.id && !user.onboardingCompleted && !sawStripeSuccessOnLoad;
 
   // Existing free user who finished onboarding but never started the
   // trial → they must go through the trial paywall before using the app
@@ -1550,7 +1559,7 @@ const AcademicAIApp = () => {
 
     switch (currentPage) {
       case 'landing':
-        return <LandingPage onNavigate={navigateTo} user={user} />;
+        return <LandingPage onNavigate={navigateTo} user={user} onAuth={handleSignUp} />;
       case 'embed':
         // Standalone embed widget — no header/footer, noindex. Lookup happens
         // inside EmbedPage based on URL pathname.
@@ -1561,7 +1570,7 @@ const AcademicAIApp = () => {
         // Look up the matching programmatic page by current URL.
         // Falls back to landing if no match (e.g. /study/unknown-subject).
         const config = getProgrammaticPageByPath(window.location.pathname);
-        if (!config) return <LandingPage onNavigate={navigateTo} user={user} />;
+        if (!config) return <LandingPage onNavigate={navigateTo} user={user} onAuth={handleSignUp} />;
         return <ProgrammaticLandingPage config={config} onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       }
       case 'signup':
@@ -1576,6 +1585,9 @@ const AcademicAIApp = () => {
         if (!isLoggedIn) {
           return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
         }
+        // Onboarding is switched off (ONBOARDING_ENABLED): anyone who lands
+        // on /onboarding goes to the dashboard instead.
+        if (!ONBOARDING_ENABLED) return <RedirectTo page="dashboard" onNavigate={navigateTo} />;
         return renderOnboarding('dashboard');
       case 'onboarding-test':
         // Preview the onboarding flow on demand. testMode skips every
@@ -1831,7 +1843,7 @@ const AcademicAIApp = () => {
       case 'collaboration':
         return <CollaborationPage onNavigate={navigateTo} user={user} />;
       default:
-        return <LandingPage onNavigate={navigateTo} user={user} />;
+        return <LandingPage onNavigate={navigateTo} user={user} onAuth={handleSignUp} />;
     }
   };
 
@@ -2010,6 +2022,8 @@ const AcademicAIApp = () => {
           hideOnPages={['login', 'signup', 'auth-callback', 'reset-password', 'email-verification']}
         />
       )}
+      {/* Opened by openVerifyEmailIfNeeded() wherever the server asks for a verified email. */}
+      <VerifyEmailPrompt />
     </div>
     </ErrorBoundary>
   );

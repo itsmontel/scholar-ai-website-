@@ -167,6 +167,8 @@ type DocSummary = {
   isDraft: boolean;
   /** Derived: was this uploaded from a file (vs. typed in-app)? */
   isUpload: boolean;
+  /** The server has a saved grade for this document. */
+  hasAnalysis?: boolean;
 };
 
 type DocFull = DocSummary & {
@@ -813,6 +815,7 @@ function DocumentRow({
   onUpgrade,
   elevated = false,
   highlighted = false,
+  graded = false,
   kind = 'document',
 }: {
   doc: Pick<DocSummary, 'id' | 'title' | 'wordCount' | 'lastEditedAt' | 'updatedAt'> & { expiresAt?: string | null };
@@ -824,6 +827,8 @@ function DocumentRow({
   elevated?: boolean;
   /** First-run after onboarding — this is the paper they just analysed. */
   highlighted?: boolean;
+  /** Free plan: this is their graded essay. Extra shine and grade wording. */
+  graded?: boolean;
   kind?: 'document' | 'pack' | 'citation';
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -897,7 +902,7 @@ function DocumentRow({
             ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#FF9600] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(217,127,0,0.45)] ring-4 ring-[#FF9600]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9600]/40'
             : isCite
               ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#1CB0F6] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(28,176,246,0.45)] ring-4 ring-[#1CB0F6]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1CB0F6]/40'
-              : 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(119,51,181,0.55)] ring-4 ring-[#A560E8]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
+              : `group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(119,51,181,0.55)] ring-4 ring-[#A560E8]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40${graded ? ' ws-shine bg-[#FBF7FF]' : ''}`
           : elevated
           ? isPack
             ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#FF9600] dark:hover:border-[#FF9600]/40 hover:shadow-[0_14px_28px_-20px_rgba(217,127,0,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9600]/40'
@@ -942,7 +947,7 @@ function DocumentRow({
         </p>
         {highlighted && (
           <span className="mt-1 inline-flex items-center rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#7733B5] dark:text-[#C9A0F0]">
-            Ready to view
+            {graded ? 'Your graded essay' : 'Ready to view'}
           </span>
         )}
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -994,7 +999,7 @@ function DocumentRow({
                 : 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[13px] font-extrabold hover:bg-[#A560E8] hover:text-white dark:hover:bg-[#A560E8] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
         }
       >
-        {highlighted ? (isPack ? 'Open pack' : isCite ? 'Open search' : 'See notes') : 'Open'}
+        {highlighted ? (isPack ? 'Open pack' : isCite ? 'Open search' : graded ? 'See your grade' : 'See notes') : 'Open'}
         <svg className="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
@@ -1215,7 +1220,7 @@ function DocumentsHub({
 
   const recentItems = useMemo(() => {
     type Item =
-      | { kind: 'doc'; id: string; at: number; doc: DocSummary; highlighted: boolean }
+      | { kind: 'doc'; id: string; at: number; doc: DocSummary; highlighted: boolean; graded?: boolean }
       | { kind: 'pack'; id: string; at: number; pack: HubStudyPack; highlighted: boolean }
       | { kind: 'citation'; id: string; at: number; cite: HubCitation; highlighted: boolean };
 
@@ -1255,12 +1260,25 @@ function DocumentsHub({
       }
     }
 
+    // Free accounts: light up their newest graded essay. Its report is
+    // the one thing on the free plan worth going back to, and the place
+    // they meet the locked part of it.
+    if (!isPaidUser && !items.some((i) => i.highlighted)) {
+      const graded = items
+        .filter((i): i is Extract<Item, { kind: 'doc' }> => i.kind === 'doc' && !!i.doc.hasAnalysis)
+        .sort((a, b) => b.at - a.at)[0];
+      if (graded) {
+        graded.highlighted = true;
+        graded.graded = true;
+      }
+    }
+
     items.sort((a, b) => {
       if (a.highlighted !== b.highlighted) return a.highlighted ? -1 : 1;
       return b.at - a.at;
     });
     return items.slice(0, 5);
-  }, [docs, packs, citations, highlightDocId, highlightPack]);
+  }, [docs, packs, citations, highlightDocId, highlightPack, isPaidUser]);
 
   const recentsLoading = loading || (Boolean(packsLoading) && docs.length === 0 && packs.length === 0);
   const recentsCount = docs.length + packs.length + citations.length;
@@ -1870,6 +1888,7 @@ function DocumentsHub({
                     doc={item.doc}
                     elevated
                     highlighted={item.highlighted}
+                    graded={item.graded}
                     onOpen={() => onOpen(item.doc.id)}
                     onDownload={() => onDownload(item.doc.id)}
                     onDelete={() => onDelete(item.doc.id)}
@@ -2642,10 +2661,10 @@ function DocumentEditorView({
                     title={
                       analysesLeft === 0
                         ? revisionsLocked
-                          ? 'No credits yet — try everything for $1'
+                          ? 'Your free grade this month is used. Pro gives you 99 credits.'
                           : 'No analyses left this month — upgrade for more'
                         : revisionsLocked
-                          ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'} left (they expire 7 days after you join)`
+                          ? `${analysesLeft} free ${analysesLeft === 1 ? 'grade' : 'grades'} left this month`
                           : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left this month`
                     }
                     className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border-2 ${
@@ -2657,7 +2676,7 @@ function DocumentEditorView({
                     }`}
                   >
                     {analysesLeft === 0
-                      ? revisionsLocked ? 'Try it for $1' : 'No analyses left'
+                      ? revisionsLocked ? 'Get Pro' : 'No analyses left'
                       : revisionsLocked
                         ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'}`
                         : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left`}
@@ -2761,19 +2780,19 @@ function DocumentEditorView({
                   className="group mt-7 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_26px_-14px_rgba(122,51,181,0.5)]"
                 >
                   <I.Sparkle />
-                  {noAnalysesLeft ? (revisionsLocked ? 'Try it for $1' : 'Upgrade to analyze') : 'Run full analysis'}
+                  {noAnalysesLeft ? (revisionsLocked ? 'Get Pro to keep grading' : 'Upgrade to analyze') : 'Run full analysis'}
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
 
                 {revisionsLocked && !noAnalysesLeft && (
                   <p className="mx-auto mt-4 max-w-[16rem] text-[11.5px] font-medium text-stone-400 dark:text-stone-500 leading-relaxed">
-                    Free grades show your grade and every highlight. Comments and fixes unlock on Pro.{' '}
+                    Your free grade shows your score, every rubric score and full feedback on the first part of your essay. The rest of the feedback, the rewrites and one-click fixes unlock on Pro.{' '}
                     <button
                       type="button"
                       onClick={() => onUpgrade('analyze_intro')}
                       className="font-extrabold text-[#8A48C7] dark:text-[#C9A0F0] underline decoration-[#A560E8]/40 underline-offset-2 hover:decoration-[#A560E8] transition-colors"
                     >
-                      Unlock comments
+                      Unlock the rewrites
                     </button>
                   </p>
                 )}
@@ -2899,7 +2918,7 @@ function DocumentEditorView({
               <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 {noAnalysesLeft
                   ? revisionsLocked
-                    ? 'Try everything for $1'
+                    ? 'Your free grade this month is used'
                     : 'No analyses left this month'
                   : isReanalyze ? 'Re-analyze this draft?' : 'Analyze this draft?'}
               </h3>
@@ -2908,7 +2927,7 @@ function DocumentEditorView({
             {noAnalysesLeft ? (
               <p className="text-sm text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
                 {revisionsLocked
-                  ? 'Grading uses credits. Start your 7-day trial for $1: 5 credits, every comment, section score and one-click fix unlocked. Then Pro is $19.99/mo, cancel anytime.'
+                  ? 'Your free grade for this month is used. It resets on the 1st, or Pro gives you 99 credits a month plus the rewrite behind every comment, at the student launch price of $19.99/mo.'
                   : 'You\u2019ve used all your analyses for this billing period. Upgrade for more, or wait until your allowance resets.'}
               </p>
             ) : (
@@ -3479,6 +3498,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           expiresAt: (d.expiresAt ?? d.expires_at ?? null) as string | null,
           isDraft,
           isUpload,
+          hasAnalysis: Boolean((d.analysisStatus as { hasAnalysis?: unknown } | undefined)?.hasAnalysis),
         };
       });
       setDocList(mapped);

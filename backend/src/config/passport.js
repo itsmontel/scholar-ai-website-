@@ -43,7 +43,10 @@ passport.use(new GoogleStrategy({
     // Check if user exists with this email
     const email = profile.emails?.[0]?.value;
     if (email) {
-      user = await userService.findUserByEmail(email);
+      // Same inbox, not just the same spelling (Gmail dots and +tags),
+      // so a Google sign-in never creates a second account for a person.
+      user = await userService.findUserByInbox(email);
+      if (user && !user.is_active) user = await userService.findUserById(user.id);
 
       if (user) {
         // User exists with email, link Google account

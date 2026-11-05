@@ -17,6 +17,7 @@ const emailSubscriptionRoutes = require('./routes/emailSubscriptions');
 const streakRoutes = require('./routes/streaks');
 const friendsRoutes = require('./routes/friends');
 const focusModeRoutes = require('./routes/focusMode');
+const eventRoutes = require('./routes/events');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./database/connection');
@@ -30,6 +31,10 @@ if (process.env.USE_SUPABASE_STORAGE === 'true') {
 }
 
 const app = express();
+// Railway's edge is the one proxy in front of us. Without this every
+// request looks like it comes from that proxy, so all visitors share
+// one rate-limit bucket and per-IP caps mean nothing.
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 
 // Security middleware
@@ -132,6 +137,7 @@ app.use('/api/email-subscriptions', emailSubscriptionRoutes);
 app.use('/api/streaks', streakRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/focus-mode', focusModeRoutes);
+app.use('/api/events', eventRoutes);
 // Webhooks already registered before body parser (line 45)
 
 // 404 handler

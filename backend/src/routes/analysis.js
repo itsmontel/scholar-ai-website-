@@ -65,10 +65,24 @@ const outOfCreditsMessage = (limitCheck) => {
   if (c && c.plan !== 'free') {
     return "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over.";
   }
-  if (c?.freeExpired) return 'Your free credits have expired. Get Pro for 99 credits a month to keep going.';
-  if (c?.freeCredits) return `You've used your ${c.freeCredits} free credits. Get Pro for 99 credits a month to keep going.`;
-  return 'This uses credits. Try everything for $1: 7 days and 5 credits, then Pro is $19.99/mo.';
+  if (c?.freeCredits) {
+    const resets = c.freeResetsAt ? new Date(c.freeResetsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'the 1st';
+    return `You've used your free grade${c.freeCredits === 1 ? '' : 's'} this month. ${c.freeCredits === 1 ? 'It resets' : 'They reset'} on ${resets}, or Pro gives you 99 credits a month, feedback on your whole essay and every rewrite.`;
+  }
+  return 'This needs Pro. Pro is $19.99 a month for 99 credits, every rewrite and one-click fixes.';
 };
+
+// Study packs and citation searches are Pro features. Free accounts get
+// essay grades only (creditService.FREE_CREDITS a month), so a free
+// account never spends a model call on a 7-generator study pack.
+const proOnlyResponse = (res, feature) =>
+  res.status(403).json({
+    success: false,
+    message: `${feature} are part of Pro. Your free plan covers essay grades; Pro adds study packs, citations and every rewrite for $19.99 a month.`,
+    upgrade: true,
+    showPaywall: true,
+    proOnly: true,
+  });
 
 // @route   GET /api/analysis/humanize-usage
 // @desc    Get user's humanize word usage this period
@@ -1255,6 +1269,7 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     const numCitations = numberOfCitations || 10;
 
     const userPlan = getEffectivePlan(req);
+    if (userPlan === 'free') return proOnlyResponse(res, 'Citation searches');
     const limitCheck = await subscriptionService.checkCombinedActionsLimit(userId);
     if (!limitCheck.allowed) {
       return res.status(429).json({
@@ -1362,6 +1377,7 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
 
     // Check user's analysis limits (citation review counts toward monthly limit)
     const userPlan = getEffectivePlan(req);
+    if (userPlan === 'free') return proOnlyResponse(res, 'Citation searches');
     const limitCheck = await subscriptionService.checkCombinedActionsLimit(userId);
     if (!limitCheck.allowed) {
       return res.status(429).json({
@@ -1574,8 +1590,9 @@ router.post('/revision-markers', authenticateToken, async (req, res) => {
  */
 router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent, title: requestedTitle } = req.body;
+    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent: requestedRubricContent, title: requestedTitle } = req.body;
     const userId = req.user.id;
+    let rubricContent = requestedRubricContent;
 
     if (rubricContent) {
       console.log('Rubric/requirements content provided, length:', rubricContent.length);
@@ -1657,13 +1674,54 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     }
     
     // Credit check: 1 credit per analysis on every plan (free accounts
-    // spend their free week's credits).
+    // spend their monthly free grades).
     const rawPlan = (await subscriptionService.getUserSubscriptionDetails(userId)).plan;
     const normalizedPaid = subscriptionService.normalizePlanForLimits(rawPlan);
     const userPlan = subscriptionService.isPaidSubscriptionTier(rawPlan)
       ? normalizedPaid
       : 'free';
     const useCombined = subscriptionService.isPaidSubscriptionTier(rawPlan);
+
+    // Free tier: essay grades only, 200 to 10,000 words, no rubric check.
+    // The caps keep one free grade a bounded model call; the rubric
+    // alignment is a second call and part of what Pro unlocks.
+    if (!useCombined) {
+      if (!isGradedFeedback(analysisType)) return proOnlyResponse(res, 'Citation reviews');
+      const creditService = require('../services/creditService');
+      const freeWordCount = analysisContent.trim().split(/\s+/).filter(Boolean).length;
+      if (freeWordCount < creditService.FREE_GRADE_MIN_WORDS) {
+        return res.status(400).json({
+          success: false,
+          code: 'TOO_SHORT',
+          message: `Paste at least ${creditService.FREE_GRADE_MIN_WORDS} words so the grade means something. This has ${freeWordCount.toLocaleString()}.`,
+          wordCount: freeWordCount,
+          minWords: creditService.FREE_GRADE_MIN_WORDS,
+        });
+      }
+      if (freeWordCount > creditService.FREE_GRADE_MAX_WORDS) {
+        return res.status(400).json({
+          success: false,
+          code: 'TOO_LONG',
+          message: `Free grades cover up to ${creditService.FREE_GRADE_MAX_WORDS.toLocaleString()} words and this has ${freeWordCount.toLocaleString()}. Grade a section, or Pro goes to 15,000 words.`,
+          wordCount: freeWordCount,
+          maxWords: creditService.FREE_GRADE_MAX_WORDS,
+          upgrade: true,
+        });
+      }
+      if (rubricContent) {
+        console.log('Free plan: rubric alignment skipped (Pro feature)');
+        rubricContent = '';
+      }
+      // Unverified email accounts get their first grade now; the rest of
+      // the month's free grades wait for the email to be verified.
+      const unverifiedGuard = require('../services/unverifiedGradeGuard');
+      const unverifiedCheck = await unverifiedGuard.checkUnverifiedGrade(req.user, req.ip);
+      if (!unverifiedCheck.allowed) {
+        return res.status(403).json(unverifiedGuard.verifyEmailResponse(req.user, unverifiedCheck.reason));
+      }
+      if (unverifiedCheck.unverified) unverifiedGuard.recordUnverifiedGrade(req.ip);
+    }
+
     if (!useCombined || (planLimits.combinedActionsPerMonth != null && planLimits.combinedActionsPerMonth !== -1)) {
       try {
         const timeoutPromise = new Promise((_, reject) => {
@@ -1773,8 +1831,9 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     res.json({
       success: true,
       message: 'Analysis completed successfully',
-      // Free accounts get the preview: highlights and the grade, no comments.
-      data: !isPaidUser && isGradedFeedback(analysisType) ? redactAnalysisPayload(data) : data
+      // Free accounts get the preview: the grade, every rubric score, and
+      // the first quarter of the essay fully marked (analysisRedaction.js).
+      data: !isPaidUser && isGradedFeedback(analysisType) ? redactAnalysisPayload(data, { content: originalContent }) : data
     });
 
   } catch (error) {
@@ -2792,8 +2851,10 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    // 1 credit per study pack on every plan (free accounts spend their
-    // free week's credits).
+    // Study packs are Pro: free credits buy essay grades only.
+    if (!subscriptionService.isPaidSubscriptionTier(dbPlan)) return proOnlyResponse(res, 'Study packs');
+
+    // 1 credit per study pack.
     const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
     if (!combinedCheck.allowed) {
       return res.status(429).json({

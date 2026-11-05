@@ -6,6 +6,7 @@ import {
 } from '../../config/pricing';
 import type { FlashOffer } from '../../hooks/useFlashOffer';
 import { trackEvent } from '../../utils/analytics';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const NUNITO = { fontFamily: '"Nunito", system-ui, sans-serif' } as const;
@@ -34,6 +35,7 @@ async function startFlashCheckout(): Promise<string | null> {
     }),
   });
   const data = await res.json().catch(() => null);
+  if (openVerifyEmailIfNeeded(res.status, data)) return null;
   return data?.success && data.data?.checkoutUrl ? data.data.checkoutUrl : null;
 }
 

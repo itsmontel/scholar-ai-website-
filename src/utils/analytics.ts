@@ -23,11 +23,23 @@ export type FunnelEvent =
 
 export type AnalyticsEvent =
   | FunnelEvent
+  // — Free first grade funnel (also stored in our own funnel_events table) —
+  | 'landing_view'
+  | 'essay_pasted'
+  | 'gate_view'
+  | 'grade_started'
+  | 'grade_completed'
+  | 'grade_failed'
+  | 'grade_question_answered'
+  | 'checkout_started'
+  | 'free_limit_hit'
+  | 'pro_only_hit'
   | 'tutorial_start'
   | 'tutorial_complete'
   | 'tutorial_skip'
   | 'paywall_view'
   | 'paywall_dismiss'
+  | 'verify_email_prompt'
   | 'paywall_start_trial'
   | 'first_analysis'
   | 'first_study_pack'
@@ -153,9 +165,70 @@ export function resetAnalytics(): void {
   } catch (_) {}
 }
 
+/* ─── Our own funnel table ───────────────────────────────────────
+   PostHog never had a key in production, so these steps are also
+   posted to POST /api/events and land in Supabase (funnel_events).
+   The anonymous id ties the landing steps to the account that follows. */
+const SERVER_EVENTS = new Set<string>([
+  'landing_view',
+  'essay_pasted',
+  'gate_view',
+  'signed_up',
+  'grade_started',
+  'grade_completed',
+  'grade_failed',
+  'grade_question_answered',
+  'paywall_view',
+  'paywall_dismiss',
+  'verify_email_prompt',
+  'checkout_started',
+  'subscription_converted',
+  'free_limit_hit',
+  'pro_only_hit',
+]);
+const ANON_ID_KEY = 'ws_anon_id';
+
+export function getAnonId(): string | null {
+  try {
+    let id = localStorage.getItem(ANON_ID_KEY);
+    if (!id) {
+      id = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID().replace(/-/g, '')
+        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem(ANON_ID_KEY, id);
+    }
+    return id;
+  } catch (_) {
+    return null;
+  }
+}
+
+function sendToServer(event: string, properties?: Record<string, unknown>): void {
+  try {
+    const base = import.meta.env?.VITE_API_URL || 'http://localhost:3001/api';
+    const token = localStorage.getItem('authToken');
+    const body = JSON.stringify({
+      event,
+      anonId: getAnonId(),
+      path: typeof window !== 'undefined' ? window.location.pathname.slice(0, 255) : null,
+      props: properties ?? {},
+    });
+    void fetch(`${base}/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch (_) {}
+}
+
 /**
  * Track a product analytics event. Safe to call anywhere.
  * Sends to PostHog if configured; otherwise logs to console in dev.
+ * Funnel steps are also written to our own funnel_events table.
  */
 export function trackEvent(event: AnalyticsEvent, properties?: Record<string, unknown>): void {
   try {
@@ -170,6 +243,9 @@ export function trackEvent(event: AnalyticsEvent, properties?: Record<string, un
     }
     if (initIfNeeded()) {
       posthog.capture(event, payload);
+    }
+    if (SERVER_EVENTS.has(event)) {
+      sendToServer(event, properties);
     }
   } catch (_) {}
 }

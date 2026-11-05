@@ -7,6 +7,7 @@ import Footer from '../common/Footer';
 import CancelRetentionModal from '../common/CancelRetentionModal';
 import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, CHECKOUT_OFFER_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
+import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 interface BillingPageProps {
   onNavigate?: (page: string) => void;
@@ -222,6 +223,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         });
 
         const data = await response.json();
+        if (openVerifyEmailIfNeeded(response.status, data)) return;
         
         if (data.success && data.data?.checkoutUrl) {
           try {
@@ -615,7 +617,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   : Math.max(0, usageStats.analysesRemaining ?? 0)}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'credits · try everything for $1' : 'credits left · unused credits roll over'}
+                {currentPlan === 'free' ? 'free grade left this month' : 'credits left · unused credits roll over'}
               </div>
             </div>
 

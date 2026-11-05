@@ -22,4 +22,4 @@ export const LANDING_PAGE_TITLE =
   "AI Essay Grader — Turn B Essays Into A's | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Get a professor-style grade and line-by-line fixes on your essay, plus study packs and citations. Try everything for $1 for 7 days.";
+  "Get a professor-style grade and line-by-line feedback on your essay: estimated grade, a score for every rubric category and comments on weak sentences. One free grade a month, no card.";
