@@ -46,6 +46,11 @@
   .landing-downstream-zoom {
     zoom: 0.9;
   }
+  /* Desktop hero 5% smaller again (0.945 × 0.95). Phones keep 0.945 so
+     the paste box text stays readable. */
+  .landing-hero-zoom {
+    zoom: 0.898;
+  }
 }
 
 /* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set */
