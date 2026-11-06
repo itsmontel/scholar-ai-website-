@@ -73,6 +73,190 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-turn-a-b-essay-into-an-a':
+      return (
+        <>
+          <p className={p}>
+            You did the reading, you hit the word count, you cited your sources, and the essay came back with a B. The comments say things like &quot;good start,&quot; &quot;needs more analysis&quot; or &quot;develop this further,&quot; which tell you something is missing without telling you what. It is one of the most frustrating grades to get, because a B usually means you did nothing wrong.
+          </p>
+          <p className={p}>
+            That is the point. A B essay is competent. An A essay does something. The gap between them is rarely talent or vocabulary. It is usually three or four specific, fixable things, and once you can see them you can fix them in a single revision. This guide shows you what they are, with before-and-after examples, and gives you a routine to run on your next draft.
+          </p>
+
+          <h2 className={h2}>What separates a B essay from an A essay</h2>
+          <p className={p}>
+            Look at almost any college rubric and the top two bands use different kinds of words. The B band says things like <strong>clear</strong>, <strong>organized</strong>, <strong>supported</strong> and <strong>adequate</strong>. The A band says <strong>insightful</strong>, <strong>original</strong>, <strong>persuasive</strong> and <strong>sophisticated</strong>. The B words describe an essay that is correct. The A words describe an essay that makes the reader think something they did not think before.
+          </p>
+          <p className={p}>
+            In practice, a B essay usually has a topic rather than an argument, paragraphs that explain the evidence rather than interpret it, and an ending that repeats the introduction. An A essay has a claim someone could disagree with, paragraphs that each move that claim forward, evidence that is analysed rather than displayed, and a conclusion that says why the argument matters. Every fix below closes part of that gap.
+          </p>
+
+          <h2 className={h2}>Fix 1: Turn your topic into an arguable thesis</h2>
+          <p className={p}>
+            The single biggest difference between B and A essays is the thesis. A B thesis states something true. An A thesis states something a smart classmate who did the same reading could push back on.
+          </p>
+          <p className={p}>
+            <strong>B:</strong> &quot;Social media has both positive and negative effects on teenagers.&quot;
+          </p>
+          <p className={p}>
+            <strong>A:</strong> &quot;Social media harms teenagers less through screen time than through the constant comparison its design encourages, which is why limiting hours alone has done little to improve teen wellbeing.&quot;
+          </p>
+          <p className={p}>
+            The second version takes a side, narrows the claim, and sets up what each body paragraph has to prove. A quick test: if nobody could disagree with your thesis, it is a topic, not an argument. Our guide on <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>how to write a thesis statement</a> walks through this step by step.
+          </p>
+
+          <h2 className={h2}>Fix 2: Replace summary with analysis</h2>
+          <p className={p}>
+            &quot;Needs more analysis&quot; is the most common comment on a B essay, and it almost always means the same thing: too much of each paragraph retells what a source says, and too little explains what it means for your argument.
+          </p>
+          <p className={p}>
+            Use the <strong>so what test</strong>. After every piece of evidence, ask &quot;so what?&quot; and write the answer as the next sentence. Then ask it again about that sentence. The first answer is usually still summary. The second is usually analysis.
+          </p>
+          <p className={p}>
+            <strong>B:</strong> &quot;In the novel, Gatsby throws large parties every weekend. Many people attend, but few of them know him.&quot;
+          </p>
+          <p className={p}>
+            <strong>A:</strong> &quot;Gatsby&apos;s parties are crowded precisely because nobody there knows him. The spectacle lets him be seen without being known, which is the whole problem of his reinvention: the version of himself he built can attract people but cannot be shared with them.&quot;
+          </p>
+          <p className={p}>
+            As a rough guide, if more than half of a body paragraph is describing a source, cut the description back and spend those sentences on interpretation.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>Fix 3: Make every quote earn its place</h2>
+          <p className={p}>
+            B essays tend to drop a quote into a paragraph and move on, as if the quote speaks for itself. It never does. Use a three-part pattern for every piece of evidence: <strong>introduce</strong> it (who said it and why it matters), <strong>quote</strong> only the words you need, then <strong>explain</strong> what those exact words show.
+          </p>
+          <p className={p}>
+            Shorter quotes are usually better. If you quote three lines and only analyse four words of them, quote the four words. Professors notice when quotes are padding, and they notice when you pick out a single word and show why it was chosen. That close reading is often what moves a paragraph from good to excellent. If you are paraphrasing instead, make sure it is cited and genuinely in your own words; our guide on <a href="/blog/how-to-avoid-plagiarism" className={internalLink}>how to avoid plagiarism</a> covers where the line is.
+          </p>
+
+          <h2 className={h2}>Fix 4: Write topic sentences that argue, not announce</h2>
+          <p className={p}>
+            Read only the first sentence of each body paragraph, in order. In an A essay, those sentences on their own form a compressed version of your argument. In a B essay, they usually announce a subject.
+          </p>
+          <p className={p}>
+            <strong>B:</strong> &quot;Another example of this is the scene at the dinner table.&quot;
+          </p>
+          <p className={p}>
+            <strong>A:</strong> &quot;The dinner scene shows that the family&apos;s politeness is a way of avoiding conflict, not resolving it.&quot;
+          </p>
+          <p className={p}>
+            The A version tells the reader what the paragraph will prove before it proves it. If you rewrite every topic sentence this way, you will often discover that two paragraphs make the same point, or that one does not support your thesis at all. Both are worth knowing before you submit.
+          </p>
+
+          <h2 className={h2}>Fix 5: Take on the strongest counterargument</h2>
+          <p className={p}>
+            Many B essays argue as if nobody could disagree. A essays name the best objection to their thesis, state it fairly, and then explain why the argument still holds, or how it needs to be limited. This is often what rubrics mean by &quot;sophisticated&quot; or &quot;nuanced.&quot;
+          </p>
+          <p className={p}>
+            You do not need a whole section. One well-placed paragraph, usually just before the conclusion, is enough: &quot;Critics might argue that X. That is true in cases where Y, but it does not explain Z, which is why…&quot; If the objection turns out to be stronger than your thesis, change the thesis. That is not a failure; it is revision working. Our guide on <a href="/blog/what-does-critically-evaluate-mean" className={internalLink}>what &quot;critically evaluate&quot; means</a> goes deeper on weighing evidence fairly.
+          </p>
+
+          <h2 className={h2}>Fix 6: Use transitions that show logic</h2>
+          <p className={p}>
+            &quot;Additionally,&quot; &quot;Furthermore&quot; and &quot;Another point is&quot; tell the reader that one thing follows another. They do not say how the ideas connect. A essays use transitions that carry the logic of the argument: &quot;This explains why…,&quot; &quot;Yet this only holds if…,&quot; &quot;If that is true, then…&quot;
+          </p>
+          <p className={p}>
+            A quick check: if you could swap two of your body paragraphs without changing any transitions, the essay is a list, not an argument. Reorder the paragraphs so each one builds on the last, then rewrite the first sentence of each to say how.
+          </p>
+
+          <h2 className={h2}>Fix 7: Cut filler and say exactly what you mean</h2>
+          <p className={p}>
+            A essays are not written in longer words. They are written in more precise ones. Cut phrases that take up space without adding meaning, such as &quot;it is important to note that,&quot; &quot;in today&apos;s society&quot; and &quot;throughout history.&quot; Replace vague verbs like &quot;shows,&quot; &quot;talks about&quot; and &quot;deals with&quot; with ones that say what the author is actually doing: argues, concedes, implies, undermines, exaggerates.
+          </p>
+          <p className={p}>
+            <strong>B:</strong> &quot;It is important to note that the author talks about the effects of poverty in many different ways throughout the book.&quot;
+          </p>
+          <p className={p}>
+            <strong>A:</strong> &quot;The author presents poverty as a slow erosion of choice rather than a single hardship.&quot;
+          </p>
+          <p className={p}>
+            Resist the thesaurus. Swapping simple words for impressive ones usually makes the writing less clear, and clarity is part of almost every rubric.
+          </p>
+
+          <h2 className={h2}>Fix 8: Grade yourself against the rubric before you submit</h2>
+          <p className={p}>
+            The rubric is the closest thing you have to the answer key, yet most students read it once, when the assignment is set. Before you submit, go through it category by category and give your draft an honest score in each one. Then spend your remaining time on the two lowest categories, not on the parts you already find easy.
+          </p>
+          <p className={p}>
+            Check the basics the rubric often weights more than students expect: whether you answered the exact question in the prompt, whether you met the length range, and whether every source is cited in the required style. If you are not sure which style you need, our <a href="/blog/mla-vs-apa-vs-chicago-citation-style" className={internalLink}>MLA vs APA vs Chicago guide</a> lays out the differences.
+          </p>
+
+          <h2 className={h2}>A 30-minute B-to-A revision routine</h2>
+          <p className={p}>
+            Revise from big to small. Polishing sentences in an essay with a weak argument barely moves the grade, so work in this order:
+          </p>
+          <h3 className={h3}>Minutes 1 to 5: The argument</h3>
+          <p className={p}>
+            Read your thesis and ask whether a smart classmate could disagree with it. If not, sharpen it until they could.
+          </p>
+          <h3 className={h3}>Minutes 5 to 12: The skeleton</h3>
+          <p className={p}>
+            Read only your topic sentences. Rewrite any that announce a subject instead of making a claim, and reorder paragraphs so each builds on the last.
+          </p>
+          <h3 className={h3}>Minutes 12 to 22: The evidence</h3>
+          <p className={p}>
+            In each paragraph, run the so what test after every quote. Cut summary, trim quotes to the words you analyse, and add one sentence of interpretation where the paragraph goes quiet.
+          </p>
+          <h3 className={h3}>Minutes 22 to 27: The objection and the ending</h3>
+          <p className={p}>
+            Add or strengthen one counterargument paragraph. Rewrite the conclusion so it says why the argument matters instead of repeating the introduction.
+          </p>
+          <h3 className={h3}>Minutes 27 to 30: The sentences</h3>
+          <p className={p}>
+            Cut filler phrases, sharpen vague verbs, and check every citation. Then read the first paragraph out loud. If you stumble, the reader will too.
+          </p>
+
+          <h2 className={h2}>Get a second read before your professor gives one</h2>
+          <p className={p}>
+            The hardest part of revising your own essay is seeing it the way a grader will. You know what you meant, so you read what you meant. That is why a second read, from a classmate, a tutor or your campus writing center, catches things you cannot.
+          </p>
+          <p className={p}>
+            You can also get one in about a minute. <a href="/" onClick={handleNavigate('landing')} className={internalLink}>WriteScholar&apos;s free AI essay grader</a> reads your essay the way a strict grader would and gives you an estimated grade, a score for every rubric category and line-by-line comments marking what is strong, what needs work and what is costing you marks. Your first grade each month is free, with no card, so you can see which of the eight fixes above your essay actually needs before you spend time on the wrong ones. The grade is an estimate to guide your revision, not a promise of the mark you will get. If you want to understand what it can and cannot judge, read <a href="/blog/how-accurate-are-ai-essay-graders" className={internalLink}>how accurate AI essay graders are</a>.
+          </p>
+          <a href="/" onClick={handleNavigate('landing')} className={ctaButton}>
+            Grade my essay free →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'What is the difference between a B essay and an A essay?',
+                answer:
+                  'A B essay is clear, organized and supported. An A essay makes an arguable claim, analyses its evidence rather than summarising it, deals with the strongest counterargument, and explains why the argument matters. Most college rubrics describe the A band with words like insightful, original and persuasive.',
+              },
+              {
+                question: 'How do I turn a B essay into an A?',
+                answer:
+                  'Revise from big to small. Sharpen the thesis into a claim someone could disagree with, rewrite topic sentences so each makes a point, replace summary with analysis after every quote, add a counterargument paragraph, then cut filler and check citations.',
+              },
+              {
+                question: 'What does "needs more analysis" mean on an essay?',
+                answer:
+                  'It usually means too much of each paragraph retells what a source says and too little explains what it means for your argument. After every piece of evidence, ask "so what?" and write the answer, then ask it again about that answer.',
+              },
+              {
+                question: 'Does a longer essay get a better grade?',
+                answer:
+                  'Not on its own. Staying inside the required length matters, but padding usually lowers the grade because it dilutes the argument. A tighter essay with more analysis per paragraph almost always scores higher than a longer one with more summary.',
+              },
+              {
+                question: 'Should I use more sophisticated vocabulary to get an A?',
+                answer:
+                  'No. Precision matters more than length or rarity. Replace vague verbs like "shows" or "talks about" with ones that say what the author actually does, such as argues, implies or undermines, and cut filler phrases. Clarity is part of almost every rubric.',
+              },
+              {
+                question: 'How can I check my essay grade before I submit it?',
+                answer:
+                  'Grade it against the rubric yourself, category by category, or get a second read from a tutor or writing center. An AI essay grader like WriteScholar gives you an estimated grade and a score for every rubric category in about a minute, with your first grade each month free.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-study-for-finals':
       return (
         <>

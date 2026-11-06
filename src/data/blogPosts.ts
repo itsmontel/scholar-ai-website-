@@ -27,6 +27,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-turn-a-b-essay-into-an-a',
+    title: 'How to Turn a B Essay Into an A: 8 Fixes Professors Reward',
+    description:
+      'What separates a B essay from an A: an arguable thesis, analysis instead of summary, evidence that does work and clean structure. Eight fixes with before-and-after examples.',
+    date: '2026-11-06',
+    author: 'WriteScholar Team',
+    readTime: '10 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'A B essay is competent; an A essay argues something. Most of the gap is the thesis and how much of each paragraph analyses rather than summarises.',
+      'Revise from big to small: thesis, then topic sentences, then evidence, then sentences. Polishing the prose of an essay with a weak argument barely moves the grade.',
+      'Grade the draft against the rubric before you submit, yourself or with an AI grader, and spend your time on the two categories losing the most points.',
+    ],
+  },
+  {
     slug: 'how-to-study-for-finals',
     title: 'How to Study for Finals: A 2-Week Plan (2026)',
     description:

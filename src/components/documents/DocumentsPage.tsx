@@ -22,6 +22,8 @@ import DashboardTopBar from '../common/DashboardTopBar';
 import Footer from '../common/Footer';
 import PromoBanner from '../common/PromoBanner';
 import FlashOfferBanner from '../common/FlashOfferBanner';
+import FirstGradeHome from './FirstGradeHome';
+import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 import GenerationOverlay from '../common/GenerationOverlay';
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
@@ -3315,6 +3317,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   const [citeList, setCiteList] = useState<HubCitation[]>([]);
   const [citesLoading, setCitesLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
+  /** The document list has come back at least once (success or error). */
+  const [docsLoaded, setDocsLoaded] = useState(false);
+  /** Free user chose "Show my full dashboard" before grading anything. */
+  const [skipFirstGradeHome, setSkipFirstGradeHome] = useState<boolean>(() => {
+    try { return localStorage.getItem('ws_skip_first_grade_home') === '1'; } catch { return false; }
+  });
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   // A PDF the user picked, held until they acknowledge that PDFs
@@ -3511,6 +3519,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       setError('Could not load your documents.');
     } finally {
       setListLoading(false);
+      setDocsLoaded(true);
     }
   }, []);
 
@@ -4644,6 +4653,29 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     );
   }
 
+  // Free account with no graded essay yet: the home view is just the
+  // paste box (FirstGradeHome). The full dashboard returns once any
+  // document has a grade, or when they choose to skip.
+  const showFirstGradeHome =
+    docsLoaded &&
+    !isPaidPlan(user) &&
+    !skipFirstGradeHome &&
+    !highlightDocId &&
+    !docList.some((d) => d.hasAnalysis);
+
+  /** Same hand-off as the landing paste box: the analysis page grades it. */
+  const startFirstGrade = (text: string) => {
+    try {
+      localStorage.setItem('textAnalysisContent', text);
+      localStorage.removeItem('viewAnalysisDocumentId');
+      localStorage.removeItem('viewAnalysisType');
+      localStorage.removeItem('freshUploadDocumentId');
+      localStorage.removeItem('selectedDocumentId');
+      sessionStorage.setItem(FREE_GRADE_FLOW_KEY, '1');
+    } catch { /* ignore */ }
+    onNavigate('analysis');
+  };
+
   const dashboardTopBar = (
     <DashboardTopBar
       user={user}
@@ -4700,7 +4732,18 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             </div>
           </div>
         )}
-        {view === 'hub' && (
+        {view === 'hub' && showFirstGradeHome && (
+          <FirstGradeHome
+            userName={firstNameOf(user)}
+            topBar={dashboardTopBar}
+            onGrade={startFirstGrade}
+            onSkip={() => {
+              try { localStorage.setItem('ws_skip_first_grade_home', '1'); } catch { /* ignore */ }
+              setSkipFirstGradeHome(true);
+            }}
+          />
+        )}
+        {view === 'hub' && !showFirstGradeHome && (
           <DocumentsHub
             docs={docList}
             packs={hubPacks}

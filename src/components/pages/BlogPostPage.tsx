@@ -174,6 +174,19 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           },
         ],
       });
+    } else if (post.slug === 'how-to-turn-a-b-essay-into-an-a') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: "What is the difference between a B essay and an A essay?", acceptedAnswer: { '@type': 'Answer', text: "A B essay is clear, organized and supported. An A essay makes an arguable claim, analyses its evidence rather than summarising it, deals with the strongest counterargument, and explains why the argument matters. Most college rubrics describe the A band with words like insightful, original and persuasive." } },
+          { '@type': 'Question', name: "How do I turn a B essay into an A?", acceptedAnswer: { '@type': 'Answer', text: "Revise from big to small. Sharpen the thesis into a claim someone could disagree with, rewrite topic sentences so each makes a point, replace summary with analysis after every quote, add a counterargument paragraph, then cut filler and check citations." } },
+          { '@type': 'Question', name: "What does \"needs more analysis\" mean on an essay?", acceptedAnswer: { '@type': 'Answer', text: "It usually means too much of each paragraph retells what a source says and too little explains what it means for your argument. After every piece of evidence, ask \"so what?\" and write the answer, then ask it again about that answer." } },
+          { '@type': 'Question', name: "Does a longer essay get a better grade?", acceptedAnswer: { '@type': 'Answer', text: "Not on its own. Staying inside the required length matters, but padding usually lowers the grade because it dilutes the argument. A tighter essay with more analysis per paragraph almost always scores higher than a longer one with more summary." } },
+          { '@type': 'Question', name: "Should I use more sophisticated vocabulary to get an A?", acceptedAnswer: { '@type': 'Answer', text: "No. Precision matters more than length or rarity. Replace vague verbs like \"shows\" or \"talks about\" with ones that say what the author actually does, such as argues, implies or undermines, and cut filler phrases. Clarity is part of almost every rubric." } },
+          { '@type': 'Question', name: "How can I check my essay grade before I submit it?", acceptedAnswer: { '@type': 'Answer', text: "Grade it against the rubric yourself, category by category, or get a second read from a tutor or writing center. An AI essay grader like WriteScholar gives you an estimated grade and a score for every rubric category in about a minute, with your first grade each month free." } },
+        ],
+      });
     } else if (post.slug === 'how-to-study-for-finals') {
       injectJsonLd('blog-post-faq', {
         '@context': 'https://schema.org',
