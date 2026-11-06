@@ -1404,20 +1404,23 @@ const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
             <span>Trusted by <span className="tabular-nums text-[#7733B5]">50,000+</span> students worldwide</span>
           </p>
 
-          <h1 className="m-0 text-[2.6rem] font-black leading-[0.98] [text-wrap:balance] tracking-[-0.025em] text-[#1C1917] dark:text-stone-50 min-[390px]:text-[2.85rem] sm:text-[3.75rem] lg:text-[4.75rem]">
-            Know your grade{' '}
+          <h1 className="m-0 text-[2.6rem] font-black leading-[0.98] [text-wrap:balance] tracking-[-0.025em] text-[#1C1917] dark:text-stone-50 min-[390px]:text-[2.85rem] sm:text-[3.75rem] lg:text-[4.25rem]">
+            Turn B essays into{' '}
             <span
               className="inline-block -rotate-[1.5deg] rounded-[12px] border-2 border-[#1C1917] bg-[#A560E8] px-2.5 text-white sm:rounded-[16px] sm:px-3.5"
               style={{ boxShadow: '4px 4px 0 #1C1917' }}
             >
-              before
+              A&apos;s
             </span>{' '}
-            your professor does.
+            with WriteScholar
           </h1>
 
-          <p className="m-0 max-w-[50rem] text-[17px] font-bold leading-[1.45] text-[#44403C] dark:text-stone-300 sm:text-[19px] lg:text-[20px]">
-            Paste any essay. In about a minute you get the estimated grade, a five-part rubric score and a comment on every sentence that needs work.
-          </p>
+          {/* H1 and H2 mirror the page title and meta description
+              (src/constants/landingSeo.ts, index.html) so a searcher sees
+              the same promise on Google and on the page. */}
+          <h2 className="m-0 max-w-[50rem] text-[17px] font-bold leading-[1.45] text-[#44403C] dark:text-stone-300 sm:text-[19px] lg:text-[20px]">
+            Paste your essay into our free AI essay grader. Get a professor-style grade, every rubric score and line-by-line feedback in about a minute.
+          </h2>
 
           <div className="relative mt-1 w-full sm:mt-2">
             {wideHero && (
@@ -1428,7 +1431,7 @@ const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
                 width={260}
                 height={260}
                 decoding="async"
-                className="pointer-events-none absolute -right-[150px] -top-[140px] z-20 h-[150px] w-[150px] rotate-[10deg] object-contain 2xl:-right-[170px] 2xl:-top-[160px] 2xl:h-[170px] 2xl:w-[170px]"
+                className="pointer-events-none absolute -right-[150px] -top-[110px] z-20 h-[150px] w-[150px] rotate-[10deg] object-contain 2xl:-right-[170px] 2xl:-top-[130px] 2xl:h-[170px] 2xl:w-[170px]"
               />
             )}
             <HeroEssayGrader onSubmit={handleHeroSubmit} initialText={restoredEssay} resetSignal={gateResetSignal} />
