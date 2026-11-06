@@ -88,6 +88,9 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [fileError, setFileError] = useState('');
+  /** Shown when "Grade my essay" is pressed before the essay is long enough. */
+  const [gradeHint, setGradeHint] = useState('');
+  const [shake, setShake] = useState(false);
   const [reading, setReading] = useState(false);
   const [stage, setStage] = useState<Stage>('edit');
   const [stepIdx, setStepIdx] = useState(0);
@@ -180,7 +183,22 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
   };
 
   const submit = () => {
-    if (!ready) return;
+    if (!ready) {
+      if (reading || stage !== 'edit') return;
+      // Never a dead button: say exactly what is missing.
+      setGradeHint(
+        words === 0
+          ? `Paste your essay first. Minimum ${FREE_GRADE_MIN_WORDS} words needed to grade your essay.`
+          : tooLong
+            ? `Free grades cover up to ${FREE_GRADE_MAX_WORDS.toLocaleString()} words and yours has ${words.toLocaleString()}. Grade a section of it.`
+            : `Minimum ${FREE_GRADE_MIN_WORDS} words needed to grade your essay. You have ${words.toLocaleString()} so far.`,
+      );
+      setShake(true);
+      window.setTimeout(() => setShake(false), 460);
+      textareaRef.current?.focus();
+      return;
+    }
+    setGradeHint('');
     const trimmed = text.trim();
     const f = readEssayFacts(trimmed, fileName);
     setFacts(f);
@@ -220,12 +238,12 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
             <label htmlFor="hero-essay">Your essay</label>
             <span>{FREE_GRADE_MIN_WORDS} to {FREE_GRADE_MAX_WORDS.toLocaleString()} words</span>
           </div>
-          <div className="relative">
+          <div className={`relative ${words === 0 && !dragOver ? 'ws-box-glow' : ''}`}>
             <textarea
               ref={textareaRef}
               id="hero-essay"
               value={text}
-              onChange={(e) => { setText(e.target.value); if (fileName) setFileName(null); }}
+              onChange={(e) => { setText(e.target.value); if (fileName) setFileName(null); if (gradeHint) setGradeHint(''); }}
               placeholder="Paste the whole essay here, introduction to conclusion. Or drop a .docx onto this box."
               spellCheck={false}
               rows={8}
@@ -271,7 +289,9 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={reading}
-                className="inline-flex min-h-[58px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-[#1C1917] bg-white px-6 text-[17px] font-black text-[#1C1917] transition-all hover:bg-[#F3EEFF] active:translate-x-px active:translate-y-px disabled:opacity-60 sm:min-h-[62px] sm:text-[18px]"
+                className={`inline-flex min-h-[58px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-[#1C1917] px-6 text-[17px] font-black text-[#1C1917] transition-all hover:bg-[#F3EEFF] active:translate-x-px active:translate-y-px disabled:opacity-60 sm:min-h-[62px] sm:text-[18px] ${
+                  words === 0 && !reading ? 'ws-upload-glow bg-[#FAF7FF]' : 'bg-white'
+                }`}
                 style={{ boxShadow: '4px 4px 0 #1C1917', ...font }}
               >
                 <svg className="h-5 w-5 text-[#7733B5]" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24" aria-hidden>
@@ -283,9 +303,10 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
               <button
                 type="button"
                 onClick={submit}
-                disabled={!ready}
-                className="group/btn inline-flex min-h-[58px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-[#1C1917] bg-[#58CC02] px-7 text-[18px] font-black sm:min-h-[62px] sm:px-9 sm:text-[20px] text-[#1C1917] transition-all hover:bg-[#61E002] active:translate-x-px active:translate-y-px disabled:cursor-not-allowed disabled:border-[#CBD5C0] disabled:bg-[#DDE9D2] disabled:text-[#7C8A70] disabled:shadow-none"
-                style={{ boxShadow: ready ? '4px 4px 0 #1C1917' : 'none', ...font }}
+                disabled={reading}
+                aria-describedby={gradeHint ? 'hero-grade-hint' : undefined}
+                className={`group/btn inline-flex min-h-[58px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-[#1C1917] bg-[#58CC02] px-7 text-[18px] font-black sm:min-h-[62px] sm:px-9 sm:text-[20px] text-[#1C1917] transition-all hover:bg-[#61E002] active:translate-x-px active:translate-y-px disabled:cursor-wait disabled:opacity-70 ${shake ? 'ws-shake' : ''}`}
+                style={{ boxShadow: '4px 4px 0 #1C1917', ...font }}
               >
                 Grade my essay
                 <svg className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
@@ -294,6 +315,17 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
               </button>
             </div>
           </div>
+
+          {gradeHint && (
+            <p
+              id="hero-grade-hint"
+              role="alert"
+              className="mt-3 flex items-start gap-2 rounded-[12px] border-2 border-[#1C1917] bg-[#FFF4E5] px-3 py-2 text-[13.5px] font-extrabold leading-snug text-[#9A3412]"
+            >
+              <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5v.5" /></svg>
+              {gradeHint}
+            </p>
+          )}
 
           {fileError && (
             <p className="mt-2 px-1 text-[12.5px] font-extrabold text-[#C2410C]" role="alert">{fileError}</p>
