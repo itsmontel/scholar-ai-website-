@@ -198,6 +198,20 @@ const Header: React.FC<HeaderProps> = ({
     // signed-out picks this variant up automatically.
     const isLandingPurple = true;
 
+    // "Try it free" means "grade an essay": the paste box is the front door,
+    // and signing up first skipped it for 7 in 10 new accounts. On the
+    // landing page, scroll to the box; anywhere else, go there.
+    const goToGrader = () => {
+      const box = typeof document !== 'undefined' ? document.getElementById('hero-essay') : null;
+      if (currentPage === 'landing' && box) {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => (box as HTMLTextAreaElement).focus({ preventScroll: true }), 450);
+        return;
+      }
+      try { sessionStorage.setItem('ws_focus_grader', '1'); } catch { /* ignore */ }
+      onNavigate?.('landing');
+    };
+
     const publicNavActiveCls = isLandingPurple
       ? 'bg-white/25 text-white font-bold border-2 border-white/40'
       : 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] font-bold border-2 border-[#A560E8]/30 dark:border-[#A560E8]/30';
@@ -274,7 +288,7 @@ const Header: React.FC<HeaderProps> = ({
                 Log in
               </button>
               <button
-                onClick={() => onNavigate?.('signup')}
+                onClick={goToGrader}
                 className={`inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
               >
                 Try it free
@@ -329,7 +343,7 @@ const Header: React.FC<HeaderProps> = ({
                   Log in
                 </button>
                 <button
-                  onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
+                  onClick={() => { goToGrader(); setIsMobileMenuOpen(false); }}
                   className={`block text-center px-4 py-2.5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
                 >
                   Try it free

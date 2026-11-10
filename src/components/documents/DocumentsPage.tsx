@@ -23,6 +23,7 @@ import Footer from '../common/Footer';
 import PromoBanner from '../common/PromoBanner';
 import FlashOfferBanner from '../common/FlashOfferBanner';
 import FirstGradeHome from './FirstGradeHome';
+import { FreeReportUnlockBar, readFreePreview, type FreePreviewInfo } from '../common/FreePreviewDivider';
 import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 import GenerationOverlay from '../common/GenerationOverlay';
@@ -3323,6 +3324,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   const [skipFirstGradeHome, setSkipFirstGradeHome] = useState<boolean>(() => {
     try { return localStorage.getItem('ws_skip_first_grade_home') === '1'; } catch { return false; }
   });
+  /** They tried a Pro tool before grading anything and were sent back here. */
+  const [firstGradeNudge, setFirstGradeNudge] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   // A PDF the user picked, held until they acknowledge that PDFs
@@ -3367,6 +3370,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   }, []);
 
   const [analyzerResult, setAnalyzerResult] = useState<AnalyzerResult | null>(null);
+  /** Free report: what the server held back (counts of hidden comments). */
+  const [analyzerPreview, setAnalyzerPreview] = useState<FreePreviewInfo | null>(null);
+  const [unlockBarDismissed, setUnlockBarDismissed] = useState(false);
   const [analyzerLoading, setAnalyzerLoading] = useState(false);
   const [analyzerError, setAnalyzerError] = useState<string | null>(null);
   const [analyzerOpen, setAnalyzerOpen] = useState(false);
@@ -3712,15 +3718,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     }
   }, [createNewDoc]);
 
-  /** Blank drafts (write from scratch) are Pro-only; uploads and paste stay free. */
+  /**
+   * Blank drafts are free for everyone: the pricing page lists the writing
+   * editor as part of the free plan, and a paywall on "New document" was the
+   * first thing some new accounts hit.
+   */
   const requestBlankDraft = useCallback(() => {
     if (trialGated) {
       onTrialGate?.();
-      return;
-    }
-    if (!isPaidPlan(user)) {
-      trackEvent('upgrade_clicked', { source: 'blank_draft' });
-      openUpgradePaywall('blank_draft');
       return;
     }
     void handleNewDoc();
@@ -4070,6 +4075,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         rubric: normalizeRubricRows(rubricRaw),
         lockedTopSuggestions: lockedTopSuggestionCount(payload),
       });
+      setAnalyzerPreview(isPaidPlan(user) ? null : readFreePreview(payload?.preview));
       persistLastAnalysisGradingStyle(gradingStyle);
       try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
       trackEvent('preview_ran', { feature: 'analysis', annotations: annotations.length });
@@ -4330,6 +4336,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // analyzed" with no highlights until a hard refresh.
   useEffect(() => {
     setAnalyzerResult(null);
+    setAnalyzerPreview(null);
     setAnalyzerOpen(false);
     setAnalyzerError(null);
     setSelectedAnnotationId(null);
@@ -4393,6 +4400,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           rubric: normalizeRubricRows(ar.grade_rubric ?? ar.gradeRubric),
           lockedTopSuggestions: lockedTopSuggestionCount(ar),
         });
+        setAnalyzerPreview(isPaidPlan(user) ? null : readFreePreview(ar.preview));
         // Restore which revisions were already applied (+ the original
         // text needed to revert) so refresh / another device keeps the
         // "Revert" state. Prefer the server copy (ws_revision_cache,
@@ -4466,16 +4474,27 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     };
   }, [analyzerResult, paidPlan]);
 
-  // End-of-essay paywall: once a free user has read their marked-up
-  // essay to the last line, open the paywall. Once per essay per
-  // session. A short essay that already fits on screen waits until
-  // they have had a moment with the highlights.
+  // A reopened report starts with its "comments locked" bar showing again.
+  useEffect(() => {
+    setUnlockBarDismissed(false);
+  }, [openDocId]);
+
+  // Report paywall: open it once per essay per session, either when a free
+  // user has read their marked-up essay to the last line, or after 20
+  // seconds on a report that has locked comments (only the first quarter
+  // is marked now, so most readers never reach the last line). A short
+  // essay that already fits on screen waits until they have had a moment
+  // with the highlights. Shares its "already offered" marker with the
+  // first report page (AnalysisPage) so nobody gets it twice in a visit.
   useEffect(() => {
     if (paidPlan || !analyzerResult || !openDocId) return;
     const seenKey = `ws_essay_end_paywall_${openDocId}`;
     try {
       if (sessionStorage.getItem(seenKey) === '1') return;
+      if (sessionStorage.getItem(`ws_divider_offer_${openDocId}`) === '1') return;
     } catch { /* storage unavailable: show at most once per mount */ }
+    const hasLockedComments = !!analyzerPreview && analyzerPreview.hidden.total > 0;
+    const LOCKED_REPORT_WAIT_MS = 20000;
     const root = editorRef.current?.view?.dom as HTMLElement | undefined;
     if (!root) return;
     const resultShownAt = Date.now();
@@ -4489,11 +4508,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       const rect = root.getBoundingClientRect();
       if (rect.height <= 0) return;
       const lastLineOnScreen = rect.bottom <= window.innerHeight - 24;
-      if (!lastLineOnScreen) return;
-      if (!scrolled && Date.now() - resultShownAt < SHORT_ESSAY_WAIT_MS) return;
+      const timeUp = hasLockedComments && Date.now() - resultShownAt >= LOCKED_REPORT_WAIT_MS;
+      if (!timeUp) {
+        if (!lastLineOnScreen) return;
+        if (!scrolled && Date.now() - resultShownAt < SHORT_ESSAY_WAIT_MS) return;
+      }
       fired = true;
       try { sessionStorage.setItem(seenKey, '1'); } catch { /* ignore */ }
-      trackEvent('paywall_view', { trigger: 'essay_end' });
+      trackEvent('paywall_view', { trigger: timeUp && !lastLineOnScreen ? 'report_time' : 'essay_end' });
       setShowSoftPaywall(true);
       stop();
     };
@@ -4511,7 +4533,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       window.clearInterval(poll);
     }
     return stop;
-  }, [analyzerResult, paidPlan, openDocId]);
+  }, [analyzerResult, analyzerPreview, paidPlan, openDocId]);
 
   // Pull the remaining-analyses count whenever a document opens so
   // the editor's top-right chip is accurate before they analyze.
@@ -4596,6 +4618,18 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           analyzeConfirmSignal={analyzeConfirmSignal}
         />
         <GenerationOverlay open={analyzerLoading} variant="analyze" />
+        {/* Free report reopened from the Library: the same pinned
+            "comments locked" bar as the first report page. */}
+        {analyzerResult && analyzerPreview && !paidPlan && !unlockBarDismissed && !showSoftPaywall && !analyzerLoading && (
+          <FreeReportUnlockBar
+            info={analyzerPreview}
+            onUnlock={() => {
+              trackEvent('upgrade_clicked', { source: 'sticky_bar' });
+              openUpgradePaywall('sticky_bar', { essayUnlock: essayUnlock ?? undefined });
+            }}
+            onDismiss={() => setUnlockBarDismissed(true)}
+          />
+        )}
         {/* Post-upload nudge — pushes a freshly imported paper toward
             an analysis. Auto-hides once they engage the analyzer. */}
         {showAnalyzeNudge && !analyzerResult && !analyzerLoading && !analyzerError && (
@@ -4662,6 +4696,35 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     !skipFirstGradeHome &&
     !highlightDocId &&
     !docList.some((d) => d.hasAnalysis);
+
+  // Tell the app-wide paywall listener whether this account still has no
+  // grade (CompleteAcademicAIApp reads ws_first_grade_pending).
+  const firstGradePending = docsLoaded && !isPaidPlan(user) && !docList.some((d) => d.hasAnalysis);
+  useEffect(() => {
+    if (!docsLoaded) return;
+    try {
+      if (firstGradePending) sessionStorage.setItem('ws_first_grade_pending', '1');
+      else sessionStorage.removeItem('ws_first_grade_pending');
+    } catch { /* ignore */ }
+  }, [docsLoaded, firstGradePending]);
+
+  // A Pro tool was clicked before the first grade: come back to the paste
+  // box, even if they had chosen "Show my full dashboard" earlier.
+  useEffect(() => {
+    const showFirstGrade = () => {
+      try {
+        if (sessionStorage.getItem('ws_first_grade_nudge') !== '1') return;
+        sessionStorage.removeItem('ws_first_grade_nudge');
+        localStorage.removeItem('ws_skip_first_grade_home');
+      } catch { /* ignore */ }
+      setSkipFirstGradeHome(false);
+      setFirstGradeNudge(true);
+      setView('hub');
+    };
+    showFirstGrade();
+    window.addEventListener('writescholar-first-grade', showFirstGrade);
+    return () => window.removeEventListener('writescholar-first-grade', showFirstGrade);
+  }, []);
 
   /** Same hand-off as the landing paste box: the analysis page grades it. */
   const startFirstGrade = (text: string) => {
@@ -4736,6 +4799,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           <FirstGradeHome
             userName={firstNameOf(user)}
             topBar={dashboardTopBar}
+            note={firstGradeNudge ? 'That tool is part of Pro. Start with your free essay grade and see what WriteScholar does first.' : undefined}
             onGrade={startFirstGrade}
             onSkip={() => {
               try { localStorage.setItem('ws_skip_first_grade_home', '1'); } catch { /* ignore */ }

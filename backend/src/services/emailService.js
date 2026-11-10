@@ -1063,15 +1063,16 @@ class EmailService {
 
   /* ─── Preview follow-up (freemium recovery) ───
    *  Fired by the hourly `notifyPreviewFollowups` cron in
-   *  subscriptionService ~24h after a free user ran a preview
+   *  subscriptionService ~3h after a free user ran a preview
    *  (analysis / citation search / study pack) but didn't upgrade.
    *  Their locked results are still sitting in the app — this email
    *  brings them back at the moment the assignment is still live.
    *  One per user, ever (users.preview_followup_email_sent_at).
    *
    *  @param {string} email   recipient
-   *  @param {Object} opts    { firstName, feature } — feature is
-   *                          'analysis' | 'citations' | 'study pack'
+   *  @param {Object} opts    { firstName, feature, report } — feature is
+   *                          'analysis' | 'citations' | 'study pack';
+   *                          report is { score, grade, hidden } for a grade
    */
   async sendPreviewFollowupEmail(email, opts = {}) {
     if (!this.transporter) {
@@ -1098,7 +1099,7 @@ class EmailService {
             ? `${firstName}, your essay fixes are still waiting`
             : 'Your essay fixes are still waiting',
           headline: `Your fixes are ready${greetingName} 📝`,
-          body: 'Yesterday WriteScholar graded your essay and found fixes that would raise it — they\'re still sitting in your draft, locked. One upgrade and you can apply every one before you submit.',
+          body: 'Earlier, WriteScholar graded your essay and found fixes that would raise it. They\'re still sitting in your draft, locked. One upgrade and you can apply every one before you submit.',
           preheader: 'WriteScholar found fixes for your essay — they\'re still waiting in your draft.',
         },
         citations: {
@@ -1106,7 +1107,7 @@ class EmailService {
             ? `${firstName}, your sources are still waiting`
             : 'Your sources are still waiting',
           headline: `Your sources are ready${greetingName} 📚`,
-          body: 'Yesterday WriteScholar found real, citable sources for your topic — most are still locked. Unlock the full list and your bibliography writes itself.',
+          body: 'Earlier, WriteScholar found real, citable sources for your topic — most are still locked. Unlock the full list and your bibliography writes itself.',
           preheader: 'WriteScholar found sources for your topic — the full list is still waiting.',
         },
         'study pack': {
@@ -1114,10 +1115,33 @@ class EmailService {
             ? `${firstName}, your study pack is still waiting`
             : 'Your study pack is still waiting',
           headline: `Your pack is ready${greetingName} 🃏`,
-          body: 'Yesterday WriteScholar turned your notes into a lesson, a quiz and flashcards. The rest of your deck, the crossword and the study games are still locked. Unlock them and drill it until it sticks before the exam.',
+          body: 'Earlier, WriteScholar turned your notes into a lesson, a quiz and flashcards. The rest of your deck, the crossword and the study games are still locked. Unlock them and drill it until it sticks before the exam.',
           preheader: 'Your study pack is built — the quiz and full deck are still waiting.',
         },
       };
+      // Essay grade with real numbers: lead with their score and the count
+      // of comments the free report is holding back.
+      const report = opts.report;
+      const hiddenTotal = report?.hidden?.total || 0;
+      if (feature === 'analysis' && report && hiddenTotal > 0) {
+        const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+        const scoreText = report.score != null
+          ? `${report.score}/100${report.grade ? ` (${report.grade})` : ''}`
+          : report.grade || '';
+        const parts = [];
+        if (report.hidden.concern > 0) parts.push(plural(report.hidden.concern, 'serious concern', 'serious concerns'));
+        if (report.hidden.improve > 0) parts.push(`${report.hidden.improve} that need work`);
+        if (report.hidden.strong > 0) parts.push(plural(report.hidden.strong, 'strong point', 'strong points'));
+        const breakdown = parts.length ? `: ${parts.join(', ')}` : '';
+        hooks.analysis = {
+          subject: scoreText
+            ? `Your essay scored ${scoreText}. ${plural(hiddenTotal, 'comment is', 'comments are')} still locked`
+            : `${plural(hiddenTotal, 'comment', 'comments')} on your essay ${hiddenTotal === 1 ? 'is' : 'are'} still locked`,
+          headline: scoreText ? `Your essay scored ${scoreText}${greetingName}` : `Your report is waiting${greetingName}`,
+          body: `Your free report marked the first quarter of your essay. The rest has ${plural(hiddenTotal, 'comment', 'comments')} you have not seen${breakdown}. Unlock them, with the rewrite for each one, while you can still fix the essay before you submit.`,
+          preheader: `${plural(hiddenTotal, 'comment', 'comments')} on the rest of your essay ${hiddenTotal === 1 ? 'is' : 'are'} still locked.`,
+        };
+      }
       const hook = hooks[feature] || hooks.analysis;
 
       const valueRows = [

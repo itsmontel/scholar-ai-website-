@@ -5,6 +5,8 @@ interface FirstGradeHomeProps {
   userName: string;
   /** Credits pill, avatar and friends: the same top bar as the full dashboard. */
   topBar?: ReactNode;
+  /** Shown when they were sent here after clicking a Pro tool. */
+  note?: string;
   /** Called with the essay once the paste box has read it. */
   onGrade: (text: string) => void;
   /** "Show my full dashboard": leave this view for good on this device. */
@@ -23,11 +25,21 @@ const STEPS = [
  * page is to get one essay in. Once an essay has a grade, the normal
  * dashboard takes over (see DocumentsPage, showFirstGradeHome).
  */
-export default function FirstGradeHome({ userName, topBar, onGrade, onSkip }: FirstGradeHomeProps) {
+export default function FirstGradeHome({ userName, topBar, note, onGrade, onSkip }: FirstGradeHomeProps) {
   const font = { fontFamily: '"Nunito", system-ui, sans-serif' } as const;
   return (
     <div className="mx-auto w-full max-w-[860px] pb-12" style={font}>
       {topBar && <div className="mb-6 flex items-center justify-end gap-2">{topBar}</div>}
+
+      {note && (
+        <p
+          role="status"
+          className="mx-auto mb-5 flex max-w-[40rem] items-start gap-2 rounded-[14px] border-2 border-[#1C1917] bg-[#F3EEFF] px-4 py-2.5 text-left text-[14px] font-extrabold leading-snug text-[#1C1917]"
+        >
+          <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#7733B5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+          {note}
+        </p>
+      )}
 
       <div className="flex flex-col items-center gap-4 text-center">
         <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#1C1917] bg-[#DCFCE7] px-3.5 py-1.5 text-[12.5px] font-black uppercase tracking-[0.08em] text-[#1C1917]">

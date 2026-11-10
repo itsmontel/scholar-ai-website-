@@ -1598,11 +1598,14 @@ const notifyTrialsEndingSoon = async () => {
 
 /**
  * Hourly: find free users who ran a preview (analysis / citation search /
- * study pack) 24–48 hours ago and never upgraded, then send the one-shot
- * "your results are still waiting" recovery email.
+ * study pack) 3–27 hours ago and never upgraded, then send the one-shot
+ * "your results are still waiting" recovery email. For an essay grade the
+ * email names their score and how many comments are still locked.
  *
- * Window is 24–48h (not open-ended) so a fresh deploy doesn't blast every
- * historical free user; idempotency via users.preview_followup_email_sent_at
+ * Three hours, not a day: the essay is usually due soon, so the email has
+ * to land while they can still act on it. The window is bounded (not
+ * open-ended) so a fresh deploy doesn't blast every historical free user;
+ * idempotency via users.preview_followup_email_sent_at
  * guarantees at most one email per user, ever, no matter how many previews
  * they run or how many cron ticks land inside the window.
  *
@@ -1614,8 +1617,8 @@ const notifyPreviewFollowups = async () => {
   let errors = 0;
   try {
     const nowMs = Date.now();
-    const windowStartIso = new Date(nowMs - 48 * 60 * 60 * 1000).toISOString();
-    const windowEndIso = new Date(nowMs - 24 * 60 * 60 * 1000).toISOString();
+    const windowStartIso = new Date(nowMs - 27 * 60 * 60 * 1000).toISOString();
+    const windowEndIso = new Date(nowMs - 3 * 60 * 60 * 1000).toISOString();
 
     const [analyses, citations, packs] = await Promise.all([
       supabaseServiceRole.from('document_analyses').select('user_id').gte('created_at', windowStartIso).lte('created_at', windowEndIso),
@@ -1639,7 +1642,7 @@ const notifyPreviewFollowups = async () => {
     const candidateCount = candidates.size;
     if (candidateCount === 0) return { sent: 0, errors: 0, candidates: 0 };
 
-    console.log(`💌 preview-followup: ${candidateCount} user(s) previewed 24–48h ago`);
+    console.log(`💌 preview-followup: ${candidateCount} user(s) previewed 3–27h ago`);
 
     for (const [userId, feature] of candidates) {
       try {
@@ -1662,7 +1665,36 @@ const notifyPreviewFollowups = async () => {
             : '') ||
           '';
 
-        const emailResult = await emailService.sendPreviewFollowupEmail(user.email, { firstName, feature });
+        // Essay grade: tell them their score and what is still locked,
+        // using the same cut the report itself applies.
+        let report = null;
+        if (feature === 'analysis') {
+          try {
+            const { data: latest } = await supabaseServiceRole
+              .from('document_analyses')
+              .select('analysis_results, analysis_type')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            const results = latest?.analysis_results;
+            if (results && typeof results === 'object') {
+              const { redactAnalysisPayload, isGradedFeedback } = require('./analysisRedaction');
+              if (isGradedFeedback(latest.analysis_type)) {
+                const cut = redactAnalysisPayload(results);
+                report = {
+                  score: typeof results.overall_score === 'number' ? Math.round(results.overall_score) : null,
+                  grade: typeof results.grade_estimate === 'string' ? results.grade_estimate : null,
+                  hidden: cut?.preview?.hidden || null,
+                };
+              }
+            }
+          } catch (reportErr) {
+            console.warn(`💌 preview-followup: report facts unavailable for ${userId}:`, reportErr.message);
+          }
+        }
+
+        const emailResult = await emailService.sendPreviewFollowupEmail(user.email, { firstName, feature, report });
         if (!emailResult.success) {
           console.error(`💌 preview-followup: send failed for ${userId}:`, emailResult.error);
           errors += 1;

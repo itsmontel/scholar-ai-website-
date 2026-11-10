@@ -313,6 +313,8 @@ const AcademicAIApp = () => {
    *  so `navigateTo` and the paywall-event listener can read the live gate
    *  state without stale closures. */
   const trialGateActiveRef = useRef(false);
+  /** Latest navigateTo, for listeners registered once on mount. */
+  const navigateToRef = useRef<(page: string) => void>(() => {});
   /** After Stripe cancel from post-tutorial checkout: choice to retry trial or forfeit (restored after refresh until resolved) */
   const [stripeCancelTrialModalOpen, setStripeCancelTrialModalOpen] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -697,6 +699,26 @@ const AcademicAIApp = () => {
       const detail = (e as CustomEvent).detail as { force?: boolean; trigger?: string; essayUnlock?: EssayUnlockSummary } | undefined;
       const force = detail?.force === true;
       const paywallTrigger = detail?.trigger;
+      // A free account that has not graded an essay yet (flag kept by
+      // DocumentsPage): a feature paywall is a dead end, because they have
+      // not seen what the product does. Send them to their free first grade
+      // instead. Clicking an explicit upgrade button still opens the paywall.
+      try {
+        if (
+          sessionStorage.getItem('ws_first_grade_pending') === '1' &&
+          !['credits_pill', 'promo_banner'].includes(paywallTrigger || '')
+        ) {
+          if (force) {
+            sessionStorage.setItem('ws_first_grade_nudge', '1');
+            trackEvent('pro_only_hit', { feature: paywallTrigger || 'unknown', reason: 'before_first_grade' });
+            navigateToRef.current('dashboard');
+            window.setTimeout(() => window.dispatchEvent(new CustomEvent('writescholar-first-grade')), 0);
+          }
+          return;
+        }
+      } catch {
+        /* ignore */
+      }
       setPaywallEssayUnlock(detail?.essayUnlock ?? null);
       // [soft-paywall-debug] Temporary trace — see comment at
       // handleOnboardingComplete dispatch site.
@@ -1114,6 +1136,7 @@ const AcademicAIApp = () => {
       }
     }
   };
+  navigateToRef.current = navigateTo;
 
   // Authentication handlers
   const handleSignUp = (userData: User) => {

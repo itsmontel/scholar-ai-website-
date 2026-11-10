@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import Header from '../common/Header';
-import PromoBanner from '../common/PromoBanner';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
@@ -623,7 +622,21 @@ const useWideHero = () => {
   return wide;
 };
 
-const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
+const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps) => {
+  // Every "start free" button on this page means "grade an essay". Sending
+  // visitors to the sign-up form instead made accounts that never graded,
+  // so 'signup' from anywhere on the landing page goes to the paste box.
+  const onNavigate = (page: string) => {
+    if (page === 'signup') {
+      const box = document.getElementById('hero-essay');
+      if (box) {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => (box as HTMLTextAreaElement).focus({ preventScroll: true }), 450);
+        return;
+      }
+    }
+    navigateRaw(page);
+  };
   // ─── Free first grade: paste box in the hero, one-field gate, then the report ───
   const [gateOpen, setGateOpen] = useState(false);
   const [pendingMeta, setPendingMeta] = useState<{ text: string; facts: EssayFacts } | null>(null);
@@ -633,6 +646,18 @@ const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
   const wideHero = useWideHero();
   useEffect(() => {
     trackEvent('landing_view');
+    // Arrived from a "Try it free" button on another page: put the cursor
+    // in the paste box.
+    try {
+      if (sessionStorage.getItem('ws_focus_grader') === '1') {
+        sessionStorage.removeItem('ws_focus_grader');
+        window.setTimeout(() => {
+          const box = document.getElementById('hero-essay');
+          box?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          (box as HTMLTextAreaElement | null)?.focus({ preventScroll: true });
+        }, 700);
+      }
+    } catch { /* ignore */ }
   }, []);
   /** Hand the essay to the analysis page and go there. */
   const startGrade = (text: string) => {
@@ -707,22 +732,10 @@ const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, [pipVisible, pipDismissed]);
 
-  // Gold promo bar: hidden on the purple hero, then pins under the
-  // header. Use scrollY — CSS `zoom` on the landing body makes
-  // getBoundingClientRect unreliable on desktop.
-  const landingPlan = (user?.plan ?? user?.subscription_plan ?? 'free').toLowerCase();
-  const isPaidLandingUser = landingPlan === 'pro' || landingPlan === 'premium';
-  const [pastHero, setPastHero] = useState(false);
-  useEffect(() => {
-    const update = () => setPastHero(window.scrollY > 420);
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    document.addEventListener('scroll', update, { passive: true, capture: true });
-    return () => {
-      window.removeEventListener('scroll', update);
-      document.removeEventListener('scroll', update, true);
-    };
-  }, []);
+  // The gold launch-price bar is not shown on the landing page (removed
+  // 2026-11-10): this page's one job is the free paste box, and a price
+  // before any value competes with it. The launch price still shows on the
+  // paywall, the pricing page and the in-app strip.
   const handleDismissPip = () => {
     setPipVisible(false);
     setPipDismissed(true);
@@ -1318,27 +1331,14 @@ const LandingPage = ({ onNavigate, user, onAuth }: LandingPageProps) => {
   return (
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader={false} />
-      {pastHero && !isPaidLandingUser && (
-        <div className="fixed inset-x-0 z-[110] top-[3.5rem] sm:top-[4.25rem] landing-promo-slide pointer-events-auto">
-          <PromoBanner
-            variant="gold"
-            onCta={() => onNavigate(user ? 'pricing' : 'signup')}
-          />
-        </div>
-      )}
       <style>{`
-        @keyframes landingPromoSlide {
-          from { transform: translateY(-100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .landing-promo-slide { animation: landingPromoSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
         @keyframes landingScholarRing {
           0% { transform: scale(0.85); opacity: 0.7; }
           100% { transform: scale(1.25); opacity: 0; }
         }
         .landing-scholar-ring { animation: landingScholarRing 2.6s ease-out infinite; }
         @media (prefers-reduced-motion: reduce) {
-          .landing-promo-slide, .landing-scholar-ring { animation: none; }
+          .landing-scholar-ring { animation: none; }
         }
       `}</style>
       <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">

@@ -30,7 +30,7 @@ import {
 import { persistTutorialToServer } from '../../utils/onboarding';
 import { POST_ACTIVATION_PAYWALL_PENDING_KEY } from '../../constants/paywallSession';
 import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
-import FreePreviewDivider, { readFreePreview, type FreePreviewInfo } from '../common/FreePreviewDivider';
+import FreePreviewDivider, { FreeReportUnlockBar, readFreePreview, type FreePreviewInfo } from '../common/FreePreviewDivider';
 
 /** Supabase/JSON occasionally returns analysis_results as a string — normalize for library reloads. */
 function normalizeSavedAnalysisResults(raw: unknown): Record<string, unknown> | null {
@@ -646,6 +646,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const [gradeRubric, setGradeRubric] = useState<Record<string, { score: number; max_score: number; feedback: string; feedbackLocked?: boolean }> | null>(null);
   /** Free grade: where the marked-up quarter ends and what is hidden after it. */
   const [previewInfo, setPreviewInfo] = useState<FreePreviewInfo | null>(null);
+  /** Free report: the pinned "comments locked" bar was closed for this visit. */
+  const [unlockBarDismissed, setUnlockBarDismissed] = useState(false);
   const [specificRewrites, setSpecificRewrites] = useState<Array<{ original: string; rewritten: string; reason: string }> | null>(null);
   const [analysisSummary, setAnalysisSummary] = useState<{
     overall_score: number | null;
@@ -2147,6 +2149,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       // over to the generic overlay.
       setShowAnalysisPopup(false);
       try { localStorage.removeItem('textAnalysisContent'); } catch (_) {}
+      // They have a grade now: in-app paywalls behave normally again.
+      try { sessionStorage.removeItem('ws_first_grade_pending'); } catch (_) {}
       setRubricAlignment(result.data.rubricAlignment ?? null);
       setLockedFeatures(result.data.lockedFeatures || []);
       setPreviewInfo(readFreePreview(result.data.preview));
@@ -2870,6 +2874,21 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     );
   };
 
+  /**
+   * Free grade: the reader has reached the end of the marked part. Show the
+   * offer once per report, without waiting for them to click a lock. Most
+   * free graders read their report and left without ever opening it.
+   */
+  const offerAtDivider = () => {
+    if (showFixPaywall) return;
+    const key = `ws_divider_offer_${selectedDocument || 'report'}`;
+    try {
+      if (sessionStorage.getItem(key) === '1') return;
+      sessionStorage.setItem(key, '1');
+    } catch { /* ignore */ }
+    openFixPaywall('divider_auto');
+  };
+
   /** Free grade: put the "rest is locked" divider after the paragraph where the marked quarter ends. */
   const withPreviewDivider = (rendered: ReactNode[], paragraphs: string[], starts: number[]): ReactNode[] => {
     if (!previewInfo || previewInfo.hidden.total <= 0) return rendered;
@@ -2878,7 +2897,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     if (idx < 0) idx = paragraphs.length - 1;
     const out = [...rendered];
     out.splice(idx + 1, 0, (
-      <FreePreviewDivider key="free-preview-divider" info={previewInfo} onUnlock={() => openFixPaywall('preview_divider')} />
+      <FreePreviewDivider
+        key="free-preview-divider"
+        info={previewInfo}
+        onUnlock={() => openFixPaywall('preview_divider')}
+        onSeen={offerAtDivider}
+      />
     ));
     return out;
   };
@@ -5191,6 +5215,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             setShowFixPaywall(false);
           }}
           onNavigate={onNavigate}
+        />
+      )}
+
+      {previewInfo && !!analysisResult && !showFixPaywall && !showAnalysisPopup && !unlockBarDismissed && (
+        <FreeReportUnlockBar
+          info={previewInfo}
+          onUnlock={() => openFixPaywall('sticky_bar')}
+          onDismiss={() => setUnlockBarDismissed(true)}
         />
       )}
 
