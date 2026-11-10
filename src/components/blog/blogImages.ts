@@ -11,6 +11,8 @@
  * the site-wide OG image, so adding a post never requires artwork first.
  */
 const SLUGS_WITH_ART = new Set<string>([
+  'how-to-write-a-conclusion',
+  'how-to-turn-a-b-essay-into-an-a',
   'how-to-study-for-finals',
   'can-professors-tell-if-you-used-chatgpt',
   'what-does-critically-evaluate-mean',
