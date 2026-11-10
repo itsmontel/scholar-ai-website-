@@ -73,6 +73,188 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-write-a-conclusion':
+      return (
+        <>
+          <p className={p}>
+            The essay is nearly done. The introduction works, the body paragraphs are in place, the word count is close, and it is late. So you type &quot;In conclusion,&quot; repeat your thesis in slightly different words, list your three points again, and submit.
+          </p>
+          <p className={p}>
+            Almost everyone writes conclusions this way, which is exactly why a good one stands out. The conclusion is the last thing your professor reads before deciding on a grade, and a paragraph that only repeats the essay tells them you ran out of things to say. This guide shows you how to write a conclusion that finishes the argument instead, with a simple structure, examples for different essay types, and the mistakes to cut.
+          </p>
+
+          <h2 className={h2}>How to write a conclusion: the short version</h2>
+          <p className={p}>
+            A strong conclusion does three things, in this order. <strong>1. Answer the question</strong> by restating your thesis in new words, as something you have now proved. <strong>2. Connect your main points</strong> in a sentence or two, showing how they add up, not listing them again. <strong>3. Say why it matters</strong> by ending on the wider significance: what the reader should now understand, do, or look at differently. No new evidence, no new arguments, and no apology.
+          </p>
+
+          <h2 className={h2}>What a conclusion is actually for</h2>
+          <p className={p}>
+            The introduction makes a promise: here is the question, and here is what I will argue. The conclusion shows the promise was kept. It is not a summary for someone who skipped the essay. It is the point where you step back from the detail and tell the reader what all of it adds up to.
+          </p>
+          <p className={p}>
+            A useful test is the question &quot;so what?&quot; By the end of the body, you have shown that your thesis is true. The conclusion answers why that is worth knowing. If your final paragraph could be deleted without the essay losing anything, it is a summary. If deleting it would leave the argument unfinished, it is a conclusion.
+          </p>
+
+          <h2 className={h2}>The three-part structure, step by step</h2>
+          <h3 className={h3}>Step 1: Restate the thesis, do not repeat it</h3>
+          <p className={p}>
+            Go back to your thesis and say it again as a finding rather than a plan. In the introduction you wrote what you would argue. Now you can write what the evidence has shown. Use different words, and be more confident than you were at the start.
+          </p>
+          <p className={p}>
+            <strong>Thesis in the introduction:</strong> &quot;This essay argues that later school start times improve learning more than any change to the curriculum.&quot;
+          </p>
+          <p className={p}>
+            <strong>Restated in the conclusion:</strong> &quot;The evidence from sleep research and from the districts that made the change points the same way: when a school day starts matters at least as much as what is taught in it.&quot;
+          </p>
+          <h3 className={h3}>Step 2: Connect your main points</h3>
+          <p className={p}>
+            Do not walk back through each paragraph in order. Instead, show how your points fit together. One or two sentences is enough: &quot;The biology explains why early starts fail, and the district results show the fix works in practice.&quot; That sentence reminds the reader of two body paragraphs while saying something neither paragraph said on its own, which is how the points relate.
+          </p>
+          <h3 className={h3}>Step 3: End on why it matters</h3>
+          <p className={p}>
+            This is the part most conclusions skip, and it is the part that earns marks. Finish by widening the lens. There are a few reliable ways to do it:
+          </p>
+          <p className={p}>
+            <strong>The implication.</strong> If your argument is right, what follows? &quot;If start times shape learning this much, schools debating new textbooks may be solving the wrong problem.&quot;
+          </p>
+          <p className={p}>
+            <strong>The wider context.</strong> Connect your specific topic to a bigger question in the subject. A point about one novel becomes a point about how fiction handles memory.
+          </p>
+          <p className={p}>
+            <strong>The limit.</strong> Say honestly what your argument does not settle and what would need to be studied next. In research papers and science writing this is expected.
+          </p>
+          <p className={p}>
+            <strong>The return.</strong> Come back to the image, example or question you opened with, and show how it looks different now. This gives the essay a sense of being finished.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>Conclusion examples: weak vs strong</h2>
+          <p className={p}>
+            Here is the same conclusion written both ways, for an essay arguing that social media harms teenagers mainly through comparison rather than screen time.
+          </p>
+          <p className={p}>
+            <strong>Weak:</strong> &quot;In conclusion, social media has many negative effects on teenagers. As this essay has shown, it affects their self-esteem, their sleep and their friendships. Social media is an important issue in today&apos;s society and more research is needed.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong:</strong> &quot;Counting hours on a screen misses what those hours contain. The research on comparison, and the limited results of screen-time limits, both suggest that the harm lies less in how long teenagers scroll than in what scrolling asks them to measure themselves against. That shifts the question for parents and schools from how much to what kind. A teenager messaging friends for two hours and a teenager comparing themselves to strangers for two hours are not having the same experience, and policy that treats them the same will keep missing the problem.&quot;
+          </p>
+          <p className={p}>
+            The weak version restates, lists and trails off. The strong version restates the thesis as a finding, connects the two main lines of evidence in one sentence, and ends on what should change as a result. It contains no new evidence, but it does contain a new thought: what the argument means.
+          </p>
+
+          <h2 className={h2}>How to conclude different types of essay</h2>
+          <h3 className={h3}>Argumentative essay</h3>
+          <p className={p}>
+            End on the stakes. You have argued for a position, so finish with what should happen, or what is at risk if nothing does. Avoid softening your claim at the last moment with phrases like &quot;of course, both sides have a point.&quot; If you dealt with the counterargument in the body, you have earned a confident ending.
+          </p>
+          <h3 className={h3}>Literary analysis</h3>
+          <p className={p}>
+            Move from the text to what the text shows. After analysing how a novel uses a symbol, conclude with what that tells us about the book as a whole, or about the theme it explores. Do not end by praising the author or retelling the ending of the plot.
+          </p>
+          <h3 className={h3}>Research paper</h3>
+          <p className={p}>
+            State what your findings add to what was already known, be honest about their limits, and point to what should be studied next. Many disciplines expect all three. If you are using APA style, our <a href="/blog/how-to-write-apa-research-paper" className={internalLink}>guide to writing an APA research paper</a> covers how the discussion and conclusion sections fit together.
+          </p>
+          <h3 className={h3}>Compare and contrast essay</h3>
+          <p className={p}>
+            Do not finish by saying the two things are similar in some ways and different in others. Say which similarity or difference matters most, and what the comparison reveals that looking at either one alone would not.
+          </p>
+          <h3 className={h3}>Personal statement</h3>
+          <p className={p}>
+            End looking forward. A personal essay should close on who you are now and what you will do with it, not on a moral. Our guide to <a href="/blog/college-admission-essay-grader" className={internalLink}>checking a college admission essay</a> has more on what admissions readers look for.
+          </p>
+
+          <h2 className={h2}>Seven conclusion mistakes to cut</h2>
+          <p className={p}>
+            <strong>1. Opening with &quot;In conclusion.&quot;</strong> It is not wrong, but it is filler. The reader can see it is the last paragraph. Start with your restated thesis instead.
+          </p>
+          <p className={p}>
+            <strong>2. Copying the thesis word for word.</strong> Repeating the same sentence suggests the essay has not moved since the introduction.
+          </p>
+          <p className={p}>
+            <strong>3. Introducing new evidence.</strong> A new quote, statistic or argument belongs in the body. If it is important, move it there. If it is not, cut it.
+          </p>
+          <p className={p}>
+            <strong>4. Listing every point again.</strong> &quot;First I showed, then I showed, finally I showed&quot; is a table of contents, not a conclusion.
+          </p>
+          <p className={p}>
+            <strong>5. Apologising or hedging.</strong> Phrases like &quot;this is only my opinion&quot; or &quot;I am not an expert&quot; undercut everything you have argued.
+          </p>
+          <p className={p}>
+            <strong>6. Ending on a quote.</strong> The last words of your essay should be yours. A quotation hands the final thought to someone else.
+          </p>
+          <p className={p}>
+            <strong>7. The grand statement.</strong> &quot;Since the dawn of time&quot; and &quot;only time will tell&quot; sound like endings but say nothing. Finish on something specific to your argument.
+          </p>
+
+          <h2 className={h2}>How long should a conclusion be?</h2>
+          <p className={p}>
+            A common guide is about 5 to 10 percent of the total word count. For a 1,000-word essay that is one paragraph of roughly 75 to 100 words, or four to six sentences. For a 3,000-word paper, a longer paragraph or two short ones is reasonable. A dissertation may need a full section. If your conclusion is longer than your longest body paragraph, it is probably doing work that belongs in the body.
+          </p>
+
+          <h2 className={h2}>Sentence starters that are better than &quot;In conclusion&quot;</h2>
+          <p className={p}>
+            You rarely need a signpost at all, but if the paragraph feels abrupt without one, these do more work than &quot;In conclusion&quot; or &quot;To sum up&quot;:
+          </p>
+          <p className={p}>
+            &quot;Taken together, the evidence shows…&quot; &quot;What this suggests is…&quot; &quot;The pattern across these examples is…&quot; &quot;This matters because…&quot; &quot;Seen this way,…&quot; &quot;The question, then, is not whether… but…&quot; Each one points forward to a claim instead of backward to a summary.
+          </p>
+
+          <h2 className={h2}>A five-minute conclusion checklist</h2>
+          <p className={p}>
+            Before you submit, read your introduction and your conclusion back to back, skipping everything in between, and check five things. Does the conclusion answer the question the introduction asked? Is the thesis restated in different words? Is there anything new that should be in the body? Does the final sentence say why the argument matters? And if you covered the last paragraph with your hand, would the essay feel unfinished? If the answer to the last one is no, rewrite it.
+          </p>
+          <p className={p}>
+            The conclusion is easier to write when the opening is solid, so if yours is not, start with our guides to <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>writing a good introduction</a> and <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>writing a thesis statement</a>. For the paragraphs in between, see <a href="/blog/how-to-turn-a-b-essay-into-an-a" className={internalLink}>how to turn a B essay into an A</a>.
+          </p>
+
+          <h2 className={h2}>Check your whole essay before you submit</h2>
+          <p className={p}>
+            A conclusion can only be as strong as the argument it finishes. If you want to know how the whole essay reads to a grader, <a href="/" onClick={handleNavigate('landing')} className={internalLink}>WriteScholar&apos;s free AI essay grader</a> gives you an estimated grade, a score for every rubric category and line-by-line comments in about a minute. Paste your essay or upload a .docx. Your first grade each month is free, with no card. The grade is an estimate to guide your revision, not a guarantee of the mark you will receive.
+          </p>
+          <a href="/" onClick={handleNavigate('landing')} className={ctaButton}>
+            Grade my essay free →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How do you write a good conclusion for an essay?',
+                answer:
+                  'Restate your thesis in new words as something you have proved, connect your main points in a sentence or two to show how they add up, and end on why the argument matters. Do not add new evidence or simply list your points again.',
+              },
+              {
+                question: 'How do you start a conclusion paragraph?',
+                answer:
+                  'Start with your restated thesis rather than a signpost like "In conclusion". If you want a transition, phrases such as "Taken together, the evidence shows" or "What this suggests is" point forward to a claim instead of back to a summary.',
+              },
+              {
+                question: 'How long should a conclusion be?',
+                answer:
+                  'About 5 to 10 percent of the total word count is a common guide. For a 1,000-word essay that is one paragraph of roughly 75 to 100 words, or four to six sentences. Longer papers can use a longer paragraph or two short ones.',
+              },
+              {
+                question: 'Can you say "In conclusion" in an essay?',
+                answer:
+                  'You can, and it is not an error, but it is filler. The reader can already see it is the final paragraph. Opening with your restated thesis is stronger and saves words.',
+              },
+              {
+                question: 'Should a conclusion include new information?',
+                answer:
+                  'It should not include new evidence or new arguments, which belong in the body. It should include a new thought about what your argument means: an implication, a wider context, a limit, or what should happen next.',
+              },
+              {
+                question: 'What is the difference between a summary and a conclusion?',
+                answer:
+                  'A summary repeats what the essay said. A conclusion says what it adds up to and why it matters. If the last paragraph could be deleted without the essay losing anything, it is a summary.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-turn-a-b-essay-into-an-a':
       return (
         <>
@@ -202,7 +384,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <h3 className={h3}>Minutes 22 to 27: The objection and the ending</h3>
           <p className={p}>
-            Add or strengthen one counterargument paragraph. Rewrite the conclusion so it says why the argument matters instead of repeating the introduction.
+            Add or strengthen one counterargument paragraph. Rewrite the conclusion so it says why the argument matters instead of repeating the introduction; our guide on <a href="/blog/how-to-write-a-conclusion" className={internalLink}>how to write a conclusion</a> shows how.
           </p>
           <h3 className={h3}>Minutes 27 to 30: The sentences</h3>
           <p className={p}>

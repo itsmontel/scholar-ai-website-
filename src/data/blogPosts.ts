@@ -27,6 +27,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-write-a-conclusion',
+    title: 'How to Write a Conclusion for an Essay (With Examples)',
+    description:
+      'How to write a conclusion for an essay: restate the thesis, connect your points and end on why it matters. Weak vs strong examples, starters and mistakes to cut.',
+    date: '2026-11-10',
+    author: 'WriteScholar Team',
+    readTime: '9 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'A conclusion finishes the argument; it does not repeat it. Restate the thesis in new words, connect your main points, then say why it matters.',
+      'Add no new evidence, but do add a new thought: the implication, the wider context, the limit of your argument, or what should happen next.',
+      'Aim for 5 to 10 percent of the word count, skip "In conclusion", and make the last sentence your own words, not a quote.',
+    ],
+  },
+  {
     slug: 'how-to-turn-a-b-essay-into-an-a',
     title: 'How to Turn a B Essay Into an A: 8 Fixes Professors Reward',
     description:

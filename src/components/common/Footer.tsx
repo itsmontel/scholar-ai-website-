@@ -346,6 +346,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 <li><a href="/blog/how-to-turn-a-b-essay-into-an-a" className="text-stone-400 hover:text-white text-sm transition-colors">How to turn a B essay into an A</a></li>
                 <li><a href="/blog/how-to-write-an-essay-or-assignment" className="text-stone-400 hover:text-white text-sm transition-colors">How to write an essay or assignment</a></li>
                 <li><a href="/blog/how-to-write-a-good-introduction" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a good introduction</a></li>
+                <li><a href="/blog/how-to-write-a-conclusion" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a conclusion</a></li>
                 <li><a href="/blog/how-to-start-an-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to start an essay</a></li>
                 <li><a href="/blog/what-does-critically-evaluate-mean" className="text-stone-400 hover:text-white text-sm transition-colors">What critically evaluate means</a></li>
                 <li><a href="/blog/can-professors-tell-if-you-used-chatgpt" className="text-stone-400 hover:text-white text-sm transition-colors">Can professors tell if you used ChatGPT?</a></li>

@@ -174,6 +174,19 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           },
         ],
       });
+    } else if (post.slug === 'how-to-write-a-conclusion') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: "How do you write a good conclusion for an essay?", acceptedAnswer: { '@type': 'Answer', text: "Restate your thesis in new words as something you have proved, connect your main points in a sentence or two to show how they add up, and end on why the argument matters. Do not add new evidence or simply list your points again." } },
+          { '@type': 'Question', name: "How do you start a conclusion paragraph?", acceptedAnswer: { '@type': 'Answer', text: "Start with your restated thesis rather than a signpost like \"In conclusion\". If you want a transition, phrases such as \"Taken together, the evidence shows\" or \"What this suggests is\" point forward to a claim instead of back to a summary." } },
+          { '@type': 'Question', name: "How long should a conclusion be?", acceptedAnswer: { '@type': 'Answer', text: "About 5 to 10 percent of the total word count is a common guide. For a 1,000-word essay that is one paragraph of roughly 75 to 100 words, or four to six sentences. Longer papers can use a longer paragraph or two short ones." } },
+          { '@type': 'Question', name: "Can you say \"In conclusion\" in an essay?", acceptedAnswer: { '@type': 'Answer', text: "You can, and it is not an error, but it is filler. The reader can already see it is the final paragraph. Opening with your restated thesis is stronger and saves words." } },
+          { '@type': 'Question', name: "Should a conclusion include new information?", acceptedAnswer: { '@type': 'Answer', text: "It should not include new evidence or new arguments, which belong in the body. It should include a new thought about what your argument means: an implication, a wider context, a limit, or what should happen next." } },
+          { '@type': 'Question', name: "What is the difference between a summary and a conclusion?", acceptedAnswer: { '@type': 'Answer', text: "A summary repeats what the essay said. A conclusion says what it adds up to and why it matters. If the last paragraph could be deleted without the essay losing anything, it is a summary." } },
+        ],
+      });
     } else if (post.slug === 'how-to-turn-a-b-essay-into-an-a') {
       injectJsonLd('blog-post-faq', {
         '@context': 'https://schema.org',
