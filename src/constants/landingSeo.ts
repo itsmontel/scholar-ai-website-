@@ -14,10 +14,10 @@
  *
  * Title: 60 characters or fewer, leads with "Free", brand last.
  * Description: 150 to 160 characters, covers both doors, ends with the
- * risk reversal ("Free to try, no sign-up.").
+ * risk reversal ("Free to start, no card.").
  */
 export const LANDING_PAGE_TITLE =
   "Free AI Study Packs and Essay Grader | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Type an exam topic for free flashcards, a practice quiz and study games in minutes, or paste an essay for a professor-style grade. Free to try, no sign-up.";
+  "Type an exam topic for free flashcards, a practice quiz and study games in minutes, or paste an essay for a professor-style grade. Free to start, no card.";

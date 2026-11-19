@@ -70,7 +70,7 @@ export default function ToolNextStep({ text, tool, onNavigate, signedIn = false 
             : `You have ${words.toLocaleString()} words. Here is what else you can do with them.`}
         </h2>
         <p className="m-0 mt-1.5 text-[15.5px] font-bold text-stone-600 dark:text-stone-400">
-          Your text comes with you, so there is nothing to paste again. Free to try, no sign-up needed.
+          Your text comes with you, so there is nothing to paste again. Free to start, no card needed.
         </p>
 
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">

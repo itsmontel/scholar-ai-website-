@@ -249,7 +249,7 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
                   </h2>
                   <p className="m-0 mt-0.5 text-[13.5px] font-bold text-[#EBDDFB] sm:text-[15px]">
                     {open === 'exam'
-                      ? 'Flashcards, a practice quiz and study games, built for your topic. No sign-up to see it.'
+                      ? (TRY_BEFORE_SIGNUP ? 'Flashcards, a practice quiz and study games, built for your topic. No sign-up to see it.' : 'Flashcards, a practice quiz and study games, built for your topic.')
                       : 'An estimated grade, every rubric score and line-by-line comments in about a minute.'}
                   </p>
                 </div>

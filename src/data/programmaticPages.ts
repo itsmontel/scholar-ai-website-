@@ -31,7 +31,7 @@ const FREE_PLAN_PROG_SHORT =
 
 /** Signup step copy — the free first grade, then Pro. */
 const FREE_SIGNUP_STEP =
-  'Paste your essay and see your grade before you sign up. Your first report is free and complete, no card. Pro is $19.99/mo ($9.99 for your first month) for the rewrites. Cancel anytime.';
+  'Sign up free and paste your essay to see your grade. Your first report is free and complete, no card. Pro is $19.99/mo ($9.99 for your first month) for the rewrites. Cancel anytime.';
 
 const freeSubjectFaqAnswer = (niceName: string) =>
   `You can try it free. ${FREE_PLAN_PROG_SHORT} Built for ${niceName} students who want to see results before subscribing.`;
