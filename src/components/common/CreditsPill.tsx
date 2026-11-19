@@ -175,8 +175,8 @@ export default function CreditsPill({
           {freeLive && credits && (
             <Note tone={remaining <= 0 ? 'warn' : 'info'}>
               {remaining > 0
-                ? `Your free grade shows your score, every rubric score and full feedback on the first part of your essay. Pro opens the rest, the rewrites and one-click fixes, plus study packs and citations.`
-                : `You've used your free grade${credits.total === 1 ? '' : 's'} this month. They reset ${freeResets ?? 'on the 1st'}, or Pro gives you ${MONTHLY_CREDITS.pro} credits a month and every rewrite.`}
+                ? `Free credits buy study packs and essay grades. Your first essay report is complete; later free grades show your score, every rubric score and feedback on the first part. Pro opens the rest, the rewrites, one-click fixes and citations.`
+                : `You've used your ${credits.total} free credits this month. They reset ${freeResets ?? 'on the 1st'}, or Pro gives you ${MONTHLY_CREDITS.pro} credits a month and every rewrite.`}
             </Note>
           )}
 

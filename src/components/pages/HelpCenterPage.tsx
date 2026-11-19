@@ -97,7 +97,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       id: 101,
       category: 'getting-started',
       question: 'How do credits and the free plan work?',
-      answer: 'A free account grades 1 essay a month (200 to 10,000 words) with the estimated grade, the score, every rubric score and full feedback on the first quarter of the essay; it resets on the 1st. Every essay analysis, study pack and citation search on a paid plan uses 1 credit. Pro is $19.99/month for 99 credits at the student launch price (list $39.99) and adds feedback on the whole essay, the rewrites, one-click fixes, rubric check, export, study packs and citations. Premium is $39.99/month (list $59.99) for 199 credits. Unused credits roll over each month, up to 499. Pausing your plan keeps your credits; cancelling resets them to 0. The writing editor and the free utilities never use credits.',
+      answer: 'A free account gets 3 credits a month, and each credit is one study pack or one essay grade (200 to 10,000 words); it resets on the 1st. Your first essay report is complete, and later free grades show the estimated grade, the score, every rubric score and full feedback on the first quarter of the essay. Every essay analysis, study pack and citation search uses 1 credit. Pro is $19.99/month for 99 credits ($9.99 for your first month) and adds feedback on every essay in full, the rewrites, one-click fixes, rubric check, export and citations. Premium is $39.99/month ($19.99 for your first month) for 199 credits. Unused credits roll over each month, up to 499. Pausing your plan keeps your credits; cancelling resets them to 0. The writing editor and the free utilities never use credits.',
       tags: ['getting-started', 'credits', 'trial', 'pricing', 'billing']
     },
     {
@@ -495,7 +495,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   onClick={() => onNavigate?.('signup')}
                   className="px-6 py-3 bg-[#58CC02] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
                 >
-                  Try Free
+                  Sign up free
                 </button>
                 <button 
                   onClick={() => onNavigate?.('pricing')}

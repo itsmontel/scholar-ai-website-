@@ -74,6 +74,8 @@ passport.use(new GoogleStrategy({
       console.error('Failed to send welcome email to Google signup:', welcomeResult.error);
     }
 
+    // Lets the site count this as a sign-up, not a sign-in.
+    newUser._isNewSignup = true;
     return done(null, newUser);
   } catch (error) {
     console.error('Google OAuth error:', error);

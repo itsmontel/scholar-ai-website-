@@ -4,8 +4,10 @@
  * are replaced with an in-memory fake.
  */
 
-// Free tier: 3 essay grades a calendar month.
+// Free tier: 3 credits a calendar month, spent on essay grades or study packs.
 process.env.FREE_CREDITS = '3';
+// The free-for-finals window is tested on its own at the end.
+process.env.FINALS_FREE_UNTIL = '';
 
 const mockDb = { user: {}, actions: [], achievements: null };
 
@@ -173,7 +175,7 @@ const monthStart = (offsetMonths = 0) => {
 };
 const inThisMonth = (ms) => new Date(monthStart().getTime() + ms).toISOString();
 
-test('a free account gets 3 essay grades a month', async () => {
+test('a free account gets 3 credits a month for grades and study packs', async () => {
   mockState.plan = 'free';
   let c = await credits.getCreditState('u1');
   expect([c.total, c.used, c.remaining, c.freeExpired, c.freeExpiresAt]).toEqual([3, 0, 3, false, null]);
@@ -182,8 +184,7 @@ test('a free account gets 3 essay grades a month', async () => {
   expect(c.freeResetsAt).toBe(monthStart(1).toISOString());
 
   mockDb.actions.push({ kind: 'analysis', at: inThisMonth(1000) });
-  mockDb.actions.push({ kind: 'analysis', at: inThisMonth(2000) });
-  // Study packs and citations are Pro, so they never touch the free count.
+  // A study pack spends a free credit too; citations are Pro and never count.
   mockDb.actions.push({ kind: 'pack', at: inThisMonth(3000) });
   mockDb.actions.push({ kind: 'cite', at: inThisMonth(4000) });
   c = await credits.getCreditState('u1');
@@ -211,4 +212,18 @@ test('lapsed subscribers get the same free grades as everyone else', async () =>
   mockState.everPaid = true;
   const c = await credits.getCreditState('u1');
   expect([c.total, c.remaining]).toEqual([3, 3]);
+});
+
+test('free for finals: the window is on until its end date and off after', () => {
+  jest.isolateModules(() => {
+    process.env.FINALS_FREE_UNTIL = '2026-12-02T23:59:59Z';
+    const c = require('../creditService');
+    expect(c.finalsFreeActive(Date.parse('2026-11-20T12:00:00Z'))).toBe(true);
+    expect(c.finalsFreeActive(Date.parse('2026-12-03T00:00:00Z'))).toBe(false);
+    process.env.FINALS_FREE_UNTIL = '';
+  });
+  jest.isolateModules(() => {
+    const c = require('../creditService');
+    expect(c.finalsFreeActive(Date.parse('2026-11-20T12:00:00Z'))).toBe(false);
+  });
 });

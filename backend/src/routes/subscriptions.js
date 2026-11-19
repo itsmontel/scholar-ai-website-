@@ -201,6 +201,8 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       });
     }
 
+    // Funnel: one row per checkout opened, whichever page opened it.
+    require('./events').recordServerEvent('checkout_session_created', userId, { plan: planType, cycle: billingCycle });
     res.json({
       success: true,
       data: {

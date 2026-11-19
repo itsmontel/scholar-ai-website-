@@ -179,7 +179,7 @@ const FAQS = [
   },
   {
     q: 'How much does the essay grader cost?',
-    a: 'One essay grade a month is free, with the score, every rubric score and full feedback on the first quarter of the essay, and no card. Pro is $19.99/mo at the student launch price (list $39.99) for 99 credits, feedback on the whole essay, the rewrite behind every comment and one-click fixes, and unused credits roll over. Cancel anytime.',
+    a: 'Your first essay report is free and complete, with no card. After that you get 3 free credits a month, and a free grade shows the score, every rubric score and full feedback on the first quarter of the essay. Pro is $19.99/mo ($9.99 for your first month) for 99 credits, feedback on every essay in full, the rewrite behind every comment and one-click fixes, and unused credits roll over. Cancel anytime.',
   },
   {
     q: 'What kinds of essays can it grade?',
@@ -277,7 +277,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
             <div className="mt-8 flex flex-col items-center gap-3">
               {cta}
               <p className="text-[12px] sm:text-sm font-bold text-stone-500 dark:text-stone-400">
-                1 free grade a month · no card. The grade is an estimate to sharpen your draft, not a guarantee.
+                Your first report is free and complete · no card. The grade is an estimate to sharpen your draft, not a guarantee.
               </p>
             </div>
           </div>

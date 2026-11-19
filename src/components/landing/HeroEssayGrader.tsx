@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { FREE_GRADE_MAX_WORDS, FREE_GRADE_MIN_WORDS } from '../../config/pricing';
 import { trackEvent } from '../../utils/analytics';
+import { BTN_GREEN, BTN_WHITE } from './webStyle';
 
 export const countWords = (text: string): number => text.trim().split(/\s+/).filter(Boolean).length;
 
@@ -63,6 +64,11 @@ interface HeroEssayGraderProps {
   initialText?: string;
   /** Bump this to return the box to its editable state (e.g. the gate was closed). */
   resetSignal?: number;
+  /**
+   * Hand the essay over straight away, with no local pre-read. Used where
+   * the real grading starts at once and shows its own progress.
+   */
+  instant?: boolean;
 }
 
 const READ_STEPS = [
@@ -83,7 +89,7 @@ const READ_STEPS = [
  * sees their own essay being understood before they are asked for an
  * email, which is the moment most of them would otherwise leave.
  */
-export default function HeroEssayGrader({ onSubmit, initialText = '', resetSignal = 0 }: HeroEssayGraderProps) {
+export default function HeroEssayGrader({ onSubmit, initialText = '', resetSignal = 0, instant = false }: HeroEssayGraderProps) {
   const [text, setText] = useState(initialText);
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -201,6 +207,10 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
     setGradeHint('');
     const trimmed = text.trim();
     const f = readEssayFacts(trimmed, fileName);
+    if (instant) {
+      onSubmit(trimmed, f);
+      return;
+    }
     setFacts(f);
     setStage('reading');
     setStepIdx(0);
@@ -224,18 +234,18 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
 
   return (
     <div
-      className={`relative w-full rounded-[24px] border-2 border-[#1C1917] bg-white p-3 text-left transition-colors sm:p-[18px] ${
-        dragOver ? 'bg-[#F3FBE8]' : ''
+      className={`relative w-full rounded-[28px] border-b-[6px] border-[#D9C2F2] p-3.5 text-left shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)] transition-colors sm:p-5 ${
+        dragOver ? 'bg-[#F3FBE8]' : 'bg-white'
       }`}
-      style={{ boxShadow: '8px 8px 0 #7733B5', ...font }}
+      style={font}
       onDragOver={(e) => { e.preventDefault(); if (stage === 'edit') setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
     >
       {stage === 'edit' ? (
         <>
-          <div className="mb-2 flex items-center justify-between px-1 text-[12.5px] font-extrabold text-[#57534E]">
-            <label htmlFor="hero-essay">Your essay</label>
+          <div className="mb-2.5 flex items-baseline justify-between gap-3 px-1 text-[13px] font-extrabold text-[#57534E]">
+            <label htmlFor="hero-essay" className="text-[17px] font-black text-[#1C1917]">Your essay</label>
             <span>{FREE_GRADE_MIN_WORDS} to {FREE_GRADE_MAX_WORDS.toLocaleString()} words</span>
           </div>
           <div className={`relative ${words === 0 && !dragOver ? 'ws-box-glow' : ''}`}>
@@ -247,11 +257,11 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
               placeholder="Paste the whole essay here, introduction to conclusion. Or drop a .docx onto this box."
               spellCheck={false}
               rows={8}
-              className="block min-h-[12rem] w-full resize-y rounded-[16px] border-2 border-[#1C1917] bg-[#FAF7FF] px-4 py-3.5 text-[15px] font-semibold leading-relaxed sm:min-h-[15rem] sm:px-[18px] sm:py-4 sm:text-[16px] text-[#1C1917] placeholder:text-[#8A8580] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#A560E8]/35"
+              className="block min-h-[11rem] w-full resize-y rounded-[18px] border-2 border-[#DCC3F6] bg-[#FBF8FF] px-4 py-3.5 text-[15px] font-semibold leading-relaxed sm:min-h-[13rem] sm:px-[18px] sm:py-4 sm:text-[16px] text-[#1C1917] placeholder:text-[#8A8580] focus:border-[#A560E8] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#A560E8]/25"
               style={font}
             />
             {dragOver && (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-[14px] border-2 border-dashed border-[#46A302] bg-[#F3FBE8]/95 text-[16px] font-black text-[#15803D]">
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-[18px] border-2 border-dashed border-[#46A302] bg-[#F3FBE8]/95 text-[16px] font-black text-[#15803D]">
                 Drop it here
               </div>
             )}
@@ -289,10 +299,10 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={reading}
-                className={`inline-flex min-h-[58px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-[#1C1917] px-6 text-[17px] font-black text-[#1C1917] transition-all hover:bg-[#F3EEFF] active:translate-x-px active:translate-y-px disabled:opacity-60 sm:min-h-[62px] sm:text-[18px] ${
-                  words === 0 && !reading ? 'ws-upload-glow bg-[#FAF7FF]' : 'bg-white'
+                className={`min-h-[58px] px-6 text-[17px] sm:min-h-[62px] sm:text-[18px] ${BTN_WHITE} ${
+                  words === 0 && !reading ? 'ws-upload-glow' : ''
                 }`}
-                style={{ boxShadow: '4px 4px 0 #1C1917', ...font }}
+                style={font}
               >
                 <svg className="h-5 w-5 text-[#7733B5]" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
@@ -305,8 +315,8 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
                 onClick={submit}
                 disabled={reading}
                 aria-describedby={gradeHint ? 'hero-grade-hint' : undefined}
-                className={`group/btn inline-flex min-h-[58px] items-center justify-center gap-2.5 rounded-[16px] border-2 border-[#1C1917] bg-[#58CC02] px-7 text-[18px] font-black sm:min-h-[62px] sm:px-9 sm:text-[20px] text-[#1C1917] transition-all hover:bg-[#61E002] active:translate-x-px active:translate-y-px disabled:cursor-wait disabled:opacity-70 ${shake ? 'ws-shake' : ''}`}
-                style={{ boxShadow: '4px 4px 0 #1C1917', ...font }}
+                className={`group/btn min-h-[58px] px-7 text-[18px] sm:min-h-[62px] sm:px-9 sm:text-[20px] ${BTN_GREEN} ${shake ? 'ws-shake' : ''}`}
+                style={font}
               >
                 Grade my essay
                 <svg className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
@@ -320,7 +330,7 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
             <p
               id="hero-grade-hint"
               role="alert"
-              className="mt-3 flex items-start gap-2 rounded-[12px] border-2 border-[#1C1917] bg-[#FFF4E5] px-3 py-2 text-[13.5px] font-extrabold leading-snug text-[#9A3412]"
+              className="mt-3 flex items-start gap-2 rounded-2xl border border-[#F3D9A8] bg-[#FFF4E5] px-3.5 py-2.5 text-[13.5px] font-extrabold leading-snug text-[#9A3412]"
             >
               <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5v.5" /></svg>
               {gradeHint}
@@ -331,12 +341,6 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
             <p className="mt-2 px-1 text-[12.5px] font-extrabold text-[#C2410C]" role="alert">{fileError}</p>
           )}
 
-          <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-[12px] font-extrabold text-[#57534E]">
-            <li className="flex items-center gap-1.5"><Check />Free to try</li>
-            <li className="flex items-center gap-1.5"><Check />Professor-style feedback</li>
-            <li className="flex items-center gap-1.5"><Check />Grade and rubric scores</li>
-            <li className="flex items-center gap-1.5"><Check />Never used to train AI</li>
-          </ul>
         </>
       ) : (
         <div className="flex flex-col gap-4 p-1" aria-live="polite">
@@ -350,7 +354,7 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
             </div>
           </div>
 
-          <div role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Pre-read progress" className="h-3.5 overflow-hidden rounded-full border-2 border-[#1C1917] bg-[#FAF7FF]">
+          <div role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Pre-read progress" className="h-3.5 overflow-hidden rounded-full bg-[#F3EAFF]">
             <div className="h-full rounded-full bg-[#A560E8] transition-[width] duration-[1700ms] ease-linear" style={{ width: `${progress}%` }} />
           </div>
 
@@ -360,7 +364,7 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
               return (
                 <li key={i} className={`flex items-start gap-3 leading-snug ${state === 'todo' ? 'text-[#A8A29E]' : 'text-[#1C1917]'}`}>
                   {state === 'done' ? (
-                    <span aria-hidden className="mt-px inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 border-[#1C1917] bg-[#58CC02] text-[11px] font-black text-[#1C1917]">✓</span>
+                    <span aria-hidden className="mt-px inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-[#58CC02] text-[11px] font-black text-white">✓</span>
                   ) : state === 'active' ? (
                     <span aria-hidden className="mt-px inline-block h-[22px] w-[22px] shrink-0 animate-spin rounded-full border-[3px] border-[#A560E8] border-r-[#F3EEFF]" />
                   ) : (
@@ -374,11 +378,5 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
         </div>
       )}
     </div>
-  );
-}
-
-function Check() {
-  return (
-    <span aria-hidden className="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-[#1C1917] bg-[#58CC02] text-[9px] font-black text-[#1C1917]">✓</span>
   );
 }

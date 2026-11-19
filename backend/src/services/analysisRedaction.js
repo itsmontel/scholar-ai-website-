@@ -117,6 +117,13 @@ function listFrom(annotations, type) {
 }
 
 /**
+ * Set on the saved analysis_results of a free account's first ever essay
+ * grade. That one report is returned whole, every time it is opened, so a
+ * new user sees what the full product does before being asked to pay.
+ */
+const FREE_FULL_FLAG = 'ws_free_full';
+
+/**
  * Redact one analysis payload. Handles both the live response
  * (camelCase extras, `rubricAlignment`) and a saved analysis_results blob
  * (`rubric_alignment`, `original_content`, strong_points etc).
@@ -124,6 +131,8 @@ function listFrom(annotations, type) {
  */
 function redactAnalysisPayload(payload, opts = {}) {
   if (!payload || typeof payload !== 'object') return payload;
+  // A free account's first ever grade is shown whole (FREE_FULL_FLAG).
+  if (payload[FREE_FULL_FLAG] === true) return payload;
   const annotations = Array.isArray(payload.annotations) ? payload.annotations : [];
   const content = typeof opts.content === 'string' ? opts.content : payload.original_content;
 
@@ -183,6 +192,7 @@ function redactAnalysisRow(row) {
 }
 
 module.exports = {
+  FREE_FULL_FLAG,
   LOCKED_FEATURES,
   PREVIEW_SHARE,
   OPEN_RUBRIC_SECTIONS,

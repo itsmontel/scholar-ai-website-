@@ -142,7 +142,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
           <p className="text-stone-600 dark:text-stone-400 font-medium mb-2">
             {signedIn
-              ? 'Your account is confirmed. Your free grade each month is yours to keep.'
+              ? 'Your account is confirmed. Your 3 free credits each month are yours to keep.'
               : 'Your email has been verified. Welcome to WriteScholar!'}
           </p>
           <p className="text-stone-500 dark:text-stone-500 text-sm mb-6">

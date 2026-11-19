@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import PreviewStrip from './PreviewStrip';
 import GenerationOverlay from '../../common/GenerationOverlay';
 import { trackEvent } from '../../../utils/analytics';
 import { openUpgradePaywall } from '../../../utils/paywall';
@@ -113,119 +112,85 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
   };
   const strip = (html: string) => html.replace(/<[^>]+>/g, '');
 
+  const copyIcon = (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h9" /></svg>
+  );
+  const copyBtn = 'inline-flex min-h-[44px] shrink-0 items-center gap-[7px] whitespace-nowrap rounded-xl border-2 border-b-4 border-[#E4D4F8] bg-white px-3.5 text-[14.5px] font-black text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 dark:border-stone-600 dark:bg-stone-900 dark:text-[#C9A0F0]';
+  const select = 'min-h-[36px] border-0 bg-transparent text-[14.5px] font-black text-[#5B2491] focus:outline-none';
+  const selectWrap = 'inline-flex min-h-[48px] items-center gap-2 rounded-[14px] border-2 border-[#E4D4F8] bg-[#F7F1FF] px-3.5 text-[14.5px] font-extrabold text-stone-900';
+  const open = results ? (isPaid ? results : results.slice(0, FREE_CITATION_PREVIEW)) : [];
+
   return (
-    <div>
+    <div className="flex flex-col gap-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <GenerationOverlay open={loading} variant="citations" />
 
-      {/* ── SEARCH CARD — premium gradient frame ──────────────────── */}
-      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
-        <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
-          {/* Ambient glow + faint grid texture */}
-          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#C79BF2]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
-
-          {/* Header */}
-          <div className="relative flex items-center gap-3.5 mb-5">
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#BD8BF0] to-[#A560E8] text-white text-xl border-2 border-b-[3px] border-[#7733B5] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.9)]" aria-hidden>
-              🔖
-              <span className="absolute -top-1.5 -right-1.5 text-[#FFC800] text-sm motion-safe:animate-pulse">✦</span>
-            </span>
+      {/* ── FIND SOURCES: purple banner with the topic box ────────── */}
+      <section
+        aria-label="Find sources"
+        className="relative overflow-hidden rounded-[30px] bg-gradient-to-b from-[#A863EA] via-[#8E48CF] to-[#6A2AA6] px-5 pb-6 pt-5 text-white shadow-[0_30px_60px_-34px_rgba(90,45,140,0.8)] sm:px-[30px] sm:pb-[30px] sm:pt-[26px]"
+      >
+        <span aria-hidden className="pointer-events-none absolute left-1/2 top-[130px] h-[900px] w-[900px] -translate-x-1/2 rounded-full bg-[#8A45C8]" />
+        <div className="relative flex flex-col gap-[18px]">
+          <div className="flex items-center gap-4">
+            <img src="/mascot-pointing.webp" alt="Scholar, the WriteScholar mascot" width={104} height={104} className="h-[76px] w-[76px] shrink-0 object-contain sm:h-[104px] sm:w-[104px]" />
             <div className="min-w-0">
-              <h2 className="text-[19px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Find citable sources</h2>
-              <p className="text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">Describe your topic — get real references with ready-to-use sentences in your style.</p>
+              <h1 className="m-0 text-[28px] font-black leading-[1.05] tracking-[-0.02em] sm:text-[38px]">
+                What do you need <span className="text-[#FFD84D]">sources</span> for?
+              </h1>
+              <p className="m-0 mt-1.5 text-[15px] font-bold text-[#F3EAFF] sm:text-[16.5px]">Describe your topic. You get real sources, each with its reference and a sentence you can use.</p>
             </div>
           </div>
-
-          <label htmlFor="citations-topic-input" className="relative block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">
-            What are you researching?
-          </label>
-          <textarea
-            id="citations-topic-input"
-            value={topic}
-            onChange={(e) => {
-              setTopic(e.target.value);
-              try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
-            }}
-            rows={3}
-            placeholder="e.g. the effect of social media on adolescent sleep quality"
-            className="relative w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] resize-none transition-all"
-          />
-          <div className="relative mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
-            <label className="flex items-center gap-2">
-              <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400">Style</span>
-              <select
-                value={style}
-                onChange={(e) => setStyle(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] transition-all"
+          <div className="flex flex-col gap-3 rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-4 text-stone-900 shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)]">
+            <div className="flex flex-wrap gap-3">
+              <label htmlFor="citations-topic-input" className="sr-only">Your topic</label>
+              <input
+                id="citations-topic-input"
+                type="text"
+                value={topic}
+                onChange={(e) => {
+                  setTopic(e.target.value);
+                  try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void search(); } }}
+                placeholder="For example, the effect of social media on teenage sleep"
+                className="min-h-[60px] min-w-0 flex-[1_1_300px] rounded-[18px] border-2 border-[#DCC3F6] bg-[#FBF8FF] px-[18px] text-[18px] font-extrabold text-stone-900 placeholder:text-stone-400 focus:border-[#A560E8] focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20"
+              />
+              <button
+                type="button"
+                onClick={search}
+                disabled={loading || !topic.trim()}
+                className="inline-flex min-h-[60px] items-center justify-center gap-2.5 whitespace-nowrap rounded-[18px] border-2 border-b-[5px] border-[#46A302] bg-[#58CC02] px-[26px] text-[18px] font-black text-white transition-all enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </label>
-            <label className="flex items-center gap-2">
-              <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400">Recency</span>
-              <select
-                value={yearRange}
-                onChange={(e) => setYearRange(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] transition-all"
-              >
-                {YEARS.map((y) => <option key={y.v} value={y.v}>{y.label}</option>)}
-              </select>
-            </label>
-            <button
-              type="button"
-              onClick={search}
-              disabled={loading || !topic.trim()}
-              className="group sm:ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#A560E8] to-[#9450D8] hover:from-[#9450D8] hover:to-[#7733B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(165,96,232,0.9)]"
-            >
-              {loading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                  </svg>
-                  Searching…
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" /></svg>
-                  Find sources
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* What you'll get — value reinforcement chips */}
-          <div className="relative mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You'll get</span>
-            {['📄 Real sources', '✍️ Ready-to-use sentences', '🏷️ In-text citations'].map((c) => (
-              <span key={c} className="px-2.5 py-1 rounded-full bg-[#FBF8FF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 text-[11px] font-extrabold text-[#7733B5] dark:text-[#A560E8]">{c}</span>
-            ))}
+                {loading ? 'Searching…' : 'Find sources'}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <label className={selectWrap}>
+                Style
+                <select value={style} onChange={(e) => setStyle(e.target.value)} className={select}>
+                  {STYLES.map((st) => <option key={st} value={st}>{st}</option>)}
+                </select>
+              </label>
+              <label className={selectWrap}>
+                From
+                <select value={yearRange} onChange={(e) => setYearRange(e.target.value)} className={select}>
+                  {YEARS.map((y) => <option key={y.v} value={y.v}>{y.label}</option>)}
+                </select>
+              </label>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="mt-8">
-        <PreviewStrip
-          title="What your sources look like"
-          subtitle="Real, citable references with ready-to-use sentences and in-text citations in your style."
-          tint="#A560E8"
-          tintShadowRgb="165,96,232"
-          items={[
-            { kind: 'video', src: '/writescholar-citation-finder-demo.mp4', label: 'Finding sources' },
-            { kind: 'image', src: '/citations-preview.png', label: 'Formatted citations' },
-          ]}
-        />
-      </div>
+      </section>
 
       {error && (
-        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
-          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#7733B5]' : 'text-[#D63A3A]'}`}>{error}</p>
+        <div className={`rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
+          <p className={`m-0 text-[15px] font-extrabold ${upgrade ? 'text-[#7733B5]' : 'text-[#D63A3A]'}`}>{error}</p>
           {upgrade && (
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="mt-2 inline-flex min-h-[44px] items-center rounded-xl border-2 border-b-4 border-[#8A48C7] bg-[#A560E8] px-4 text-[14.5px] font-black text-white transition-all active:translate-y-0.5 active:border-b-2"
             >
               See plans
             </button>
@@ -233,83 +198,81 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
         </div>
       )}
 
-      {/* Loading skeletons */}
       {loading && (
-        <div className="mt-5 space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-32 rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
-          ))}
+        <div className="flex flex-col gap-4">
+          {[0, 1, 2].map((i) => <div key={i} className="h-[190px] animate-pulse rounded-[24px] bg-stone-100 dark:bg-stone-800" />)}
         </div>
       )}
 
-      {/* Results */}
-      {!loading && results && (
-        <div className="mt-5">
+      {!loading && results && results.length === 0 && (
+        <div className="rounded-[24px] border-2 border-dashed border-[#C9A0F0] bg-[#F7F1FF] p-8 text-center dark:bg-[#A560E8]/10">
+          <p className="m-0 text-[19px] font-black text-stone-900 dark:text-stone-50">No sources found</p>
+          <p className="m-0 mt-1 text-[15px] font-bold text-stone-600 dark:text-stone-400">Try a broader topic or a wider range of years.</p>
+        </div>
+      )}
+
+      {!loading && results && results.length > 0 && (
+        <>
+          <div className="flex flex-wrap items-center gap-3.5">
+            <h2 className="m-0 text-[22px] font-black tracking-[-0.01em] text-stone-900 dark:text-stone-50">{results.length} {results.length === 1 ? 'source' : 'sources'} found</h2>
+            <span aria-hidden className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+            <button type="button" onClick={() => copy(open.map((c) => strip(c.citation)).join('\n\n'), -1)} className={copyBtn}>
+              {copyIcon}
+              {copiedIdx === -1 ? 'Copied' : open.length === 1 ? 'Copy the reference' : `Copy all ${open.length} references`}
+            </button>
+          </div>
           {keywords.length > 0 && (
-            <div className="mb-4 flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-extrabold uppercase tracking-wide text-stone-400 mr-1">Search terms</span>
+            <div className="-mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-[13.5px] font-extrabold text-stone-600 dark:text-stone-400">Searched for</span>
               {keywords.map((k) => (
-                <span key={k} className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-[11px] font-bold text-stone-600 dark:text-stone-300">{k}</span>
+                <span key={k} className="rounded-full bg-[#F3EAFF] px-2.5 py-1 text-[13px] font-extrabold text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]">{k}</span>
               ))}
             </div>
           )}
-          {results.length === 0 ? (
-            <div className="rounded-2xl border-2 border-stone-200 dark:border-stone-700 p-8 text-center">
-              <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No sources found</p>
-              <p className="mt-1 text-xs text-stone-500">Try a broader topic or widen the year range.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {results.map((c, i) => {
-                const locked = !isPaid && i >= FREE_CITATION_PREVIEW;
-                return (
-                <div key={i} className="relative rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 sm:p-5 overflow-hidden">
-                  <div className={`flex items-start gap-3 ${locked ? 'blur-[5px] select-none pointer-events-none' : ''}`} aria-hidden={locked || undefined}>
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[11px] font-extrabold">{i + 1}</span>
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className="text-[13.5px] leading-relaxed text-stone-800 dark:text-stone-100 [&_i]:italic"
-                        dangerouslySetInnerHTML={{ __html: c.citation }}
-                      />
-                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        {c.type && <span className="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-[10px] font-extrabold uppercase tracking-wide text-stone-500">{c.type}</span>}
-                        {c.year && <span className="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-[10px] font-bold text-stone-500">{c.year}</span>}
-                        {c.accessibility && <span className="px-2 py-0.5 rounded-full bg-[#F3EAFF] text-[10px] font-extrabold text-[#7733B5]">{c.accessibility}</span>}
-                      </div>
-                      {c.ready_to_use_sentence && (
-                        <p className="mt-2.5 text-[12.5px] italic text-stone-600 dark:text-stone-300 border-l-2 border-[#A560E8]/30 pl-3">
-                          {c.ready_to_use_sentence}
-                        </p>
-                      )}
-                      {Array.isArray(c.key_points) && c.key_points.length > 0 && (
-                        <ul className="mt-2.5 space-y-1">
-                          {c.key_points.slice(0, 3).map((p, k) => (
-                            <li key={k} className="flex gap-2 text-[12px] text-stone-600 dark:text-stone-300">
-                              <span className="text-[#A560E8] font-extrabold">•</span>
-                              <span>{p}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      <div className="mt-3 flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => copy(strip(c.citation), i)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 hover:text-[#7733B5] transition-colors"
-                        >
-                          {copiedIdx === i ? 'Copied ✓' : 'Copy citation'}
-                        </button>
-                        {c.in_text_citation && (
-                          <button
-                            type="button"
-                            onClick={() => copy(c.in_text_citation as string, 1000 + i)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 hover:text-[#7733B5] transition-colors"
-                          >
-                            {copiedIdx === 1000 + i ? 'Copied ✓' : `In-text: ${c.in_text_citation}`}
-                          </button>
-                        )}
-                      </div>
+
+          <ul className="m-0 flex list-none flex-col gap-4 p-0">
+            {results.map((c, i) => {
+              const locked = !isPaid && i >= FREE_CITATION_PREVIEW;
+              return (
+                <li key={i} className="relative overflow-hidden rounded-[24px] border border-[#E4D4F8] bg-white p-5 shadow-[0_16px_34px_-26px_rgba(90,45,140,0.55)] dark:border-stone-700 dark:bg-stone-900">
+                  <div className={`flex flex-col gap-3 ${locked ? 'pointer-events-none select-none blur-[5px]' : ''}`} aria-hidden={locked || undefined}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#A560E8] text-[16px] font-black text-white">{i + 1}</span>
+                      {c.type && <span className="rounded-full bg-[#F3EAFF] px-3 py-1 text-[13px] font-black capitalize text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]">{c.type}</span>}
+                      {c.year && <span className="rounded-full bg-[#F3EAFF] px-3 py-1 text-[13px] font-black text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]">{c.year}</span>}
+                      {c.accessibility && <span className="rounded-full bg-[#E6F9D2] px-3 py-1 text-[13px] font-black text-[#14532D]">{c.accessibility}</span>}
                     </div>
+                    <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-[#F7F1FF] px-3.5 py-3 dark:bg-stone-800">
+                      <div className="min-w-0 flex-[1_1_380px]">
+                        <p className="m-0 text-[11.5px] font-black uppercase tracking-[0.14em] text-[#7733B5] dark:text-[#C9A0F0]">Reference, {style}</p>
+                        <p className="m-0 mt-0.5 text-[15px] font-bold leading-[1.45] text-stone-900 dark:text-stone-100 [&_i]:italic" dangerouslySetInnerHTML={{ __html: c.citation }} />
+                      </div>
+                      <button type="button" onClick={() => copy(strip(c.citation), i)} className={copyBtn}>{copyIcon}{copiedIdx === i ? 'Copied' : 'Copy'}</button>
+                    </div>
+                    {c.ready_to_use_sentence && (
+                      <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-dashed border-[#DCC3F6] px-3.5 py-3 dark:border-stone-600">
+                        <div className="min-w-0 flex-[1_1_380px]">
+                          <p className="m-0 text-[11.5px] font-black uppercase tracking-[0.14em] text-[#7733B5] dark:text-[#C9A0F0]">A sentence you can use</p>
+                          <p className="m-0 mt-0.5 text-[15px] font-bold leading-[1.45] text-stone-900 dark:text-stone-100">
+                            {c.ready_to_use_sentence}
+                            {c.in_text_citation && !c.ready_to_use_sentence.includes(c.in_text_citation) && (
+                              <> <span className="whitespace-nowrap rounded-full bg-[#FFF1C2] px-2 py-px font-black text-[#5A4500]">{c.in_text_citation}</span></>
+                            )}
+                          </p>
+                        </div>
+                        <button type="button" onClick={() => copy(c.ready_to_use_sentence as string, 1000 + i)} className={copyBtn}>{copyIcon}{copiedIdx === 1000 + i ? 'Copied' : 'Copy'}</button>
+                      </div>
+                    )}
+                    {Array.isArray(c.key_points) && c.key_points.length > 0 && (
+                      <ul className="m-0 flex list-none flex-col gap-1 p-0">
+                        {c.key_points.slice(0, 3).map((pt, k) => (
+                          <li key={k} className="flex gap-2 text-[14.5px] font-bold text-stone-700 dark:text-stone-300">
+                            <span aria-hidden className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#A560E8]" />
+                            <span>{pt}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                   {locked && (
                     <button
@@ -318,47 +281,33 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                       className="absolute inset-0 flex items-center justify-center bg-white/40 dark:bg-stone-900/40"
                       aria-label="Unlock this source with Pro"
                     >
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#A560E8] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] shadow-lg">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                          <rect x="5" y="11" width="14" height="9" rx="2" />
-                          <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
-                        </svg>
+                      <span className="inline-flex min-h-[44px] items-center gap-2 rounded-full border-2 border-b-4 border-[#8A48C7] bg-[#A560E8] px-4 text-[14.5px] font-black text-white">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.8} viewBox="0 0 24 24" aria-hidden><rect x="5" y="11" width="14" height="9" rx="2" /><path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
                         Unlock with Pro
                       </span>
                     </button>
                   )}
-                </div>
-                );
-              })}
-            </div>
-          )}
+                </li>
+              );
+            })}
+          </ul>
+
           {!isPaid && results.length > FREE_CITATION_PREVIEW && (
-            <div className="mt-4 rounded-2xl border-2 border-[#A560E8]/40 bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
-              <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#C79BF2]">
-                {results.length - FREE_CITATION_PREVIEW} more sources ready for your topic
-              </p>
-              <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
-                Free shows the first {FREE_CITATION_PREVIEW}. Unlock every source — plus the full bibliography — with Pro.
-              </p>
+            <div className="flex flex-wrap items-center gap-4 rounded-[24px] border border-[#E4D4F8] bg-[#F7F1FF] p-5 dark:border-stone-700 dark:bg-[#A560E8]/10">
+              <div className="min-w-0 flex-[1_1_300px]">
+                <p className="m-0 text-[18px] font-black text-stone-900 dark:text-stone-50">{results.length - FREE_CITATION_PREVIEW} more sources are ready for your topic</p>
+                <p className="m-0 mt-0.5 text-[14.5px] font-bold text-stone-600 dark:text-stone-400">Free shows the first {FREE_CITATION_PREVIEW}. Pro opens every source.</p>
+              </div>
               <button
                 type="button"
                 onClick={() => { trackEvent('upgrade_clicked', { source: 'citations_unlock_banner' }); openUpgradePaywall('citations_unlock_banner'); }}
-                className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="inline-flex min-h-[54px] items-center whitespace-nowrap rounded-[16px] border-2 border-b-[5px] border-[#46A302] bg-[#58CC02] px-6 text-[16.5px] font-black text-white transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
               >
                 Unlock all {results.length} sources
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {!loading && !results && !error && (
-        <div className="mt-6 rounded-2xl border-2 border-dashed border-stone-200 dark:border-stone-700 p-8 text-center">
-          <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">Find credible, citable sources in seconds</p>
-          <p className="mt-1 text-xs text-stone-500 dark:text-stone-400 max-w-md mx-auto">
-            Describe your topic and we'll surface real references with ready-to-use sentences and in-text citations in your chosen style.
-          </p>
-        </div>
+        </>
       )}
     </div>
   );

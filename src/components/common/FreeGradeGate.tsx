@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PENDING_ESSAY_KEY } from '../../config/pricing';
 import { trackEvent } from '../../utils/analytics';
 import type { EssayFacts } from '../landing/HeroEssayGrader';
+import { BTN_GREEN, BTN_WHITE, INPUT } from '../landing/webStyle';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -27,7 +28,33 @@ interface FreeGradeGateProps {
   onClose: () => void;
   /** The account is created or signed in; token and user are already in localStorage. */
   onAuthed: (user: GateUser) => void;
+  /**
+   * Replaces the "report so far" block at the top. The try-first flow puts
+   * the real grade or the finished study pack here.
+   */
+  header?: ReactNode;
+  /** Wording for other uses of the gate (saving a study pack, a finished grade). */
+  copy?: Partial<GateCopy>;
 }
+
+export interface GateCopy {
+  title: string;
+  body: string;
+  cta: string;
+  loginTitle: string;
+  loginCta: string;
+  /** The short line under the form. */
+  footnote: string;
+}
+
+const DEFAULT_COPY: GateCopy = {
+  title: 'Where should we send your report?',
+  body: 'It finishes in about a minute. Make a free account so you can come back to it. No card.',
+  cta: 'Finish my report',
+  loginTitle: 'Welcome back. Log in to finish this one.',
+  loginCta: 'Log in and finish my report',
+  footnote: 'Free. We email you a link to verify your account. Your essay is never used to train AI.',
+};
 
 type Mode = 'email' | 'login';
 
@@ -45,7 +72,8 @@ const GATE_PROGRESS = 78;
  * report is "most of the way there" and the email is the last step,
  * not the first.
  */
-export default function FreeGradeGate({ open, words, fileName, facts, onClose, onAuthed }: FreeGradeGateProps) {
+export default function FreeGradeGate({ open, words, fileName, facts, onClose, onAuthed, header, copy }: FreeGradeGateProps) {
+  const text: GateCopy = { ...DEFAULT_COPY, ...(copy || {}) };
   const [mode, setMode] = useState<Mode>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -188,9 +216,9 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
 
   const font = { fontFamily: '"Nunito", system-ui, sans-serif' } as const;
   const kindLabel = facts?.kind ? `${/^[aeiou]/i.test(facts.kind) ? 'An' : 'A'} ${facts.kind}` : null;
-  const inputCls = 'min-h-[52px] rounded-[14px] border-2 border-[#1C1917] bg-[#FAF7FF] px-4 text-[16px] font-bold text-[#1C1917] placeholder:text-[#8A8580] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#A560E8]/35';
-  const primaryCls = 'mt-1 flex min-h-[56px] items-center justify-center gap-2.5 rounded-[14px] border-2 border-[#1C1917] bg-[#58CC02] text-[18px] font-black text-[#1C1917] transition-all hover:bg-[#61E002] active:translate-x-px active:translate-y-px disabled:opacity-70';
-  const googleCls = 'flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-[14px] border-2 border-[#1C1917] bg-white text-[15px] font-extrabold text-[#1C1917] transition-all hover:bg-[#FAF7FF] active:translate-x-px active:translate-y-px';
+  const inputCls = `min-h-[52px] px-4 text-[16px] ${INPUT}`;
+  const primaryCls = `mt-1 min-h-[56px] w-full text-[18px] ${BTN_GREEN}`;
+  const googleCls = `min-h-[54px] w-full text-[15.5px] !text-[#1C1917] ${BTN_WHITE}`;
 
   return (
     <div
@@ -201,18 +229,20 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
     >
       <div className="absolute inset-0 bg-[#2A1540]/60" onClick={onClose} aria-hidden />
       <section
-        className="relative w-full max-w-[540px] rounded-[24px] border-2 border-[#1C1917] bg-white p-5 text-[#1C1917] sm:p-7"
-        style={{ boxShadow: '8px 8px 0 #7733B5', ...font }}
+        className="relative max-h-[calc(100dvh-2rem)] w-full max-w-[540px] overflow-y-auto rounded-[28px] border border-[#E4D4F8] bg-white p-5 text-[#1C1917] shadow-[0_30px_70px_-30px_rgba(42,21,64,0.7)] sm:p-7"
+        style={font}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#1C1917] bg-white text-[#1C1917] hover:bg-[#FAF7FF]"
+          className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#E4D4F8] bg-white text-[#57534E] hover:bg-[#FBF8FF]"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
 
+        {header ? header : (
+          <>
         {/* The report so far: progress plus what the box read. */}
         <div className="flex items-center gap-3.5 pr-10">
           <img src="/mascot-paper-still.webp" alt="" width={64} height={64} className="h-16 w-16 shrink-0 object-contain" />
@@ -223,26 +253,29 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
                 {words.toLocaleString()} words{fileName ? ` · ${fileName}` : ''}
               </p>
             </div>
-            <div role="progressbar" aria-valuenow={GATE_PROGRESS} aria-valuemin={0} aria-valuemax={100} aria-label="Report progress" className="mt-1.5 h-3 overflow-hidden rounded-full border-2 border-[#1C1917] bg-[#FAF7FF]">
+            <div role="progressbar" aria-valuenow={GATE_PROGRESS} aria-valuemin={0} aria-valuemax={100} aria-label="Report progress" className="mt-1.5 h-3 overflow-hidden rounded-full bg-[#F3EAFF]">
               <div className="h-full rounded-full bg-[#A560E8]" style={{ width: `${GATE_PROGRESS}%` }} />
             </div>
           </div>
         </div>
         {(kindLabel || facts?.thesis) && (
-          <ul className="mt-3 flex flex-col gap-1.5 rounded-[12px] border-2 border-[#1C1917] bg-[#F3EEFF] px-3.5 py-2.5 text-[13px] font-extrabold leading-snug text-[#1C1917]">
+          <ul className="mt-3 flex flex-col gap-1.5 rounded-2xl border border-[#E4D4F8] bg-[#FBF8FF] px-3.5 py-2.5 text-[13px] font-extrabold leading-snug text-[#1C1917]">
             {kindLabel && <li className="flex gap-2"><span className="text-[#15803D]">✓</span>{kindLabel}, {facts?.paragraphs} paragraphs</li>}
             {facts?.thesis && <li className="flex gap-2"><span className="text-[#15803D]">✓</span><span className="min-w-0">Thesis: <span className="font-bold text-[#44403C]">“{facts.thesis}”</span></span></li>}
             <li className="flex gap-2 text-[#57534E]"><span aria-hidden className="inline-block h-[16px] w-[16px] animate-spin rounded-full border-[2.5px] border-[#A560E8] border-r-transparent" />Scoring the rubric and writing your comments</li>
           </ul>
         )}
 
+          </>
+        )}
+
         {mode === 'email' ? (
           <>
             <h2 id="free-grade-gate-title" className="mt-4 text-[25px] font-black leading-[1.1] sm:text-[28px]">
-              Where should we send your report?
+              {text.title}
             </h2>
             <p className="mt-2 text-[15px] font-semibold leading-relaxed text-[#57534E]">
-              It finishes in about a minute. Make a free account so you can come back to it. No card.
+              {text.body}
             </p>
 
             <button type="button" onClick={continueWithGoogle} className={`mt-5 ${googleCls}`}>
@@ -288,8 +321,8 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <button type="submit" disabled={submitting} className={primaryCls} style={{ boxShadow: '4px 4px 0 #1C1917' }}>
-                {submitting ? 'Setting up…' : 'Finish my report'}
+              <button type="submit" disabled={submitting} className={primaryCls}>
+                {submitting ? 'Setting up…' : text.cta}
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
               </button>
             </form>
@@ -297,7 +330,7 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
         ) : (
           <>
             <h2 id="free-grade-gate-title" className="mt-4 text-[25px] font-black leading-[1.1] sm:text-[28px]">
-              Welcome back. Log in to finish this one.
+              {text.loginTitle}
             </h2>
             <p className="mt-2 text-[15px] font-semibold leading-relaxed text-[#57534E]">
               <span className="font-extrabold text-[#1C1917]">{email.trim()}</span> already has an account, so your reports stay in one place.
@@ -320,8 +353,8 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
                 autoFocus
                 className={inputCls}
               />
-              <button type="submit" disabled={submitting} className={primaryCls} style={{ boxShadow: '4px 4px 0 #1C1917' }}>
-                {submitting ? 'Logging in…' : 'Log in and finish my report'}
+              <button type="submit" disabled={submitting} className={primaryCls}>
+                {submitting ? 'Logging in…' : text.loginCta}
               </button>
               <div className="flex items-center justify-between text-[13px] font-bold text-[#57534E]">
                 <button type="button" onClick={() => { setMode('email'); setError(''); }} className="underline underline-offset-2">Use a different email</button>
@@ -332,13 +365,13 @@ export default function FreeGradeGate({ open, words, fileName, facts, onClose, o
         )}
 
         {error && (
-          <p className="mt-3 rounded-[12px] border-2 border-[#1C1917] bg-[#FFF1F2] px-3 py-2 text-[13px] font-bold text-[#9F1239]" role="alert">
+          <p className="mt-3 rounded-2xl border border-[#FBC4CC] bg-[#FFF1F2] px-3.5 py-2.5 text-[13px] font-bold text-[#9F1239]" role="alert">
             {error}
           </p>
         )}
 
         <p className="mt-4 text-center text-[12px] font-bold leading-relaxed text-[#78716C]">
-          Free. We email you a link to verify your account. Your essay is never used to train AI. By continuing you agree to the{' '}
+          {text.footnote} By continuing you agree to the{' '}
           <a href="/terms" className="text-[#7733B5] underline underline-offset-2">terms</a>.
         </p>
       </section>

@@ -934,7 +934,8 @@ router.get('/google/callback',
         username: req.user.username,
         name: req.user.name,
         profilePicture: req.user.profile_picture,
-        onboardingCompleted: req.user.onboarding_completed || false
+        onboardingCompleted: req.user.onboarding_completed || false,
+        isNew: req.user._isNewSignup === true
       }))}`);
     } catch (error) {
       console.error('Google OAuth callback error:', error);

@@ -183,6 +183,8 @@ const validationSchemas = {
     // Optional library title (onboarding / paste flow). Used when the
     // backend creates a documents row from pasted text.
     title: Joi.string().max(120).optional().allow(''),
+    // Claims a grade made before sign-up (services/previewStore.js).
+    previewToken: Joi.string().max(64).optional().allow('', null),
     rubricContent: Joi.string().max(100000).optional().allow('').messages({
       'string.max': 'Rubric content is too long (max 100,000 characters)'
     })

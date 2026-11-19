@@ -11,6 +11,10 @@ import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES, FREEMIUM_PREVIEW, ONBOARDING_ENAB
 import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
 import type { EssayUnlockSummary } from '../utils/paywall';
+import { claimPendingPack, flushAnswers } from '../utils/tryFirst';
+
+/** See the note where DailyReviewReadyModal is rendered. */
+const DAILY_REVIEW_POPUP = false;
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 import { LANDING_META_DESCRIPTION, LANDING_PAGE_TITLE } from '../constants/landingSeo';
 
@@ -463,7 +467,7 @@ const AcademicAIApp = () => {
     'study-pack': TOOL_SEO_META['study-pack'],
     features: { title: 'Features — Essay Feedback & Study Tools | WriteScholar', description: 'Write in a real editor and get a professor-style grade with a full rubric and one-click line-by-line fixes. Plus citations, summarizer, and study tools in one workspace.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
-    pricing: { title: 'Pricing — Free Essay Grade, Pro $19.99/mo | WriteScholar', description: 'Grade 1 essay a month free with the score and every rubric score. Pro is $19.99/mo at the student launch price (list $39.99) for 99 credits, every rewrite and one-click fixes.' },
+    pricing: { title: 'Pricing: 3 Free Study Packs or Essay Grades a Month | WriteScholar', description: 'Three study packs or essay grades a month are free, and your first essay report is complete. Pro is $9.99 for your first month, then $19.99/mo, for 99 credits, every rewrite and one-click fixes.' },
     about: { title: 'About WriteScholar | Study & Writing Help for Students', description: 'WriteScholar helps students improve drafts before deadlines: professor-style essay feedback, citations, quizzes, flashcards, and distraction blocking in one app.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot for College Writing | 2026', description: 'Honest comparison: essay feedback and rubrics vs grammar-only tools. See which fits research papers and coursework.' },
     'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt — College Study Tools | 2026', description: 'Why students add WriteScholar for essay feedback and rubrics, not just flashcards. Side-by-side features vs Quizlet and Knowt.' },
@@ -798,6 +802,18 @@ const AcademicAIApp = () => {
     }, 300);
     return () => window.clearTimeout(t);
   }, [isLoggedIn, user?.id, user?.plan, user?.onboardingCompleted]);
+
+  // Work done before sign-up now has an account: send the wait-time
+  // answers to the survey table and save the study pack made as a guest.
+  // Both are no-ops when there is nothing waiting.
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id) return;
+    let token = '';
+    try { token = localStorage.getItem('authToken') || ''; } catch { /* ignore */ }
+    if (!token) return;
+    void flushAnswers(token);
+    void claimPendingPack(token);
+  }, [isLoggedIn, user?.id]);
 
   /** Restore soft paywall after refresh if user is still on Free and did not dismiss */
   useEffect(() => {
@@ -1860,7 +1876,7 @@ const AcademicAIApp = () => {
       case 'game-launcher-word-tower':
         return <GameLauncherPage gameType="word_tower" onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-viewer':
-        return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialData={studyPackInitialData || undefined} />;
+        return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialData={studyPackInitialData || undefined} onAuth={(u) => handleSignUp(u as unknown as User)} />;
       case 'admin':
         return <AdminDashboard onNavigate={navigateTo} user={user} />;
       case 'collaboration':
@@ -1935,7 +1951,10 @@ const AcademicAIApp = () => {
           />
         </Suspense>
       )}
-      {showDailyReviewPrompt && user?.id && (
+      {/* The once-a-day "your review is ready" pop-up is off: today's plan on
+          the dashboard now starts with the review, so the pop-up was a
+          second voice saying the same thing. */}
+      {DAILY_REVIEW_POPUP && showDailyReviewPrompt && user?.id && (
         <DailyReviewReadyModal
           userId={user.id}
           userName={

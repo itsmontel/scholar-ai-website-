@@ -11,7 +11,6 @@ import DailyReviewTab from '../pages/DailyReviewTab';
 import CitationsPanel from './panels/CitationsPanel';
 import StudyPacksPanel from './panels/StudyPacksPanel';
 import GamesPanel from './panels/GamesPanel';
-import PreviewStrip from './panels/PreviewStrip';
 import SoftPaywall from '../common/SoftPaywall';
 import { FREE_EDITOR_WORD_LIMIT } from '../../config/featureFlags';
 import { getTotalXP, getLevelInfo, getUnlockedCount, BADGES } from '../../data/achievements';
@@ -22,7 +21,9 @@ import DashboardTopBar from '../common/DashboardTopBar';
 import Footer from '../common/Footer';
 import PromoBanner from '../common/PromoBanner';
 import FlashOfferBanner from '../common/FlashOfferBanner';
-import FirstGradeHome from './FirstGradeHome';
+import TodayHome from './TodayHome';
+import WelcomeQuestions, { shouldAskWelcome } from './WelcomeQuestions';
+import TryFlow, { type TryRequest } from '../landing/TryFlow';
 import { FreeReportUnlockBar, readFreePreview, type FreePreviewInfo } from '../common/FreePreviewDivider';
 import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
@@ -313,7 +314,10 @@ function PanelHeader({
   right,
   tint,
   mascotSrc,
+  badge,
 }: {
+  /** What using the tool costs, shown as a pill on the right. */
+  badge?: { label: string; tone?: 'credit' | 'pro' | 'free' };
   eyebrow: string;
   title: string;
   subtitle?: string;
@@ -344,51 +348,44 @@ function PanelHeader({
     );
   }
 
-  // Clean dashboard-style header — a brand-coloured icon chip beside a
-  // dark Nunito title on the page background (no saturated banner), so
-  // every tool page reads like the redesigned home instead of the old
-  // gradient hero. The tool's own icon + colour anchor each page.
+  // Slim header, the same on every tool page: a flat purple icon tile,
+  // the title, one line of what the tool does and an optional badge
+  // (what it costs). No mascot and no eyebrow, so the tool itself starts
+  // higher up the page. `mascotSrc` and `eyebrow` are still accepted so
+  // the call sites do not have to change, but they are not drawn.
+  void mascotSrc;
+  void eyebrow;
+  const badgeTone = badge?.tone === 'pro'
+    ? 'border border-[#D4A300] bg-[#FFC800] text-[#5A4500]'
+    : badge?.tone === 'free'
+      ? 'bg-[#E6F9D2] text-[#14532D]'
+      : 'bg-[#F3EAFF] text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]';
   return (
-    <div className="mb-6 sm:mb-7 flex items-center gap-3.5 sm:gap-4">
-      {/* Tool icon chip — same chunky, brand-coloured chip language as
-          the dashboard "Pick a tool" cards. */}
-      <span
-        className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.4)] [&>svg]:h-6 [&>svg]:w-6 sm:[&>svg]:h-7 sm:[&>svg]:w-7"
-        style={{ backgroundColor: tint.tint, borderColor: shadeColor(tint.tint, -28) }}
-        aria-hidden
-      >
-        {tint.icon ?? null}
-      </span>
-      <div className="flex-1 min-w-0">
-        <p
-          className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-[0.22em] mb-1"
-          style={{ color: tint.tint }}
-        >
-          {eyebrow}
-        </p>
-        <h1
-          className="text-[1.7rem] sm:text-[2rem] lg:text-[2.3rem] font-extrabold leading-[1.04] tracking-tight text-stone-900 dark:text-stone-50"
-          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-        >
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-1.5 text-[13px] sm:text-[15px] font-bold text-stone-500 dark:text-stone-400 leading-snug max-w-2xl">
-            {subtitle}
-          </p>
-        )}
-        {right && <div className="mt-4">{right}</div>}
-      </div>
-      {mascotSrc && (
-        <img
-          src={mascotSrc}
-          alt=""
+    <div className="mb-6 sm:mb-7" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="flex flex-wrap items-center gap-3.5 sm:gap-4">
+        <span
+          className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl bg-[#A560E8] text-white [&>svg]:h-6 [&>svg]:w-6"
           aria-hidden
-          className="hidden md:block w-16 h-16 lg:w-20 lg:h-20 object-contain shrink-0 self-start drop-shadow-[0_10px_18px_rgba(0,0,0,0.12)]"
-          loading="eager"
-          decoding="async"
-        />
-      )}
+        >
+          {tint.icon ?? null}
+        </span>
+        <div className="min-w-0 flex-1 basis-[260px]">
+          <h1 className="m-0 text-[1.5rem] font-black leading-[1.1] tracking-[-0.01em] text-stone-900 dark:text-stone-50 sm:text-[1.65rem]">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="m-0 mt-0.5 max-w-2xl text-[13.5px] font-bold leading-snug text-stone-600 dark:text-stone-400 sm:text-[15px]">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {badge && (
+          <span className={`inline-flex min-h-[36px] shrink-0 items-center rounded-full px-3.5 text-[13.5px] font-black ${badgeTone}`}>
+            {badge.label}
+          </span>
+        )}
+      </div>
+      {right && <div className="mt-4">{right}</div>}
     </div>
   );
 }
@@ -422,6 +419,7 @@ function AnalyzePanel({
   onPasteAnalyze,
   onUploadFile,
   onNew,
+  onOpenDoc,
 }: {
   docs: DocSummary[];
   loading: boolean;
@@ -430,6 +428,8 @@ function AnalyzePanel({
   /** Formatting-preserving uploader (mammoth → HTML) for .docx/.txt. */
   onUploadFile: (file: File) => void;
   onNew: () => void;
+  /** Open a document without running a new grade. */
+  onOpenDoc: (id: string) => void;
 }) {
   const [text, setText] = useState('');
   const [dropActive, setDropActive] = useState(false);
@@ -502,181 +502,293 @@ function AnalyzePanel({
     }
   };
 
-  return (
-    <div>
-      {/* ── ANALYZE CARD — premium gradient frame ─────────────────── */}
-      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
-        <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
-          {/* Ambient glow + faint grid texture */}
-          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#C79BF2]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
+  /* Grades so far, newest first: the banner shows the latest one, and each
+     document row shows its own. */
+  type PanelGrade = { documentId: string | null; title: string; score: number | null; grade: string | null; fixes: string[] };
+  const [grades, setGrades] = useState<PanelGrade[] | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/analysis/history?limit=12`, { headers: authHeaders() });
+        const json = await res.json().catch(() => null);
+        const rows: any[] = Array.isArray(json?.data) ? json.data : [];
+        const found: PanelGrade[] = [];
+        for (const row of rows) {
+          const r = row?.analysis_results;
+          if (!r || typeof r !== 'object') continue;
+          if (row.analysis_type === 'citation_review' || row.analysis_type === 'citation') continue;
+          const score = typeof r.overall_score === 'number' ? Math.round(r.overall_score) : null;
+          // "C (70-79%)" is shown as "C"; the score sits beside it.
+          const grade = typeof r.grade_estimate === 'string' ? (r.grade_estimate.replace(/\s*\(.*$/, '').trim() || null) : null;
+          if (score === null && !grade) continue;
+          found.push({
+            documentId: row.document_id ?? null,
+            title: row.documents?.title || row.title || 'Your essay',
+            score,
+            grade,
+            fixes: Array.isArray(r.top_suggestions)
+              ? r.top_suggestions
+                .map((x: any) => (typeof x === 'string' ? x : x?.suggestion || x?.text || x?.title || ''))
+                .filter((x: string) => x && x.trim())
+              : [],
+          });
+        }
+        if (!cancelled) setGrades(found);
+      } catch {
+        if (!cancelled) setGrades([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [docs.length]);
+  const latest = grades?.[0] ?? null;
+  const gradeOf = (id: string) => grades?.find((g) => g.documentId === id) ?? null;
+  // "4 points from an A-": only for US letter grades, where the steps are known.
+  const nextUp = (() => {
+    if (!latest || latest.score === null || !latest.grade || !/^[A-F][+-]?$/.test(latest.grade)) return null;
+    const ladder: [number, string][] = [[60, 'D'], [70, 'C-'], [73, 'C'], [77, 'C+'], [80, 'B-'], [83, 'B'], [87, 'B+'], [90, 'A-'], [93, 'A']];
+    const step = ladder.find(([min]) => min > (latest.score as number));
+    if (!step) return null;
+    return { points: step[0] - (latest.score as number), grade: step[1] };
+  })();
+  const runPaste = () => {
+    try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
+    stagePendingGradingStyle(gradingStyle);
+    onPasteAnalyze(text);
+  };
 
-          {/* Header */}
-          <div className="relative flex items-center gap-3.5 mb-5">
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#BD8BF0] to-[#A560E8] text-white text-xl border-2 border-b-[3px] border-[#7733B5] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.9)]" aria-hidden>
-              ✦
-            </span>
-            <div className="min-w-0">
-              <h2 className="text-[19px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Get essay feedback</h2>
-              <p className="text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">Upload or paste your essay — we&apos;ll mark it up with professor-style notes and a grade.</p>
-            </div>
-          </div>
-
-          {/* Drop zone */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => !parsing && fileRef.current?.click()}
-            onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !parsing) { e.preventDefault(); fileRef.current?.click(); } }}
-            onDragEnter={(e) => { e.preventDefault(); setDropActive(true); }}
-            onDragOver={(e) => { e.preventDefault(); setDropActive(true); }}
-            onDragLeave={(e) => { e.preventDefault(); setDropActive(false); }}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDropActive(false);
-              const f = e.dataTransfer.files?.[0];
-              if (f && !parsing) void handleFile(f);
-            }}
-            className={`group relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
-              parsing ? 'opacity-70 cursor-wait pointer-events-none' : ''
-            } ${
-              dropActive
-                ? 'scale-[1.005] border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/10'
-                : 'border-[#A560E8]/30 dark:border-stone-600 bg-[#FBF8FF] dark:bg-stone-800/60 hover:border-[#A560E8]/70 hover:bg-[#F3EAFF]/60'
-            }`}
+  const pasteBox = (
+    <div
+      onDragEnter={(e) => { e.preventDefault(); setDropActive(true); }}
+      onDragOver={(e) => { e.preventDefault(); setDropActive(true); }}
+      onDragLeave={(e) => { e.preventDefault(); setDropActive(false); }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDropActive(false);
+        const f = e.dataTransfer.files?.[0];
+        if (f && !parsing) void handleFile(f);
+      }}
+      className="flex flex-col gap-3"
+    >
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.txt"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ''; }}
+      />
+      <label htmlFor="analyze-paste-input" className="sr-only">Your essay</label>
+      <textarea
+        id="analyze-paste-input"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={7}
+        placeholder="Paste your essay here, or drop a file on this box"
+        className={`min-h-[190px] w-full resize-y rounded-[18px] border-2 px-[18px] py-4 text-[17px] font-bold leading-normal text-stone-900 placeholder:text-stone-400 focus:border-[#A560E8] focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 ${dropActive ? 'border-[#A560E8] bg-[#F3EAFF]' : 'border-[#DCC3F6] bg-[#FBF8FF]'}`}
+      />
+      <div className="flex flex-wrap items-center gap-2.5">
+        <button
+          type="button"
+          onClick={() => !parsing && fileRef.current?.click()}
+          disabled={parsing}
+          className="inline-flex min-h-[48px] items-center gap-2 rounded-[14px] border-2 border-b-4 border-[#E4D4F8] bg-white px-4 text-[15px] font-black text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 disabled:opacity-60"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 16V4M7 9l5-5 5 5M4 20h16" /></svg>
+          {parsing ? 'Reading your file' : 'Add a file'}
+        </button>
+        <label className="inline-flex min-h-[48px] items-center gap-2 rounded-[14px] border-2 border-[#E4D4F8] bg-[#F7F1FF] px-3.5 text-[14.5px] font-extrabold text-stone-900">
+          Citations
+          <select
+            value={citationStyle}
+            onChange={(e) => updateCitationStyle(e.target.value)}
+            className="min-h-[36px] border-0 bg-transparent text-[14.5px] font-black text-[#5B2491] focus:outline-none"
           >
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ''; }}
-            />
-            <div className="px-6 py-8 text-center">
-              <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] dark:bg-[#A560E8]/15 text-[#A560E8] border-2 border-[#A560E8]/25 transition-transform group-hover:-translate-y-0.5">
-                {parsing ? (
-                  <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
-                )}
-              </span>
-              <p className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                {parsing ? 'Reading your paper' : 'Drop your essay here'}
-              </p>
-              <p className="mt-1 text-[13px] font-bold text-stone-500 dark:text-stone-400">
-                {parsing ? 'One moment' : 'or click to browse. Opens in the editor, ready when you are.'}
-              </p>
-              {!parsing && (
-                <div className="mt-3 flex items-center justify-center gap-1.5">
-                  {['PDF', 'Word', 'TXT'].map((t) => (
-                    <span key={t} className="px-2.5 py-1 rounded-full bg-white dark:bg-stone-800 border border-[#A560E8]/20 text-[10px] font-extrabold uppercase tracking-wide text-[#8A48C7] dark:text-stone-400">{t}</span>
+            <option value="None">None</option>
+            <option value="APA">APA</option>
+            <option value="Harvard">Harvard</option>
+            <option value="Chicago">Chicago</option>
+            <option value="MLA">MLA</option>
+            <option value="IEEE">IEEE</option>
+            <option value="Vancouver">Vancouver</option>
+          </select>
+        </label>
+        <label className="inline-flex min-h-[48px] items-center gap-2 rounded-[14px] border-2 border-[#E4D4F8] bg-[#F7F1FF] px-3.5 text-[14.5px] font-extrabold text-stone-900">
+          Grades
+          <select
+            value={gradingStyle}
+            onChange={(e) => updateGradingStyle(e.target.value as GradingStyle)}
+            className="min-h-[36px] border-0 bg-transparent text-[14.5px] font-black text-[#5B2491] focus:outline-none"
+          >
+            <option value="us">US, A to F</option>
+            <option value="uk">UK, class and %</option>
+          </select>
+        </label>
+        <span className={`text-[14px] font-extrabold ${words >= 50 ? 'text-[#3F8F00]' : 'text-stone-500'}`}>
+          {words === 0 ? '' : words >= 50 ? `${words.toLocaleString()} words` : `${50 - words} more words needed`}
+        </span>
+        <button
+          type="button"
+          onClick={runPaste}
+          disabled={words < 50}
+          className={`inline-flex min-h-[60px] items-center gap-2.5 whitespace-nowrap rounded-[18px] border-2 border-b-[5px] px-7 text-[18px] font-black text-white transition-all enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-not-allowed disabled:opacity-60 sm:ml-auto ${latest ? 'border-[#8A48C7] bg-[#A560E8]' : 'border-[#46A302] bg-[#58CC02]'}`}
+        >
+          Grade my essay
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </button>
+      </div>
+      {fileError && <p className="m-0 text-[14px] font-bold text-[#D63A3A]">{fileError}</p>}
+    </div>
+  );
+  const bannerShell = 'relative overflow-hidden rounded-[30px] bg-gradient-to-b from-[#A863EA] via-[#8E48CF] to-[#6A2AA6] text-white shadow-[0_30px_60px_-34px_rgba(90,45,140,0.8)]';
+
+  return (
+    <div className="flex flex-col gap-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      {latest ? (
+        <>
+          {/* ── YOUR LAST GRADE ───────────────────────────────────── */}
+          <section aria-label="Your last grade" className={`${bannerShell} flex flex-wrap items-center gap-7 px-5 py-6 sm:px-[30px] sm:py-7`}>
+            <span aria-hidden className="pointer-events-none absolute -left-40 -top-36 h-[520px] w-[520px] rounded-full bg-[#9652D3]" />
+            <div className="relative mx-auto flex shrink-0 items-end">
+              <div
+                role="img"
+                aria-label={`${latest.grade ?? ''}${latest.score !== null ? `, ${latest.score} out of 100` : ''}`}
+                className="flex h-[176px] w-[176px] flex-col items-center justify-center rounded-full border-[10px] border-[#58CC02] bg-white text-stone-900 shadow-[0_20px_40px_-18px_rgba(0,0,0,0.5)]"
+              >
+                <span className={`font-black leading-none tracking-[-0.03em] ${(latest.grade ?? '').length > 3 ? 'text-[40px]' : 'text-[64px]'}`}>{latest.grade ?? latest.score}</span>
+                {latest.grade && latest.score !== null && <span className="text-[16px] font-black text-stone-600">{latest.score} of 100</span>}
+              </div>
+              <img src="/mascot-celebrating-still.webp" alt="Scholar, the WriteScholar mascot" width={110} height={110} className="-ml-[22px] hidden h-[110px] w-[110px] object-contain sm:block" />
+            </div>
+            <div className="relative flex min-w-0 flex-[1_1_420px] flex-col items-start gap-3">
+              <span className="inline-flex min-h-[30px] items-center rounded-full bg-[#5A1F8F] px-3 text-[12.5px] font-extrabold uppercase tracking-[0.14em]">Your last grade</span>
+              <h1 className="m-0 text-[26px] font-black leading-[1.1] tracking-[-0.02em] sm:text-[34px]">
+                {nextUp
+                  ? <>You are {nextUp.points} {nextUp.points === 1 ? 'point' : 'points'} from {/^A/.test(nextUp.grade) ? 'an' : 'a'} <span className="text-[#FFD84D]">{nextUp.grade}</span></>
+                  : latest.fixes.length > 0 ? <>Here is what to fix <span className="text-[#FFD84D]">next</span></> : <>Your last essay is <span className="text-[#FFD84D]">graded</span></>}
+              </h1>
+              <p className="m-0 text-[16px] font-bold text-[#F3EAFF]">{latest.title}</p>
+              {latest.fixes.length > 0 && (
+                <ul className="m-0 flex w-full list-none flex-col gap-2 p-0">
+                  {latest.fixes.slice(0, 2).map((fix, i) => (
+                    <li key={i} className="flex items-center gap-2.5 rounded-[14px] bg-white px-3.5 py-2.5 text-[15px] font-extrabold text-stone-900">
+                      <span aria-hidden className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full bg-[#FFC800] text-[14px] font-black text-[#3D2F00]">{i + 1}</span>
+                      <span className="line-clamp-2 min-w-0">{fix}</span>
+                    </li>
                   ))}
+                </ul>
+              )}
+              {latest.documentId && (
+                <div className="mt-1 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => onOpenDoc(latest.documentId as string)}
+                    className="inline-flex min-h-[60px] items-center gap-2.5 whitespace-nowrap rounded-[20px] border-2 border-b-[6px] border-[#46A302] bg-[#58CC02] px-7 text-[18px] font-black text-white transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
+                  >
+                    Open the report and fix these
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => askThenRun(() => onPickDoc(latest.documentId as string))}
+                    className="inline-flex min-h-[60px] items-center whitespace-nowrap rounded-[20px] border-2 border-b-[6px] border-[#E4D4F8] bg-white px-6 text-[18px] font-black text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
+                  >
+                    Grade it again
+                  </button>
                 </div>
               )}
             </div>
-          </div>
-          {fileError && <p className="mt-2 text-[12px] font-bold text-[#D63A3A]">{fileError}</p>}
+          </section>
 
-          {/* OR divider */}
-          <div className="relative my-4 flex items-center gap-3">
-            <span className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
-            <span className="text-[11px] font-extrabold uppercase tracking-wide text-stone-400">or paste it</span>
-            <span className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+          <section aria-label="Grade a new essay" className="flex flex-col gap-3 rounded-[26px] border border-[#E4D4F8] bg-white p-5 shadow-[0_16px_34px_-26px_rgba(90,45,140,0.55)]">
+            <h2 className="m-0 text-[22px] font-black tracking-[-0.01em] text-stone-900">Grade a new essay</h2>
+            {pasteBox}
+            <p className="m-0 text-[13.5px] font-bold text-stone-500">Each grade uses 1 credit. Your essay is never used to train AI.</p>
+          </section>
+        </>
+      ) : (
+        /* ── PASTE UP FRONT ──────────────────────────────────────── */
+        <section aria-label="Grade an essay" className={`${bannerShell} px-5 pb-6 pt-5 sm:px-[30px] sm:pb-[30px] sm:pt-[26px]`}>
+          <span aria-hidden className="pointer-events-none absolute left-1/2 top-[130px] h-[900px] w-[900px] -translate-x-1/2 rounded-full bg-[#8A45C8]" />
+          <div className="relative flex flex-col gap-[18px]">
+            <div className="flex items-center gap-4">
+              <img src="/mascot-paper-still.webp" alt="Scholar, the WriteScholar mascot" width={104} height={104} className="h-[76px] w-[76px] shrink-0 object-contain sm:h-[104px] sm:w-[104px]" />
+              <div className="min-w-0">
+                <h1 className="m-0 text-[28px] font-black leading-[1.05] tracking-[-0.02em] sm:text-[38px]">
+                  What grade would this <span className="text-[#FFD84D]">get</span>?
+                </h1>
+                <p className="m-0 mt-1.5 text-[15px] font-bold text-[#F3EAFF] sm:text-[16.5px]">Paste your essay. You get an estimated grade, every rubric score and notes on your sentences.</p>
+              </div>
+            </div>
+            <div className="rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-4 text-stone-900 shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)]">
+              {pasteBox}
+            </div>
+            <p className="m-0 text-[13.5px] font-bold text-[#F3EAFF]">Each grade uses 1 credit. Your essay is never used to train AI.</p>
           </div>
+        </section>
+      )}
 
-          {/* Paste */}
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="analyze-paste-input" className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your essay</label>
-            <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold tabular-nums px-2 py-0.5 rounded-full transition-colors ${words >= 50 ? 'text-[#8A48C7] bg-[#F3EAFF] dark:bg-[#A560E8]/15' : 'text-stone-400 bg-stone-100 dark:bg-stone-800'}`}>
-              {words >= 50 && (<svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>)}
-              {words} words
-            </span>
-          </div>
-          <textarea
-            id="analyze-paste-input"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={6}
-            placeholder="Paste your draft here. It saves as a document and opens in the editor, where you can run the analysis when you're ready."
-            className="w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] resize-y transition-all"
-          />
-          <div className="mt-4 flex items-center gap-2">
-            {words > 0 && words < 50 && <p className="text-[11px] font-bold text-stone-400">Add {50 - words} more words.</p>}
-            <button
-              type="button"
-              onClick={() => askThenRun(() => onPasteAnalyze(text))}
-              disabled={words < 50}
-              className="group ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#A560E8] to-[#8A48C7] hover:from-[#8A48C7] hover:to-[#7733B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(165,96,232,0.9)]"
-            >
-              Open in editor
-              <svg className="w-4 h-4 transition-transform group-enabled:group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </button>
-          </div>
-
-          {/* What you'll get — value reinforcement chips */}
-          <div className="mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You&apos;ll get</span>
-            {['📝 Margin notes', '📊 Rubric breakdown', '🎯 Grade estimate'].map((c) => (
-              <span key={c} className="px-2.5 py-1 rounded-full bg-[#FBF8FF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C79BF2]">{c}</span>
-            ))}
-          </div>
+      {/* ── YOUR DOCUMENTS ────────────────────────────────────────── */}
+      {loading ? (
+        <div className="flex flex-col gap-3.5">
+          {[0, 1].map((i) => <div key={i} className="h-[98px] animate-pulse rounded-[24px] bg-stone-100 dark:bg-stone-800" />)}
         </div>
-      </div>
-
-      {/* 3. What analysis gives you */}
-      <div className="mt-8">
-        <PreviewStrip
-          title="What analysis gives you"
-          subtitle="Professor-style margin notes, a rubric breakdown and a grade estimate, marked up right on your paper."
-          items={[
-            { kind: 'video', src: '/quick-walkthrough.mp4', label: 'Quick walkthrough' },
-            { kind: 'image', src: '/rubric-and-notes.png', label: 'Rubric & notes' },
-            { kind: 'image', src: '/full-report.png', label: 'Full report' },
-          ]}
-        />
-      </div>
-
-      {/* 4. Analyze one of your documents */}
-      <div className="mt-2">
-        <h2 className="text-base font-extrabold text-stone-900 dark:text-stone-50 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-          Analyze one of your documents
-        </h2>
-        {loading ? (
-          <div className="space-y-2">
-            {[0, 1, 2].map((i) => <div key={i} className="h-16 rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />)}
+      ) : recent.length > 0 && (
+        <>
+          <div className="flex items-center gap-3.5">
+            <h2 className="m-0 text-[22px] font-black tracking-[-0.01em] text-stone-900 dark:text-stone-50">{latest ? 'Your essays' : 'Or grade one of your documents'}</h2>
+            <span aria-hidden className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+            <button type="button" onClick={onNew} className="min-h-[44px] text-[14.5px] font-black text-[#7733B5] underline hover:text-[#5F2594] dark:text-[#C9A0F0]">Start a blank document</button>
           </div>
-        ) : recent.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-stone-200 dark:border-stone-700 p-8 text-center">
-            <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No documents yet</p>
-            <p className="mt-1 text-xs text-stone-500 dark:text-stone-400 mb-3">Start a draft, then analyze it whenever you're ready.</p>
-            <button type="button" onClick={onNew} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all">
-              New document
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {recent.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => askThenRun(() => onPickDoc(d.id))}
-                className="group w-full flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8]"><I.Sparkle /></span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-extrabold text-stone-800 dark:text-stone-100 truncate">{d.title || 'Untitled'}</span>
-                  <span className="block text-[11px] font-bold text-stone-400 mt-0.5">{d.wordCount ? `${d.wordCount.toLocaleString()} words` : 'Empty'} · edited {timeAgo(d.lastEditedAt || d.updatedAt)}</span>
-                </span>
-                <span className="text-stone-300 group-hover:text-[#A560E8] transition-colors"><I.ArrowR /></span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+          <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
+            {recent.map((d) => {
+              const g = gradeOf(d.id);
+              const graded = !!g || !!d.hasAnalysis;
+              return (
+                <li key={d.id} className="flex flex-wrap items-center gap-[18px] rounded-[24px] border border-[#E4D4F8] bg-white px-5 py-4 dark:border-stone-700 dark:bg-stone-900">
+                  <span
+                    role="img"
+                    aria-label={g ? `Last grade ${g.grade ?? ''} ${g.score ?? ''}` : graded ? 'Graded' : 'Not graded yet'}
+                    className={`flex h-[66px] w-[66px] shrink-0 flex-col items-center justify-center rounded-[20px] ${g ? 'bg-[#E6F9D2] text-[#14532D]' : 'bg-[#F3EAFF] text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]'}`}
+                  >
+                    {g ? (
+                      <>
+                        <span className={`font-black leading-none ${(g.grade ?? '').length > 3 ? 'text-[15px]' : 'text-[24px]'}`}>{g.grade ?? g.score}</span>
+                        {g.grade && g.score !== null && <span className="text-[12px] font-black">{g.score}</span>}
+                      </>
+                    ) : graded ? (
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+                    ) : (
+                      <span className="text-[26px] font-black">?</span>
+                    )}
+                  </span>
+                  <div className="min-w-0 flex-[1_1_320px]">
+                    <h3 className="m-0 truncate text-[19px] font-black leading-tight text-stone-900 dark:text-stone-50">{d.title || 'Untitled'}</h3>
+                    <p className="m-0 mt-[3px] text-[14px] font-bold text-stone-600 dark:text-stone-400">
+                      {graded ? 'Graded.' : 'Not graded yet.'} {d.wordCount ? `${d.wordCount.toLocaleString()} words.` : 'Empty.'} Edited {timeAgo(d.lastEditedAt || d.updatedAt)}.
+                    </p>
+                  </div>
+                  {graded && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenDoc(d.id)}
+                      className="inline-flex min-h-[50px] items-center whitespace-nowrap rounded-[14px] border-2 border-b-4 border-[#E4D4F8] bg-white px-[18px] text-[15.5px] font-black text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 dark:border-stone-600 dark:bg-stone-900 dark:text-[#C9A0F0]"
+                    >
+                      Open report
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => askThenRun(() => onPickDoc(d.id))}
+                    className="inline-flex min-h-[50px] items-center whitespace-nowrap rounded-[14px] border-2 border-b-4 border-[#8A48C7] bg-[#A560E8] px-5 text-[15.5px] font-black text-white transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
+                  >
+                    {graded ? 'Grade again' : 'Grade this'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
 
       {/* ─── Citation + grading picker ──────────────────────────
           Always shown before the analyser actually runs, so the
@@ -1115,7 +1227,10 @@ function DocumentsHub({
   onDismissHighlight,
   onOpenHighlightedPack,
   onOpenHighlightedTool,
+  hideIntro = false,
 }: {
+  /** The greeting and the essay upload hero are replaced by TodayHome above this. */
+  hideIntro?: boolean;
   docs: DocSummary[];
   packs: HubStudyPack[];
   citations?: HubCitation[];
@@ -1371,6 +1486,7 @@ function DocumentsHub({
         }}
       />
 
+      {!hideIntro && (<>
       {/* ─── Header — mascot + greeting left, account chrome right ─ */}
       <div className="relative z-40 flex flex-col-reverse sm:flex-row sm:items-center gap-4 sm:gap-6 mb-7 sm:mb-8">
         <div className="min-w-0 flex-1 flex items-center gap-3.5 sm:gap-5">
@@ -1482,6 +1598,8 @@ function DocumentsHub({
         </div>
       )}
 
+      </>)}
+
       {offerBanner && <div className="mb-7 sm:mb-8">{offerBanner}</div>}
 
       {/* ─── Free-plan expiry nudge ─────────────────────────────── */}
@@ -1546,6 +1664,7 @@ function DocumentsHub({
       {/* ─── Flagship: essay feedback upload ──────────────────────
           Product-led split — copy + CTA left, real editor preview
           right (same crop bias as the college grader page). */}
+      {!hideIntro && (
       <div
         role="button"
         tabIndex={0}
@@ -1675,8 +1794,12 @@ function DocumentsHub({
           </div>
         )}
       </div>
+      )}
 
-      {/* ─── Quick start — soft purple tray of launch cards ─────── */}
+      {/* ─── Quick start — soft purple tray of launch cards ───────
+          Not shown under TodayHome: its banner, steps and start box already
+          cover every way in, and the sidebar lists the tools. */}
+      {!hideIntro && (
       <div className="mt-8 sm:mt-10">
         <div className="mb-4 flex items-center gap-3">
           <h2
@@ -1771,6 +1894,7 @@ function DocumentsHub({
           </div>
         </div>
       </div>
+      )}
 
       {/* ─── Recent documents — title outside, spaced cards inside ─ */}
       <div className="mt-8 sm:mt-10">
@@ -1936,11 +2060,53 @@ function DocumentsLibrary({
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState('');
+  const [show, setShow] = useState<'all' | 'graded' | 'ungraded'>('all');
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+
+  // Each document's latest grade, for the chip on its row.
+  const [gradeMap, setGradeMap] = useState<Record<string, { grade: string | null; score: number | null }>>({});
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/analysis/history?limit=50`, { headers: authHeaders() });
+        const json = await res.json().catch(() => null);
+        const rows: any[] = Array.isArray(json?.data) ? json.data : [];
+        const map: Record<string, { grade: string | null; score: number | null }> = {};
+        for (const row of rows) {
+          const r = row?.analysis_results;
+          const id = row?.document_id;
+          if (!id || map[id] || !r || typeof r !== 'object') continue;
+          if (row.analysis_type === 'citation_review' || row.analysis_type === 'citation') continue;
+          const score = typeof r.overall_score === 'number' ? Math.round(r.overall_score) : null;
+          const grade = typeof r.grade_estimate === 'string' ? (r.grade_estimate.replace(/\s*\(.*$/, '').trim() || null) : null;
+          if (score === null && !grade) continue;
+          map[id] = { grade, score };
+        }
+        if (!cancelled) setGradeMap(map);
+      } catch { /* the chips are best-effort */ }
+    })();
+    return () => { cancelled = true; };
+  }, [docs.length]);
+
+  useEffect(() => {
+    if (!menuFor) return;
+    const close = () => setMenuFor(null);
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('click', close); document.removeEventListener('keydown', onKey); };
+  }, [menuFor]);
+
+  const isGraded = useCallback((d: DocSummary) => !!gradeMap[d.id] || !!d.hasAnalysis, [gradeMap]);
+  const gradedCount = docs.filter(isGraded).length;
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return docs
       .filter((d) => {
+        if (show === 'graded' && !isGraded(d)) return false;
+        if (show === 'ungraded' && isGraded(d)) return false;
         if (!q) return true;
         const inTitle = d.title.toLowerCase().includes(q);
         const inFilename = (d.originalFilename || '').toLowerCase().includes(q);
@@ -1951,10 +2117,11 @@ function DocumentsLibrary({
         const tb = b.lastEditedAt || b.updatedAt;
         return new Date(tb).getTime() - new Date(ta).getTime();
       });
-  }, [docs, search]);
+  }, [docs, search, show, isGraded]);
+  const plain = !search.trim() && show === 'all';
 
   return (
-    <>
+    <div className="flex flex-col gap-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <input
         ref={fileInputRef}
         type="file"
@@ -1967,103 +2134,145 @@ function DocumentsLibrary({
         }}
       />
 
-      {/* Heading row — title (left) · account controls (right), so the
-          top bar shares the band instead of floating over the page. */}
-      <div className="relative z-40 flex flex-col-reverse sm:flex-row sm:items-start justify-between gap-3 sm:gap-5 mb-6">
-        <div className="min-w-0">
-          <h1
-            className="text-[1.85rem] sm:text-[2.1rem] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-50"
-            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-          >
-            My Documents
-          </h1>
-          <p className="mt-1.5 text-[14px] font-bold text-stone-500 dark:text-stone-400">
-            {docs.length} {docs.length === 1 ? 'document' : 'documents'}
-            {usage && usage.limit != null && <> · {usage.used}/{usage.limit} on the {usage.plan} plan</>}
+      {topBar && <div className="relative z-40 -mb-2 flex items-center justify-end gap-2">{topBar}</div>}
+
+      <div className="flex flex-wrap items-center gap-3.5">
+        <img src="/mascot-paper-still.webp" alt="Scholar, the WriteScholar mascot" width={84} height={84} className="hidden h-[84px] w-[84px] shrink-0 object-contain sm:block" />
+        <div className="min-w-0 flex-[1_1_260px]">
+          <h1 className="m-0 text-[28px] font-black leading-[1.1] tracking-[-0.02em] text-stone-900 dark:text-stone-50 sm:text-[32px]">Your documents</h1>
+          <p className="m-0 mt-[3px] text-[15.5px] font-bold text-stone-600 dark:text-stone-400">
+            {docs.length === 0
+              ? 'Nothing here yet.'
+              : `${docs.length} ${docs.length === 1 ? 'document' : 'documents'}. ${gradedCount} graded, ${docs.length - gradedCount} still to grade.`}
+            {usage && usage.limit != null && <> {usage.used} of {usage.limit} used on the {usage.plan} plan.</>}
           </p>
         </div>
-        <div className="flex items-center justify-end gap-2 shrink-0 sm:pt-1">{topBar}</div>
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="inline-flex min-h-[54px] items-center gap-2 whitespace-nowrap rounded-[16px] border-2 border-b-[5px] border-[#E4D4F8] bg-white px-5 text-[16px] font-black text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 dark:border-stone-600 dark:bg-stone-900 dark:text-[#C9A0F0]"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 16V4M7 9l5-5 5 5M4 20h16" /></svg>
+          Upload a file
+        </button>
+        <button
+          type="button"
+          onClick={onNew}
+          className="inline-flex min-h-[54px] items-center gap-2 whitespace-nowrap rounded-[16px] border-2 border-b-[5px] border-[#46A302] bg-[#58CC02] px-[22px] text-[16.5px] font-black text-white transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>
+          New document
+        </button>
       </div>
 
-      {/* Search (left) · create actions (right) */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
-        <div className="relative w-full sm:max-w-md">
-          <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
-            <I.Search />
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documents…"
-            className="w-full pl-10 pr-10 h-11 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[14px] font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:border-[#A560E8] transition-colors"
-          />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              aria-label="Clear search"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-        <div className="flex items-center gap-2 sm:ml-auto shrink-0">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <label htmlFor="documents-search" className="sr-only">Search your documents</label>
+        <input
+          id="documents-search"
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search your documents"
+          className="min-h-[50px] min-w-0 flex-[1_1_260px] rounded-[16px] border-2 border-[#DCC3F6] bg-white px-[18px] text-[16px] font-extrabold text-stone-900 placeholder:text-stone-400 focus:border-[#A560E8] focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-50"
+        />
+        {([['all', `All, ${docs.length}`], ['graded', `Graded, ${gradedCount}`], ['ungraded', `Not graded, ${docs.length - gradedCount}`]] as ['all' | 'graded' | 'ungraded', string][]).map(([value, label]) => (
           <button
+            key={value}
             type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-2 h-11 px-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 text-[13.5px] font-extrabold hover:border-[#A560E8]/45 hover:text-[#7733B5] dark:hover:text-[#C9A0F0] transition-colors"
+            onClick={() => setShow(value)}
+            aria-pressed={show === value}
+            className={`min-h-[44px] rounded-full border-2 px-4 text-[14.5px] font-black ${show === value ? 'border-[#A560E8] bg-[#A560E8] text-white' : 'border-[#E4D4F8] bg-white text-stone-700 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-300'}`}
           >
-            <I.Upload /> Upload
+            {label}
           </button>
-          <button
-            type="button"
-            onClick={onNew}
-            className="inline-flex items-center gap-2 h-11 px-4 rounded-xl bg-[#A560E8] hover:bg-[#9450D8] text-white text-[13.5px] font-extrabold transition-colors"
-          >
-            <I.Plus /> New document
-          </button>
-        </div>
+        ))}
       </div>
 
-      {search.trim() && !loading && (
-        <p className="mb-3 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">
-          {filtered.length} of {docs.length} {docs.length === 1 ? 'document' : 'documents'} match &ldquo;<span className="text-[#7733B5] dark:text-[#C9A0F0]">{search.trim()}</span>&rdquo;
-        </p>
-      )}
-
-      <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 shadow-[0_2px_8px_-5px_rgba(60,40,90,0.16)]">
-        {loading ? (
-          <>
-            <DocumentRowSkeleton />
-            <DocumentRowSkeleton />
-            <DocumentRowSkeleton />
-            <DocumentRowSkeleton />
-          </>
-        ) : filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex flex-col gap-3.5">
+          {[0, 1, 2, 3].map((i) => <div key={i} className="h-[98px] animate-pulse rounded-[24px] bg-stone-100 dark:bg-stone-800" />)}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="overflow-hidden rounded-[24px] border border-[#E4D4F8] bg-white dark:border-stone-700 dark:bg-stone-900">
           <DocsEmptyState
             hasAnyDocs={docs.length > 0}
             hasSearch={search.trim().length > 0}
             onNew={onNew}
             onUpload={() => fileInputRef.current?.click()}
           />
-        ) : (
-          filtered.map((d) => (
-            <DocumentRow
-              key={d.id}
-              doc={d}
-              onOpen={() => onOpen(d.id)}
-              onDownload={() => onDownload(d.id)}
-              onDelete={() => onDelete(d.id)}
-              onUpgrade={onUpgrade}
-            />
-          ))
-        )}
-      </div>
-    </>
+        </div>
+      ) : (
+        <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
+          {filtered.map((d, i) => {
+            const g = gradeMap[d.id];
+            const graded = isGraded(d);
+            const first = plain && i === 0;
+            return (
+              <li
+                key={d.id}
+                className={`relative flex flex-wrap items-center gap-4 rounded-[24px] bg-white px-5 py-4 dark:bg-stone-900 ${first ? 'border-2 border-[#A560E8] shadow-[0_20px_40px_-28px_rgba(90,45,140,0.7)]' : 'border border-[#E4D4F8] dark:border-stone-700'}`}
+              >
+                <span
+                  role="img"
+                  aria-label={g ? `Grade ${g.grade ?? ''} ${g.score ?? ''}` : graded ? 'Graded' : 'Not graded yet'}
+                  className={`flex h-[62px] w-[62px] shrink-0 flex-col items-center justify-center rounded-[18px] ${graded ? 'bg-[#E6F9D2] text-[#14532D]' : 'bg-[#F3EAFF] text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]'}`}
+                >
+                  {g ? (
+                    <>
+                      <span className={`font-black leading-none ${(g.grade ?? '').length > 3 ? 'text-[15px]' : 'text-[23px]'}`}>{g.grade ?? g.score}</span>
+                      {g.grade && g.score !== null && <span className="text-[12px] font-black">{g.score}</span>}
+                    </>
+                  ) : graded ? (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+                  ) : (
+                    <span className="text-[24px] font-black">?</span>
+                  )}
+                </span>
+                <div className="min-w-0 flex-[1_1_340px]">
+                  <h3 className="m-0 truncate text-[19px] font-black leading-tight text-stone-900 dark:text-stone-50">{d.title || 'Untitled'}</h3>
+                  {d.contentPreview && <p className="m-0 mt-[3px] truncate text-[14.5px] font-bold text-stone-700 dark:text-stone-300">{d.contentPreview}</p>}
+                  <p className="m-0 mt-0.5 text-[13.5px] font-bold text-stone-600 dark:text-stone-400">
+                    {d.wordCount ? `${d.wordCount.toLocaleString()} words.` : 'Empty.'} {d.isUpload && !d.lastEditedAt ? 'Uploaded' : 'Edited'} {editedAgo(d.lastEditedAt || d.updatedAt)}. {graded ? 'Graded.' : 'Not graded yet.'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onOpen(d.id)}
+                  className={`inline-flex min-h-[50px] items-center whitespace-nowrap rounded-[14px] border-2 px-5 font-black transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 ${
+                    first
+                      ? 'border-b-[5px] border-[#46A302] bg-[#58CC02] text-[16px] text-white'
+                      : 'border-b-4 border-[#E4D4F8] bg-white text-[15.5px] text-[#7733B5] dark:border-stone-600 dark:bg-stone-900 dark:text-[#C9A0F0]'
+                  }`}
+                >
+                  {first ? 'Keep writing' : 'Open'}
+                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setMenuFor(menuFor === d.id ? null : d.id); }}
+                    aria-label={`More options for ${d.title || 'this document'}`}
+                    aria-expanded={menuFor === d.id}
+                    className="flex h-12 w-12 items-center justify-center rounded-[14px] border-2 border-b-4 border-[#E4D4F8] bg-white text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 dark:border-stone-600 dark:bg-stone-900 dark:text-[#C9A0F0]"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden><circle cx="5" cy="12" r="2.2" /><circle cx="12" cy="12" r="2.2" /><circle cx="19" cy="12" r="2.2" /></svg>
+                  </button>
+                  {menuFor === d.id && (
+                    <div className="absolute right-0 top-[54px] z-30 flex w-[190px] flex-col gap-1 rounded-[16px] border border-[#E4D4F8] bg-white p-1.5 shadow-[0_20px_40px_-18px_rgba(42,21,64,0.5)] dark:border-stone-600 dark:bg-stone-900">
+                      <button type="button" onClick={() => { setMenuFor(null); onDownload(d.id); }} className="flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-left text-[15px] font-extrabold text-stone-800 hover:bg-[#F7F1FF] dark:text-stone-100 dark:hover:bg-stone-800">
+                        <I.Download /> Download
+                      </button>
+                      <button type="button" onClick={() => { setMenuFor(null); onDelete(d.id); }} className="flex min-h-[44px] items-center gap-2 rounded-xl px-3 text-left text-[15px] font-extrabold text-[#D63A3A] hover:bg-[#FFF0F0] dark:hover:bg-stone-800">
+                        <I.Trash /> Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }
 
@@ -2664,7 +2873,7 @@ function DocumentEditorView({
                     title={
                       analysesLeft === 0
                         ? revisionsLocked
-                          ? 'Your free grade this month is used. Pro gives you 99 credits.'
+                          ? 'Your free credits this month are used. Pro gives you 99 credits.'
                           : 'No analyses left this month — upgrade for more'
                         : revisionsLocked
                           ? `${analysesLeft} free ${analysesLeft === 1 ? 'grade' : 'grades'} left this month`
@@ -2789,7 +2998,7 @@ function DocumentEditorView({
 
                 {revisionsLocked && !noAnalysesLeft && (
                   <p className="mx-auto mt-4 max-w-[16rem] text-[11.5px] font-medium text-stone-400 dark:text-stone-500 leading-relaxed">
-                    Your free grade shows your score, every rubric score and full feedback on the first part of your essay. The rest of the feedback, the rewrites and one-click fixes unlock on Pro.{' '}
+                    After your first report, a free grade shows your score, every rubric score and full feedback on the first part of your essay. The rest of the feedback, the rewrites and one-click fixes unlock on Pro.{' '}
                     <button
                       type="button"
                       onClick={() => onUpgrade('analyze_intro')}
@@ -2921,7 +3130,7 @@ function DocumentEditorView({
               <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 {noAnalysesLeft
                   ? revisionsLocked
-                    ? 'Your free grade this month is used'
+                    ? 'Your free credits this month are used'
                     : 'No analyses left this month'
                   : isReanalyze ? 'Re-analyze this draft?' : 'Analyze this draft?'}
               </h3>
@@ -2930,7 +3139,7 @@ function DocumentEditorView({
             {noAnalysesLeft ? (
               <p className="text-sm text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
                 {revisionsLocked
-                  ? 'Your free grade for this month is used. It resets on the 1st, or Pro gives you 99 credits a month plus the rewrite behind every comment, at the student launch price of $19.99/mo.'
+                  ? 'Your free credits for this month are used. They reset on the 1st, or Pro gives you 99 credits a month plus the rewrite behind every comment: $9.99 for your first month, then $19.99.'
                   : 'You\u2019ve used all your analyses for this billing period. Upgrade for more, or wait until your allowance resets.'}
               </p>
             ) : (
@@ -3321,6 +3530,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   /** The document list has come back at least once (success or error). */
   const [docsLoaded, setDocsLoaded] = useState(false);
   /** Free user chose "Show my full dashboard" before grading anything. */
+  /** A study pack being built from the dashboard (TryFlow overlay). */
+  const [packRequest, setPackRequest] = useState<TryRequest | null>(null);
   const [skipFirstGradeHome, setSkipFirstGradeHome] = useState<boolean>(() => {
     try { return localStorage.getItem('ws_skip_first_grade_home') === '1'; } catch { return false; }
   });
@@ -3591,6 +3802,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   }, []);
 
   useEffect(() => { if (view === 'hub') void refreshCites(); }, [view, refreshCites]);
+
+  // The welcome questions, once, for an account that has not answered them.
+  const welcomeUserId = user?.id ? String(user.id) : '';
+  const [welcomeOpen, setWelcomeOpen] = useState(() => shouldAskWelcome(welcomeUserId));
+  const [welcomeRev, setWelcomeRev] = useState(0);
+  useEffect(() => { setWelcomeOpen(shouldAskWelcome(welcomeUserId)); }, [welcomeUserId]);
 
   const hubPacks = useMemo(() => {
     if (!highlightPack) return packList;
@@ -3995,6 +4212,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     setAnalyzerOpen(true);
     setAnalyzerLoading(true);
     setAnalyzerError(null);
+    trackEvent('grade_started', { words: text.trim().split(/\s+/).filter(Boolean).length, source: 'editor' });
     // Re-analyze invalidates any "applied" markers from the previous
     // result — every card starts fresh (and the cached revisions are
     // no longer valid against the new annotations). Drop the persisted
@@ -4079,6 +4297,11 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       persistLastAnalysisGradingStyle(gradingStyle);
       try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
       trackEvent('preview_ran', { feature: 'analysis', annotations: annotations.length });
+      trackEvent('grade_completed', {
+        grade: payload?.grade_estimate != null ? String(payload.grade_estimate) : undefined,
+        score: typeof payload?.overall_score === 'number' ? payload.overall_score : undefined,
+        source: 'editor',
+      });
       // Funnel step 2 of 4 — activation. This is the primary analyze path
       // (the workspace editor), so it's the one the funnel has to measure.
       trackFunnelStep('analysis_completed', {
@@ -4098,6 +4321,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } catch (e) {
       console.error('[Documents] analyze error', e);
       const aborted = e instanceof DOMException && e.name === 'AbortError';
+      trackEvent('grade_failed', { code: aborted ? 'timeout' : 'error', source: 'editor' });
       setAnalyzerError(
         aborted
           ? 'Analysis timed out. Your connection may be slow — please try again.'
@@ -4566,6 +4790,49 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     }
   };
 
+  // These hooks must run on every render, so they sit ABOVE the editor's
+  // early return. Below it, opening a document rendered fewer hooks than
+  // the dashboard had and React crashed the page.
+  // Free account with no graded essay yet: the home view is just the
+  // paste box (FirstGradeHome). The full dashboard returns once any
+  // document has a grade, or when they choose to skip.
+  const showFirstGradeHome =
+    docsLoaded &&
+    !isPaidPlan(user) &&
+    !skipFirstGradeHome &&
+    !highlightDocId &&
+    !docList.some((d) => d.hasAnalysis);
+
+  // Tell the app-wide paywall listener whether this account still has no
+  // grade (CompleteAcademicAIApp reads ws_first_grade_pending).
+  // Having made a study pack counts: they have seen what the product does.
+  const firstGradePending = docsLoaded && !isPaidPlan(user) && !docList.some((d) => d.hasAnalysis) && hubPacks.length === 0;
+  useEffect(() => {
+    if (!docsLoaded) return;
+    try {
+      if (firstGradePending) sessionStorage.setItem('ws_first_grade_pending', '1');
+      else sessionStorage.removeItem('ws_first_grade_pending');
+    } catch { /* ignore */ }
+  }, [docsLoaded, firstGradePending]);
+
+  // A Pro tool was clicked before the first grade: come back to the paste
+  // box, even if they had chosen "Show my full dashboard" earlier.
+  useEffect(() => {
+    const showFirstGrade = () => {
+      try {
+        if (sessionStorage.getItem('ws_first_grade_nudge') !== '1') return;
+        sessionStorage.removeItem('ws_first_grade_nudge');
+        localStorage.removeItem('ws_skip_first_grade_home');
+      } catch { /* ignore */ }
+      setSkipFirstGradeHome(false);
+      setFirstGradeNudge(true);
+      setView('hub');
+    };
+    showFirstGrade();
+    window.addEventListener('writescholar-first-grade', showFirstGrade);
+    return () => window.removeEventListener('writescholar-first-grade', showFirstGrade);
+  }, []);
+
   if (view === 'editor' && openDocId) {
     if (!openDoc) {
       return (
@@ -4687,45 +4954,6 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     );
   }
 
-  // Free account with no graded essay yet: the home view is just the
-  // paste box (FirstGradeHome). The full dashboard returns once any
-  // document has a grade, or when they choose to skip.
-  const showFirstGradeHome =
-    docsLoaded &&
-    !isPaidPlan(user) &&
-    !skipFirstGradeHome &&
-    !highlightDocId &&
-    !docList.some((d) => d.hasAnalysis);
-
-  // Tell the app-wide paywall listener whether this account still has no
-  // grade (CompleteAcademicAIApp reads ws_first_grade_pending).
-  const firstGradePending = docsLoaded && !isPaidPlan(user) && !docList.some((d) => d.hasAnalysis);
-  useEffect(() => {
-    if (!docsLoaded) return;
-    try {
-      if (firstGradePending) sessionStorage.setItem('ws_first_grade_pending', '1');
-      else sessionStorage.removeItem('ws_first_grade_pending');
-    } catch { /* ignore */ }
-  }, [docsLoaded, firstGradePending]);
-
-  // A Pro tool was clicked before the first grade: come back to the paste
-  // box, even if they had chosen "Show my full dashboard" earlier.
-  useEffect(() => {
-    const showFirstGrade = () => {
-      try {
-        if (sessionStorage.getItem('ws_first_grade_nudge') !== '1') return;
-        sessionStorage.removeItem('ws_first_grade_nudge');
-        localStorage.removeItem('ws_skip_first_grade_home');
-      } catch { /* ignore */ }
-      setSkipFirstGradeHome(false);
-      setFirstGradeNudge(true);
-      setView('hub');
-    };
-    showFirstGrade();
-    window.addEventListener('writescholar-first-grade', showFirstGrade);
-    return () => window.removeEventListener('writescholar-first-grade', showFirstGrade);
-  }, []);
-
   /** Same hand-off as the landing paste box: the analysis page grades it. */
   const startFirstGrade = (text: string) => {
     try {
@@ -4754,6 +4982,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
 
   return (
     <>
+      <TryFlow
+        request={packRequest}
+        user={user as { id?: string } | null}
+        onClose={() => setPackRequest(null)}
+        onNavigate={onNavigate as (page: string, slug?: string, options?: unknown) => void}
+        onStartGrade={startFirstGrade}
+      />
       <WorkspaceShell
         activeView={view}
         onSelect={handleRailSelect}
@@ -4795,20 +5030,33 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             </div>
           </div>
         )}
-        {view === 'hub' && showFirstGradeHome && (
-          <FirstGradeHome
-            userName={firstNameOf(user)}
-            topBar={dashboardTopBar}
-            note={firstGradeNudge ? 'That tool is part of Pro. Start with your free essay grade and see what WriteScholar does first.' : undefined}
-            onGrade={startFirstGrade}
-            onSkip={() => {
-              try { localStorage.setItem('ws_skip_first_grade_home', '1'); } catch { /* ignore */ }
-              setSkipFirstGradeHome(true);
-            }}
+        {view === 'hub' && welcomeOpen && welcomeUserId && (
+          <WelcomeQuestions
+            userId={welcomeUserId}
+            firstName={firstNameOf(user)}
+            onClose={() => { setWelcomeOpen(false); setWelcomeRev((n) => n + 1); }}
           />
         )}
-        {view === 'hub' && !showFirstGradeHome && (
+        {view === 'hub' && (
+          <TodayHome
+            key={welcomeRev}
+            userName={firstNameOf(user)}
+            topBar={dashboardTopBar}
+            packs={hubPacks}
+            packsLoading={packsLoading}
+            docs={docList}
+            docsLoaded={docsLoaded}
+            onOpenPack={openHubStudyPack}
+            onOpenDoc={handleOpenDoc}
+            onGradeEssay={startFirstGrade}
+            onMakePack={(req) => { if (trialGated) { onTrialGate?.(); return; } setPackRequest({ kind: 'pack', req }); }}
+            onStartReview={() => handleRailSelect('daily-review')}
+            userId={typeof user?.id === 'string' ? user.id : undefined}
+          />
+        )}
+        {view === 'hub' && docsLoaded && (docList.length > 0 || hubPacks.length > 0) && (
           <DocumentsHub
+            hideIntro
             docs={docList}
             packs={hubPacks}
             citations={citeList}
@@ -4856,13 +5104,6 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         )}
         {view === 'analyze' && (
           <>
-            <PanelHeader
-              eyebrow="Feedback"
-              title="Analyze a paper"
-              subtitle="Get professor-style feedback marked up right inside the document: strengths, fixes, and a grade estimate."
-              tint={SIDEBAR_TOOLS.find((t) => t.view === 'analyze')}
-              mascotSrc="/mascot-thinking.webp"
-            />
             <AnalyzePanel
               docs={docList}
               loading={listLoading}
@@ -4870,18 +5111,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
               onPasteAnalyze={handlePasteAnalyze}
               onUploadFile={handleUploadAndAnalyze}
               onNew={requestBlankDraft}
+              onOpenDoc={handleOpenDoc}
             />
           </>
         )}
         {view === 'daily-review' && (
           <>
-            <PanelHeader
-              eyebrow="Review"
-              title="Daily review"
-              subtitle="A quick recall session pulled from everything you've studied. Keep your streak alive."
-              tint={SIDEBAR_TOOLS.find((t) => t.view === 'daily-review')}
-              mascotSrc="/mascot-celebrating.webp"
-            />
             <DailyReviewTab
               user={user}
               onNavigate={onNavigate}
@@ -4891,37 +5126,16 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         )}
         {view === 'study-packs' && (
           <>
-            <PanelHeader
-              eyebrow="Study"
-              title="Study packs"
-              subtitle="Turn any notes into a lesson, flashcards, a quiz, a crossword and arcade mode."
-              tint={SIDEBAR_TOOLS.find((t) => t.view === 'study-packs')}
-              mascotSrc="/mascot-juggling.webp"
-            />
             <StudyPacksPanel onNavigate={onNavigate} />
           </>
         )}
         {view === 'citations' && (
           <>
-            <PanelHeader
-              eyebrow="Research"
-              title="Citations"
-              subtitle="Describe your topic and get real, citable sources with ready-to-use sentences in your style."
-              tint={SIDEBAR_TOOLS.find((t) => t.view === 'citations')}
-              mascotSrc="/mascot-pointing.webp"
-            />
             <CitationsPanel onNavigate={onNavigate} isPaid={isPaidPlan(user)} />
           </>
         )}
         {view === 'games' && (
           <>
-            <PanelHeader
-              eyebrow="Arcade"
-              title="Arcade mode"
-              subtitle="Drill recall the fun way. Load Crater Blast, Word Tower & Word Blitz with your own notes via Study Packs."
-              tint={SIDEBAR_TOOLS.find((t) => t.view === 'games')}
-              mascotSrc="/mascot-jumping-joy.webp"
-            />
             <GamesPanel onNavigate={onNavigate} onOpenStudyPacks={() => setView('study-packs')} />
           </>
         )}

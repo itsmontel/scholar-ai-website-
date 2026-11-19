@@ -176,7 +176,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   const getFreePlanButtonText = () => {
-    if (!user) return 'Try Free';
+    if (!user) return 'Sign up free';
     if (currentPlan === 'free') return 'Current Plan';
     return 'Switch to Free';
   };
@@ -297,8 +297,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       answer: "We accept Visa and Mastercard payments processed securely through Stripe. All transactions are encrypted and secure."
     },
     {
-      question: "Is the launch price really a discount?",
-      answer: "Yes. Pro is $19.99 a month and Premium $39.99 a month at the student launch price. The list prices are $39.99 and $59.99, and that is what the plans move to after launch. Subscribe now and your price stays where it is for as long as you keep the plan."
+      question: "What does the first month cost?",
+      answer: "New subscribers pay half for the first month on a monthly plan: $9.99 for Pro and $19.99 for Premium. After that it is the standard price, $19.99 a month for Pro and $39.99 for Premium, until you cancel."
     },
     {
       question: "Is there a money-back guarantee?",
@@ -360,7 +360,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              One essay grade a month is free, with the score, every rubric score and full feedback on the first quarter of your essay. Pro opens the whole essay, the rewrites and one-click fixes at the student launch price: $19.99 a month, not $39.99.
+              Three study packs or essay grades a month are free, and your first essay report is complete. Pro opens every essay in full, the rewrites and one-click fixes: $9.99 for your first month, then $19.99 a month.
             </p>
           </div>
 
@@ -689,7 +689,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
-                : 'Your first grade each month is free, no card. Pro is $19.99 a month at the launch price. Cancel anytime.'}
+                : 'Three study packs or essay grades a month are free, no card. Pro is $9.99 for your first month, then $19.99. Cancel anytime.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

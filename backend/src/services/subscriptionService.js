@@ -25,13 +25,13 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     maxDocuments: 3, // hard cap on TOTAL documents owned (not monthly)
-    // Free accounts get creditService.FREE_CREDITS essay grades a month
-    // (3). Study packs and citation searches are Pro.
-    analysesPerMonth: 1,
+    // Free accounts get creditService.FREE_CREDITS credits a month (3),
+    // spent on essay grades or study packs. Citation searches are Pro.
+    analysesPerMonth: 3,
     citationSearchesPerMonth: 0,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
-    studyPackGenerationsPerMonth: 0,
+    studyPackGenerationsPerMonth: 3,
     studyPackMaxWordsPerGeneration: 5000,
     quizWordsPerMonth: 15000,
     quizGenerationsPerMonth: 1,
@@ -1679,13 +1679,15 @@ const notifyPreviewFollowups = async () => {
               .maybeSingle();
             const results = latest?.analysis_results;
             if (results && typeof results === 'object') {
-              const { redactAnalysisPayload, isGradedFeedback } = require('./analysisRedaction');
+              const { redactAnalysisPayload, isGradedFeedback, FREE_FULL_FLAG } = require('./analysisRedaction');
               if (isGradedFeedback(latest.analysis_type)) {
                 const cut = redactAnalysisPayload(results);
                 report = {
                   score: typeof results.overall_score === 'number' ? Math.round(results.overall_score) : null,
                   grade: typeof results.grade_estimate === 'string' ? results.grade_estimate : null,
                   hidden: cut?.preview?.hidden || null,
+                  // The first free report is given in full: nothing is locked.
+                  full: results[FREE_FULL_FLAG] === true,
                 };
               }
             }

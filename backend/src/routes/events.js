@@ -36,11 +36,29 @@ const ALLOWED_EVENTS = new Set([
   'subscription_converted',
   'free_limit_hit',
   'pro_only_hit',
+  // First result before sign-up (landing page).
+  'door_selected',
+  // Sign-up page: seen, and Google button tapped.
+  'signup_view',
+  'signup_google_click',
+  // Written by the server when a study pack is saved to an account.
+  'pack_created',
+  // Written by the server when a Stripe checkout is opened.
+  'checkout_session_created',
+  'preview_started',
+  'preview_completed',
+  'preview_failed',
+  'preview_save_click',
+  'onboarding_answer',
+  'pack_started',
+  'pack_completed',
+  'tool_next_step',
 ]);
 
 const ALLOWED_PROP_KEYS = new Set([
   'method', 'plan', 'source', 'trigger', 'words', 'grade', 'score', 'purpose', 'due',
   'code', 'reason', 'page', 'variant', 'feature', 'cycle', 'referrer',
+  'door', 'kind', 'question', 'answer', 'utm_source', 'utm_medium', 'utm_campaign',
 ]);
 
 let tableMissing = false;
@@ -90,4 +108,25 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 });
 
+/**
+ * Record a funnel step from the server (for steps every client shares,
+ * such as a study pack being made). Never throws.
+ */
+async function recordServerEvent(event, userId, props = {}) {
+  try {
+    if (tableMissing || !ALLOWED_EVENTS.has(event)) return;
+    const { error } = await supabase.from('funnel_events').insert({
+      event,
+      user_id: userId || null,
+      anon_id: null,
+      path: null,
+      props: cleanProps(props),
+    });
+    if (error) console.error('[events] server event failed:', error.message);
+  } catch (err) {
+    console.error('[events] server event failed:', err?.message || err);
+  }
+}
+
 module.exports = router;
+module.exports.recordServerEvent = recordServerEvent;

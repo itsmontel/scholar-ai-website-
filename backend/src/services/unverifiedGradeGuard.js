@@ -40,13 +40,14 @@ setInterval(() => {
   for (const ip of ipGrades.keys()) prune(ip, now);
 }, 60 * 60 * 1000).unref();
 
+/** Essay grades plus study packs: either one uses the unverified allowance. */
 async function countAllGrades(userId) {
-  const { count, error } = await supabaseServiceRole
-    .from('document_analyses')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId);
-  if (error) throw error;
-  return count || 0;
+  const [grades, packs] = await Promise.all([
+    supabaseServiceRole.from('document_analyses').select('id', { count: 'exact', head: true }).eq('user_id', userId),
+    supabaseServiceRole.from('quiz_usage').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('quiz_type', 'study_pack'),
+  ]);
+  if (grades.error) throw grades.error;
+  return (grades.count || 0) + (packs.error ? 0 : packs.count || 0);
 }
 
 /**

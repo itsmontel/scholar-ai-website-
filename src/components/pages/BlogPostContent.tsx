@@ -553,7 +553,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Turn your notes into a finals study pack</h2>
           <p className={p}>
-            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>get Pro</a> at the student launch price, $19.99 a month, which covers finals week.
+            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>get Pro</a>, $19.99 a month, which covers finals week.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Make my finals study pack →
@@ -2902,7 +2902,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             For flashcards, you can study them directly in the browser with a flip-card interface, or export them for offline use. Quizzes give you immediate feedback on each question, with explanations for correct answers. Crosswords can be solved interactively online or printed for pencil-and-paper solving. All your generated materials are saved to your account, so you can return to them anytime.
           </p>
           <p className={p}>
-            The best part? You can start for free. WriteScholar grades three essays a month at no cost, and Pro ($19.99/mo at the student launch price) adds study packs built from your own notes. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
+            The best part? You can start for free. WriteScholar gives you three study packs or essay grades a month at no cost, and Pro ($19.99/mo) adds study packs built from your own notes. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
           </p>
 
           <ExpandedAiStudyTools handleNavigate={handleNavigate} />

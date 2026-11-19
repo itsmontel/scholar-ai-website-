@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import PreviewStrip from './PreviewStrip';
 import GenerationOverlay from '../../common/GenerationOverlay';
 import { trackEvent } from '../../../utils/analytics';
 import { openUpgradePaywall } from '../../../utils/paywall';
-import { FREE_PACK_FLASHCARDS } from '../../../config/pricing';
+import { PACK_STEPS, nextStep, packKey, stepsDone, type PackStep } from '../../../utils/packProgress';
 
 /* ═══════════════════════════════════════════════════════════════
    StudyPacksPanel — notes → a full study pack (lesson, flashcards,
@@ -18,7 +17,7 @@ const TOPIC_DRAFT_KEY = 'writescholar_dashboard_topic_draft';
 const VIEWER_KEY = 'writescholar_study_pack_viewer';
 
 // Quick-fill suggestions for "from a topic" mode.
-const TOPIC_EXAMPLES = ["Plato's philosophy", 'Psych 101', 'The French Revolution', 'Photosynthesis', 'Supply and demand'];
+const TOPIC_EXAMPLES = ["Aristotle's ethics", 'Statistics 101', 'Cell respiration', 'The French Revolution'];
 
 function authHeaders(json = true): HeadersInit {
   const token = localStorage.getItem('authToken');
@@ -45,7 +44,9 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
   });
   // 'notes' = paste/upload notes (default). 'topic' = type a subject and we
   // write the notes + build the whole pack from it.
-  const [mode, setMode] = useState<'notes' | 'topic'>('notes');
+  const [mode, setMode] = useState<'notes' | 'topic'>(() => {
+    try { return (sessionStorage.getItem(DRAFT_KEY) || '').trim() ? 'notes' : 'topic'; } catch { return 'topic'; }
+  });
   const [topic, setTopic] = useState(() => {
     try { return sessionStorage.getItem(TOPIC_DRAFT_KEY) || ''; } catch { return ''; }
   });
@@ -144,182 +145,148 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
   const topicReady = topic.trim().length >= 2;
   const canGenerate = mode === 'notes' ? notesReady : topicReady;
 
+  const check = (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+  );
+  const makeButton = (
+    <button
+      type="button"
+      onClick={generate}
+      disabled={loading || !canGenerate}
+      className="inline-flex min-h-[60px] items-center justify-center gap-2.5 whitespace-nowrap rounded-[18px] border-2 border-b-[5px] border-[#46A302] bg-[#58CC02] px-[26px] text-[18px] font-black text-white transition-all enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      {loading ? 'Building your pack…' : 'Make my study pack'}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+    </button>
+  );
+  const pill = 'inline-flex min-h-[32px] items-center gap-1.5 rounded-full px-[11px] text-[13px]';
+
   return (
-    <div>
+    <div className="flex flex-col gap-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <GenerationOverlay open={loading} variant="studyPack" />
 
-      {/* ── CREATOR CARD — premium gradient frame ─────────────────── */}
-      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
-        <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
-          {/* Ambient glow + faint grid texture */}
-          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/10 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
-
-          {/* Header */}
-          <div className="relative flex items-center gap-3.5 mb-5">
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#BD8BF0] to-[#A560E8] text-white text-xl border-2 border-b-[3px] border-[#7733B5] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.9)]" aria-hidden>
-              📚
-              <span className="absolute -top-1.5 -right-1.5 text-[#FFC800] text-sm motion-safe:animate-pulse">✦</span>
-            </span>
+      {/* ── MAKE A PACK: purple banner with the topic box ─────────── */}
+      <section
+        aria-label="Make a study pack"
+        className="relative overflow-hidden rounded-[30px] bg-gradient-to-b from-[#A863EA] via-[#8E48CF] to-[#6A2AA6] px-5 pb-6 pt-5 text-white shadow-[0_30px_60px_-34px_rgba(90,45,140,0.8)] sm:px-[30px] sm:pb-[30px] sm:pt-[26px]"
+      >
+        <span aria-hidden className="pointer-events-none absolute left-1/2 top-[130px] h-[900px] w-[900px] -translate-x-1/2 rounded-full bg-[#8A45C8]" />
+        <div className="relative flex flex-col gap-[18px]">
+          <div className="flex items-center gap-4">
+            <img src="/mascot-pointing.webp" alt="Scholar, the WriteScholar mascot" width={104} height={104} className="h-[76px] w-[76px] shrink-0 object-contain sm:h-[104px] sm:w-[104px]" />
             <div className="min-w-0">
-              <h2 className="text-[19px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Make a study pack</h2>
-              <p className="text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">Paste notes or pick a topic — get a lesson, flashcards, a quiz, a crossword &amp; arcade games.</p>
+              <h1 className="m-0 text-[28px] font-black leading-[1.05] tracking-[-0.02em] sm:text-[38px]">
+                What are we studying <span className="text-[#FFD84D]">next</span>?
+              </h1>
+              <p className="m-0 mt-1.5 text-[15px] font-bold text-[#F3EAFF] sm:text-[16.5px]">
+                {mode === 'topic'
+                  ? 'One line is enough. You get a lesson, flashcards, a quiz, a crossword and three games.'
+                  : 'Paste your notes or add a file. You get a lesson, flashcards, a quiz, a crossword and three games.'}
+              </p>
             </div>
           </div>
 
-          {/* Mode segmented control — sliding pill */}
-          <div className="relative flex p-1.5 mb-4 rounded-2xl bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700">
-            <span
-              aria-hidden
-              className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-xl bg-white dark:bg-stone-900 border-2 border-[#A560E8] shadow-[0_6px_16px_-8px_rgba(165,96,232,0.8)] transition-transform duration-300 ease-out"
-              style={{ transform: mode === 'topic' ? 'translateX(calc(100% + 0.25rem))' : 'translateX(0)' }}
+          <div className="flex flex-col gap-3 rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-4 text-stone-900 shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)]">
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); e.target.value = ''; }}
             />
-            <button
-              type="button"
-              onClick={() => { setMode('notes'); setError(null); }}
-              aria-pressed={mode === 'notes'}
-              className={`relative z-10 flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-extrabold transition-colors ${mode === 'notes' ? 'text-[#A560E8]' : 'text-stone-500 dark:text-stone-400'}`}
-            >
-              <span>📝</span> Paste notes
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMode('topic'); setError(null); }}
-              aria-pressed={mode === 'topic'}
-              className={`relative z-10 flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-extrabold transition-colors ${mode === 'topic' ? 'text-[#A560E8]' : 'text-stone-500 dark:text-stone-400'}`}
-            >
-              <span>✨</span> From a topic
-            </button>
-          </div>
-
-          {mode === 'notes' ? (
-            <>
-              <div className="relative flex items-center justify-between mb-2">
-                <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
-                <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold tabular-nums px-2 py-0.5 rounded-full transition-colors ${notesReady ? 'text-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/15' : 'text-stone-400 bg-stone-100 dark:bg-stone-800'}`}>
-                  {notesReady && (
-                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  )}
-                  {wordCount} words
-                </span>
-              </div>
-              <textarea
-                value={notes}
-                onChange={(e) => {
-                  setNotes(e.target.value);
-                  try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
-                }}
-                rows={8}
-                placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade mode."
-                className="w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] resize-y transition-all"
-              />
-            </>
-          ) : (
-            <>
-              <label htmlFor="study-pack-topic-input" className="block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">What do you want to study?</label>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 dark:text-stone-500" aria-hidden>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" /></svg>
-                </span>
-                <input
-                  id="study-pack-topic-input"
-                  type="text"
-                  value={topic}
-                  onChange={(e) => {
-                    setTopic(e.target.value);
-                    try { sessionStorage.setItem(TOPIC_DRAFT_KEY, e.target.value); } catch { /* noop */ }
-                  }}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!loading && topic.trim().length >= 2) void generate(); } }}
-                  maxLength={200}
-                  placeholder="e.g. Plato's philosophy, Psych 101, the French Revolution"
-                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] transition-all"
-                />
-              </div>
-              <p className="mt-2 text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-snug">Type any subject, topic or course. We&apos;ll write the notes, then build the whole pack from them.</p>
-              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                <span className="text-[11px] font-bold text-stone-400">Try:</span>
-                {TOPIC_EXAMPLES.map((ex) => (
-                  <button
-                    key={ex}
-                    type="button"
-                    onClick={() => {
-                      setTopic(ex);
-                      try { sessionStorage.setItem(TOPIC_DRAFT_KEY, ex); } catch { /* noop */ }
+            {mode === 'topic' ? (
+              <>
+                <div className="flex flex-wrap gap-3">
+                  <label htmlFor="study-pack-topic-input" className="sr-only">What is the exam on?</label>
+                  <input
+                    id="study-pack-topic-input"
+                    type="text"
+                    value={topic}
+                    onChange={(e) => {
+                      setTopic(e.target.value);
+                      try { sessionStorage.setItem(TOPIC_DRAFT_KEY, e.target.value); } catch { /* noop */ }
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 text-[#7733B5] dark:text-[#A560E8] text-[11px] font-extrabold transition-all hover:border-[#A560E8] hover:-translate-y-0.5 active:translate-y-0"
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!loading && topicReady) void generate(); } }}
+                    maxLength={200}
+                    placeholder="A course, a chapter or one idea"
+                    className="min-h-[60px] min-w-0 flex-[1_1_300px] rounded-[18px] border-2 border-[#DCC3F6] bg-[#FBF8FF] px-[18px] text-[18px] font-extrabold text-stone-900 placeholder:text-stone-400 focus:border-[#A560E8] focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20"
+                  />
+                  {makeButton}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {TOPIC_EXAMPLES.slice(0, 4).map((ex) => (
+                    <button
+                      key={ex}
+                      type="button"
+                      onClick={() => {
+                        setTopic(ex);
+                        try { sessionStorage.setItem(TOPIC_DRAFT_KEY, ex); } catch { /* noop */ }
+                      }}
+                      className="min-h-[44px] rounded-full border-2 border-b-4 border-[#E4D4F8] bg-[#F7F1FF] px-3.5 text-[14px] font-extrabold text-stone-900 transition-all hover:-translate-y-0.5 hover:border-[#C9A0F0] active:translate-y-0.5 active:border-b-2"
+                    >
+                      {ex}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => { setMode('notes'); setError(null); }}
+                    className="inline-flex min-h-[44px] items-center gap-[7px] px-1.5 text-[14.5px] font-black text-[#7733B5] underline hover:text-[#5F2594] sm:ml-auto"
                   >
-                    {ex}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 16V4M7 9l5-5 5 5M4 20h16" /></svg>
+                    Use my notes or a file
                   </button>
-                ))}
-              </div>
-            </>
-          )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".pdf,.doc,.docx,.txt"
-            className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); e.target.value = ''; }}
-          />
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2.5">
-            {mode === 'notes' && (
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#A560E8]/50 hover:text-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
-                Upload a file
-              </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <label htmlFor="study-pack-notes-input" className="sr-only">Your notes</label>
+                <textarea
+                  id="study-pack-notes-input"
+                  value={notes}
+                  onChange={(e) => {
+                    setNotes(e.target.value);
+                    try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
+                  }}
+                  rows={7}
+                  placeholder="Paste a chapter, your class notes or an article. At least 50 words."
+                  className="w-full resize-y rounded-[18px] border-2 border-[#DCC3F6] bg-[#FBF8FF] px-[18px] py-3.5 text-[16px] font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#A560E8] focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20"
+                />
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="inline-flex min-h-[48px] items-center gap-2 rounded-[14px] border-2 border-b-4 border-[#E4D4F8] bg-white px-4 text-[15px] font-black text-[#7733B5] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 16V4M7 9l5-5 5 5M4 20h16" /></svg>
+                    Add a file
+                  </button>
+                  <span className={`text-[14px] font-extrabold ${notesReady ? 'text-[#3F8F00]' : 'text-stone-500'}`}>
+                    {wordCount === 0 ? 'PDF, Word or text' : notesReady ? `${wordCount} words` : `${50 - wordCount} more words needed`}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setMode('topic'); setError(null); }}
+                    className="min-h-[44px] px-1.5 text-[14.5px] font-black text-[#7733B5] underline hover:text-[#5F2594]"
+                  >
+                    Type a topic instead
+                  </button>
+                  <span className="sm:ml-auto">{makeButton}</span>
+                </div>
+              </>
             )}
-            <button
-              type="button"
-              onClick={generate}
-              disabled={loading || !canGenerate}
-              className="group sm:ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#A560E8] to-[#9450D8] hover:from-[#9450D8] hover:to-[#7733B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(165,96,232,0.9)]"
-            >
-              {loading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                  </svg>
-                  Building your pack…
-                </>
-              ) : (
-                <>
-                  <span>✨</span> Generate study pack
-                  <svg className="w-4 h-4 transition-transform group-enabled:group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                </>
-              )}
-            </button>
           </div>
-          {mode === 'notes' && wordCount > 0 && !notesReady && (
-            <p className="mt-2.5 text-[11px] font-bold text-stone-400">Add {50 - wordCount} more words to generate.</p>
-          )}
-
-          {/* What you'll get — value reinforcement chips */}
-          <div className="mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You'll get</span>
-            {['🎓 Lesson', '🃏 Flashcards', '📝 Quiz', '🧩 Crossword', '🎮 Games'].map((c) => (
-              <span key={c} className="px-2.5 py-1 rounded-full bg-[#FBF8FF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 text-[11px] font-extrabold text-[#7733B5] dark:text-[#A560E8]">{c}</span>
-            ))}
-            <span className="w-full mt-1 text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
-              Free: the lesson, the full quiz and {FREE_PACK_FLASHCARDS} flashcards · full deck &amp; games with Pro
-            </span>
-          </div>
+          <p className="m-0 text-[13.5px] font-bold text-[#F3EAFF]">Each pack uses 1 credit.</p>
         </div>
-      </div>
+      </section>
 
       {error && (
-        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
+        <div className={`rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
           <p className={`text-sm font-extrabold ${upgrade ? 'text-[#7733B5]' : 'text-[#D63A3A]'}`}>{error}</p>
           {upgrade && (
             <button
               type="button"
               onClick={() => { trackEvent('upgrade_clicked', { source: 'study_pack_limit_error' }); openUpgradePaywall('study_pack_limit_error'); }}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-xl border-2 border-b-[3px] border-[#7733B5] bg-[#A560E8] px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white transition-all hover:bg-[#7733B5] active:translate-y-0.5 active:border-b-2"
             >
               See plans
             </button>
@@ -327,69 +294,70 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
         </div>
       )}
 
-      <div className="mt-8">
-        <PreviewStrip
-          title="Everything a study pack creates"
-          subtitle="One paste becomes a full pack — free users get the lesson plus half the flashcards and quiz; Pro unlocks games and the rest of the deck."
-          aspect="aspect-[4/5]"
-          tint="#A560E8"
-          tintShadowRgb="165,96,232"
-          items={[
-            { kind: 'image', src: '/study-pack-previews/lesson-plan.png', label: 'Lesson' },
-            { kind: 'video', src: '/writescholar-flashcards-demo.mp4', label: 'Flashcards' },
-            { kind: 'video', src: '/writescholar-quiz-generator-demo.mp4', label: 'Quiz' },
-            { kind: 'video', src: '/writescholar-crossword-demo.mp4', label: 'Crossword' },
-            { kind: 'video', src: '/writescholar-crater-blast-demo.mp4', label: 'Crater Blast' },
-            { kind: 'image', src: '/study-pack-previews/word-tower.png', label: 'Word Tower' },
-            { kind: 'image', src: '/study-pack-previews/word-blitz.png', label: 'Word Blitz' },
-          ]}
-        />
-      </div>
-
-      {/* Recents */}
-      <div className="mt-7">
-        <h2 className="text-base font-extrabold text-stone-900 dark:text-stone-50 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-          Your study packs
-        </h2>
-        {recents === null ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {[0, 1].map((i) => <div key={i} className="h-20 rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />)}
+      {/* ── YOUR PACKS: one row per pack, with its steps ──────────── */}
+      {recents === null ? (
+        <div className="flex flex-col gap-3.5">
+          {[0, 1, 2].map((i) => <div key={i} className="h-[98px] animate-pulse rounded-[24px] bg-stone-100 dark:bg-stone-800" />)}
+        </div>
+      ) : recents.length > 0 && (
+        <>
+          <div className="flex items-center gap-3.5">
+            <h2 className="m-0 text-[22px] font-black tracking-[-0.01em] text-stone-900 dark:text-stone-50">Your packs</h2>
+            <span aria-hidden className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+            <span className="text-[14.5px] font-extrabold text-stone-600 dark:text-stone-400">{recents.length} {recents.length === 1 ? 'pack' : 'packs'}</span>
           </div>
-        ) : recents.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-[#A560E8]/30 dark:border-[#A560E8]/25 bg-[#FBF8FF] dark:bg-[#A560E8]/5 p-8 text-center">
-            <img src="/mascot-juggling.webp" alt="" aria-hidden loading="lazy" decoding="async" className="mx-auto w-16 h-16 object-contain mb-2" />
-            <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No study packs yet</p>
-            <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">Generate your first one above. It takes about a minute.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {recents.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => {
-                  const q = (r.questions && typeof r.questions === 'object' && !Array.isArray(r.questions))
-                    ? r.questions as Record<string, unknown>
-                    : { questions: r.questions };
-                  openViewer({ ...q, created_at: r.created_at }, r.title);
-                }}
-                className="group flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
-              >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600]">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" /></svg>
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-extrabold text-stone-800 dark:text-stone-100 truncate">{r.title}</span>
-                  <span className="block text-[11px] font-bold text-stone-400 mt-0.5">{timeAgo(r.created_at)}</span>
-                </span>
-                <span className="text-stone-300 group-hover:text-[#FF9600] transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+          <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
+            {recents.map((r) => {
+              const q = (r.questions && typeof r.questions === 'object' && !Array.isArray(r.questions))
+                ? r.questions as Record<string, unknown>
+                : { questions: r.questions };
+              const available = PACK_STEPS.filter((s) =>
+                s.key === 'games' ? !!(q.wordBlitz || q.wordTower || q.craterBlast) : !!q[s.key]);
+              const keys = available.map((s) => s.key);
+              const done = stepsDone(packKey(r.title, r.created_at)).filter((s: PackStep) => keys.includes(s));
+              const upNext = nextStep(done, keys);
+              const state = done.length === 0 ? 'new' : upNext ? 'going' : 'finished';
+              return (
+                <li
+                  key={r.id}
+                  className={`flex flex-wrap items-center gap-[18px] rounded-[24px] bg-white px-5 py-[18px] dark:bg-stone-900 ${state === 'going' ? 'border-2 border-[#A560E8] shadow-[0_20px_40px_-28px_rgba(90,45,140,0.7)]' : 'border border-[#E4D4F8] dark:border-stone-700'}`}
+                >
+                  <div className="flex min-w-0 flex-[1_1_340px] flex-col gap-2.5">
+                    <h3 className="m-0 text-[20px] font-black leading-tight text-stone-900 dark:text-stone-50">{r.title}</h3>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {state === 'finished' ? (
+                        <span className={`${pill} bg-[#E6F9D2] font-black text-[#14532D]`}>
+                          {check}All {available.length} steps done
+                        </span>
+                      ) : available.map((s) => (
+                        done.includes(s.key) ? (
+                          <span key={s.key} className={`${pill} bg-[#E6F9D2] font-black text-[#14532D]`}>{check}{s.label}<span className="sr-only"> done</span></span>
+                        ) : s.key === upNext && state === 'going' ? (
+                          <span key={s.key} className={`${pill} bg-[#A560E8] font-black text-white`}>{s.label}<span className="sr-only"> is next</span></span>
+                        ) : (
+                          <span key={s.key} className={`${pill} bg-[#F3EAFF] font-extrabold text-[#5B2491] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]`}>{s.label}</span>
+                        )
+                      ))}
+                      <span className="ml-1 text-[13px] font-bold text-stone-500 dark:text-stone-400">Made {timeAgo(r.created_at)}</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => openViewer({ ...q, created_at: r.created_at }, r.title)}
+                    className={`inline-flex min-h-[54px] shrink-0 items-center whitespace-nowrap rounded-[16px] border-2 border-b-[5px] px-[26px] text-[17px] font-black transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 ${
+                      state === 'going' ? 'border-[#46A302] bg-[#58CC02] text-white'
+                        : state === 'new' ? 'border-[#8A48C7] bg-[#A560E8] text-white'
+                        : 'border-[#E4D4F8] bg-white text-[#7733B5] dark:border-stone-600 dark:bg-stone-900 dark:text-[#C9A0F0]'
+                    }`}
+                  >
+                    {state === 'going' ? 'Continue' : state === 'finished' ? 'Review again' : 'Start'}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ToolNextStep from '../../common/ToolNextStep';
 import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
@@ -410,6 +411,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
           </div>
         </div>
       </section>
+
+      <ToolNextStep text={text} tool="readability" onNavigate={onNavigate} signedIn={!!user} />
 
       {/* Formula Explanations */}
       <section className="py-12 sm:py-16">

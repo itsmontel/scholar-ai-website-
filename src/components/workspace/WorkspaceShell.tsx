@@ -56,10 +56,10 @@ export function WorkspaceShell({
   /** Optional site footer at the bottom of the content column. */
   footer?: ReactNode;
 }) {
-  // The toolbar is pinned to the top-right of the content column. A
-  // banner occupies that same corner, so when one is present the toolbar
-  // sits in normal flow underneath it instead of covering the strip.
-  const floatingTopBar = Boolean(topBar) && !banner;
+  // The toolbar (credits, plan, account) always sits in its own row above
+  // the page, right-aligned. It used to float over the top-right corner
+  // of the content, where it covered page titles, badges and buttons.
+  const floatingTopBar = false;
   return (
     <div className="flex w-full min-h-screen items-stretch">
       <WorkspaceSidebar
@@ -93,7 +93,7 @@ export function WorkspaceShell({
               <div className="pointer-events-auto">{topBar}</div>
             </div>
           ) : (
-            <div className="relative z-40 flex justify-end px-3 py-2 sm:px-4 sm:py-2.5">
+            <div className="relative z-40 flex justify-end px-4 pt-3 sm:px-7 sm:pt-4 lg:px-10">
               {topBar}
             </div>
           )
@@ -101,7 +101,7 @@ export function WorkspaceShell({
         {bare ? (
           children
         ) : (
-          <div className={`flex-1 px-4 sm:px-7 lg:px-10 ${floatingTopBar ? 'pt-16 sm:pt-20 lg:pt-4 pb-6 sm:pb-9' : 'py-6 sm:py-9'}`}>
+          <div className={`flex-1 px-4 sm:px-7 lg:px-10 ${topBar ? 'pt-4 pb-6 sm:pt-5 sm:pb-9' : 'py-6 sm:py-9'}`}>
             <div className="max-w-[1500px]">{children}</div>
           </div>
         )}

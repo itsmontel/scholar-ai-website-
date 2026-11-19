@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ToolNextStep from '../../common/ToolNextStep';
 import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
@@ -335,6 +336,8 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
           </div>
         </div>
       </section>
+
+      <ToolNextStep text={text} tool="word_counter" onNavigate={onNavigate} signedIn={!!user} />
 
       {/* ─── Word count → page count reference ────────────────────
           "How many pages is 500 words" is the single most-searched

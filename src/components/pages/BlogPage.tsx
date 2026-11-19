@@ -621,7 +621,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                       onClick={() => onNavigate('signup')}
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
                     >
-                      Try free
+                      Sign up free
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>

@@ -3,6 +3,12 @@ import { getTotalXP, getLevelInfo, getUnlockedCount, BADGES } from '../../data/a
 import type { WorkspaceView } from './types';
 import { SIDEBAR_TOOLS, sidebarIcons as I } from './sidebarTools';
 
+/**
+ * Daily Review is no longer a tool of its own in the rail: it is step 1 of
+ * today's plan on the dashboard home (TodayHome), which opens the same session.
+ */
+const RAIL_TOOLS = SIDEBAR_TOOLS.filter((t) => t.view !== 'daily-review');
+
 /** Best-effort display name from the loosely-typed user record. */
 function displayNameOf(user: Record<string, unknown> | null | undefined): string {
   if (!user) return 'Your account';
@@ -201,7 +207,7 @@ export function WorkspaceSidebar({
 
       <SectionLabel>Study tools</SectionLabel>
       <div className="flex flex-col gap-0.5 w-full">
-        {SIDEBAR_TOOLS.map((t) => (
+        {RAIL_TOOLS.map((t) => (
           <Item
             key={t.view}
             active={activeView === t.view}
@@ -451,7 +457,7 @@ export function WorkspaceMobileNav({
 
             <p className="px-3 pt-5 pb-2 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-stone-400">Study tools</p>
             <div className="flex flex-col gap-0.5">
-              {SIDEBAR_TOOLS.map((t) => (
+              {RAIL_TOOLS.map((t) => (
                 <Row key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} onClick={() => pick(t.view)} />
               ))}
             </div>

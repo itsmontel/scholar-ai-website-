@@ -2,6 +2,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import { clearPendingEssay, readPendingEssay } from '../common/FreeGradeGate';
 import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
 import { ONBOARDING_ENABLED } from '../../config/featureFlags';
+import { readPendingPack } from '../../utils/tryFirst';
+
+/**
+ * A study pack was made on the landing page before "Continue with Google".
+ * It is still in this tab's storage: go back to it. The app saves it to
+ * the new account as soon as the sign-in lands (CompleteAcademicAIApp).
+ */
+function resumePendingPack(onNavigate: (page: string) => void): boolean {
+  if (!readPendingPack()) return false;
+  onNavigate('study-pack-viewer');
+  return true;
+}
 
 /**
  * An essay pasted on the landing page before "Continue with Google"
@@ -31,7 +43,7 @@ function resumePendingGrade(onNavigate: (page: string) => void): boolean {
  * first refresh after the grade dropped them into the full onboarding.
  */
 async function markFreeGradeOnboarded(token: string): Promise<boolean> {
-  if (!readPendingEssay()) return false;
+  if (!readPendingEssay() && !readPendingPack()) return false;
   try {
     const res = await fetch(
       `${(import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api'}/users/complete-onboarding`,
@@ -114,12 +126,18 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
             onboardingCompleted = true;
           }
 
+          // A brand-new Google account is a sign-up (the server says so).
+          if (userData.isNew === true) {
+            void import('../../utils/analytics').then((m) => m.trackEvent('signed_up', { method: 'google' }));
+          }
+          delete userData.isNew;
           const finalUser = { ...userData, onboardingCompleted, welcomeTutorialCompleted };
           localStorage.setItem('user', JSON.stringify(finalUser));
           onLogin(finalUser);
 
           setTimeout(() => {
             if (resumePendingGrade(onNavigate)) return;
+            if (resumePendingPack(onNavigate)) return;
             onNavigate(onboardingCompleted || !ONBOARDING_ENABLED ? 'dashboard' : 'onboarding');
           }, 800);
           return;
@@ -139,6 +157,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
           }
           setTimeout(() => {
             if (resumePendingGrade(onNavigate)) return;
+            if (resumePendingPack(onNavigate)) return;
             onNavigate(nextPage);
           }, 300);
           return;

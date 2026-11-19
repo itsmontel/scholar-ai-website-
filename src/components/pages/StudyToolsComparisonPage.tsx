@@ -34,8 +34,8 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
     { feature: 'Import Quizlet Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Community/Shared Study Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Spaced Repetition', ws: false, quizlet: true, knowt: true },
-    { feature: 'Free Tier', ws: '1 free essay grade a month', quizlet: 'Limited, ads', knowt: 'Unlimited notes' },
-    { feature: 'Starting Price', ws: 'Free, then $19.99/mo (launch price)', quizlet: '$7.99/mo', knowt: 'Free / $4.99/mo' },
+    { feature: 'Free Tier', ws: '3 free study packs or essay grades a month', quizlet: 'Limited, ads', knowt: 'Unlimited notes' },
+    { feature: 'Starting Price', ws: 'Free, then $19.99/mo ($9.99 first month)', quizlet: '$7.99/mo', knowt: 'Free / $4.99/mo' },
   ];
 
   const renderCell = (value: CellValue, isWs = false) => {
@@ -204,7 +204,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
               onClick={() => onNavigate('signup')}
               className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
             >
-              Try free
+              Sign up free
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

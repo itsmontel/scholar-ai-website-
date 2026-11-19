@@ -34,6 +34,18 @@ export type AnalyticsEvent =
   | 'checkout_started'
   | 'free_limit_hit'
   | 'pro_only_hit'
+  // — First result before sign-up (landing page doors) —
+  | 'door_selected'
+  | 'signup_view'
+  | 'signup_google_click'
+  | 'preview_started'
+  | 'preview_completed'
+  | 'preview_failed'
+  | 'preview_save_click'
+  | 'onboarding_answer'
+  | 'pack_started'
+  | 'pack_completed'
+  | 'tool_next_step'
   | 'tutorial_start'
   | 'tutorial_complete'
   | 'tutorial_skip'
@@ -185,6 +197,17 @@ const SERVER_EVENTS = new Set<string>([
   'subscription_converted',
   'free_limit_hit',
   'pro_only_hit',
+  'door_selected',
+  'signup_view',
+  'signup_google_click',
+  'preview_started',
+  'preview_completed',
+  'preview_failed',
+  'preview_save_click',
+  'onboarding_answer',
+  'pack_started',
+  'pack_completed',
+  'tool_next_step',
 ]);
 const ANON_ID_KEY = 'ws_anon_id';
 
@@ -205,6 +228,9 @@ export function getAnonId(): string | null {
 
 function sendToServer(event: string, properties?: Record<string, unknown>): void {
   try {
+    // Local development usually points at the production database, so a
+    // developer clicking around must not be counted as a visitor.
+    if (typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname)) return;
     const base = import.meta.env?.VITE_API_URL || 'http://localhost:3001/api';
     const token = localStorage.getItem('authToken');
     const body = JSON.stringify({

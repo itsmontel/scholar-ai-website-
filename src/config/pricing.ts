@@ -2,19 +2,23 @@
  * Pricing and offer policy. One place that decides what the front door
  * sells and where any discount is allowed to appear.
  *
- * Current model (2026-11-05):
- *   Free      1 essay grade a month, no card, 200 to 10,000 words. The
- *             grade, score and every rubric score are included, with full
- *             feedback on the first quarter of the essay and the reasoning
- *             on 2 rubric sections. The rest of the essay's feedback,
- *             rewrites, one-click fixes, the rubric check and export are
- *             Pro (cut on the server in analysisRedaction.js).
- *   Pro       $19.99/mo, 99 credits. Shown as the student launch price
- *             against the $39.99 list price it moves to after launch.
- *   Premium   $39.99/mo, 199 credits. Launch price against $59.99.
+ * Current model (2026-11-18):
+ *   Free      3 credits a month, no card. A credit is one essay grade
+ *             (200 to 10,000 words) or one study pack. The first essay
+ *             an account grades comes back whole. Later free grades show
+ *             the grade, score and every rubric score, with full feedback
+ *             on the first quarter of the essay (cut on the server in
+ *             analysisRedaction.js). Free study packs are complete and
+ *             kept for 30 days.
+ *   Pro       $19.99/mo, 99 credits. New subscribers pay $9.99 for the
+ *             first month (WELCOME_PROMO_CODE).
+ *   Premium   $39.99/mo, 199 credits. First month $19.99.
  *
  * The $1 trial and the card-required free trial are retired
- * (TRIAL_DAYS = 0). Study packs and citation searches are Pro only.
+ * (TRIAL_DAYS = 0). Citation searches are Pro only. The struck-through
+ * "list price" is retired too (LAUNCH_OFFER_ENABLED = false): the only
+ * struck-through price shown is the real monthly price next to the
+ * first-month price.
  *
  * Exit (cancel flow / post-lapse winback) can still reuse the welcome
  * coupon as a save offer for users who already paid.
@@ -33,9 +37,9 @@ export const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
 
 /**
  * Whether acquisition surfaces auto-apply WELCOME_PROMO_CODE.
- * false: the launch price is the offer, no stacked coupon.
+ * true (since 2026-11-18): $19.99 struck through, $9.99 first month.
  */
-export const WELCOME_DISCOUNT_AT_SIGNUP = false;
+export const WELCOME_DISCOUNT_AT_SIGNUP = true;
 
 /** First-month price per plan when the discount IS applied. */
 export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
@@ -53,7 +57,7 @@ export const STANDARD_MONTHLY_PRICE: Record<string, number> = { pro: 19.99, prem
  * protection rules and both app stores treat as deceptive. Keep the
  * label honest: "launch price", not "was".
  */
-export const LAUNCH_OFFER_ENABLED = true;
+export const LAUNCH_OFFER_ENABLED = false;
 export const LIST_MONTHLY_PRICE: Record<string, number> = { pro: 39.99, premium: 59.99 };
 export const LAUNCH_OFFER_LABEL = 'Student launch price';
 export const LAUNCH_OFFER_FOOTNOTE = 'Lock in this price for as long as you stay subscribed.';
@@ -91,8 +95,8 @@ export const TRIAL_PRICE = 1;
  * Mirrors backend/src/services/creditService.js.
  */
 export const TRIAL_CREDITS = 5;
-/** Free accounts: essay grades per calendar month, resetting on the 1st. */
-export const FREE_CREDITS = 1;
+/** Free accounts: credits per calendar month (grades or study packs), resetting on the 1st. */
+export const FREE_CREDITS = 3;
 /** Legacy: the free tier no longer expires after a week. */
 export const FREE_CREDIT_DAYS = 0;
 /** Free grades take essays in this range; Pro goes to 15,000 words. */
@@ -100,11 +104,34 @@ export const FREE_GRADE_MIN_WORDS = 200;
 export const FREE_GRADE_MAX_WORDS = 10000;
 export const PRO_GRADE_MAX_WORDS = 15000;
 /**
- * Free study packs open the full lesson and quiz plus this many
- * flashcards; the rest of the deck, the crossword and the games are Pro.
- * Study packs are Pro only now; kept for the preview copy.
+ * Free study packs are complete: every flashcard, the crossword and the
+ * games. false restores the old preview (FREE_PACK_FLASHCARDS cards, the
+ * rest behind Pro).
  */
+/**
+ * Whether the landing page's two buttons open the "try it first" pop-up
+ * (make a pack or grade an essay with no account, sign up to keep it).
+ * Off since 2026-11-18: the buttons go to the sign-up page, as they did
+ * until 4 November. Weekly sign-ups were 15 to 31 with that, and fell to
+ * 8, 6 and 3 after the 5 November "paste first, then sign up" front door.
+ * The pop-up flow is still in the code; set this to true to test it.
+ */
+export const TRY_BEFORE_SIGNUP = false;
+
+export const FREE_PACKS_FULL = true;
 export const FREE_PACK_FLASHCARDS = 5;
+
+/**
+ * Free for finals: until this moment free accounts get 9 credits a month
+ * (not the usual 3) and whole essay reports. Mirrors FINALS_FREE_UNTIL in
+ * backend/src/services/creditService.js; '' turns the banner off.
+ */
+export const FINALS_FREE_UNTIL = '2026-12-02T23:59:59Z';
+export const FINALS_FREE_LABEL = '2 December';
+export function finalsFreeActive(now: number = Date.now()): boolean {
+  const end = Date.parse(FINALS_FREE_UNTIL);
+  return Number.isFinite(end) && now < end;
+}
 export const MONTHLY_CREDITS: Record<string, number> = { pro: 99, premium: 199 };
 export const CREDIT_CAP = 499;
 

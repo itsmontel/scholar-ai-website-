@@ -788,7 +788,7 @@ const SoftPaywall = ({
                 ) : showDiscount ? (
                   <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
                 ) : LAUNCH_OFFER_ENABLED ? (
-                  <>{planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span> at the student launch price, not ${LIST_MONTHLY_PRICE[checkoutPlan]}. Cancel anytime.</>
+                  <>{planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel anytime.</>
                 ) : (
                   <>Subscribe to {planName}. Cancel anytime.</>
                 )}

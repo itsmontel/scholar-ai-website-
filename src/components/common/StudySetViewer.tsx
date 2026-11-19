@@ -42,7 +42,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
   const isPaidUser = plan === 'pro' || plan === 'premium';
 
   const isLocked = (tabKey: TabKey): boolean => {
-    if (isPaidUser) return false;
+    if (isPaidUser || FREE_PACKS_FULL) return false;
     return (PRO_LOCKED_TABS as readonly string[]).includes(tabKey);
   };
 

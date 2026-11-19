@@ -12,6 +12,7 @@ import ActivationAnalysisCoach from '../common/ActivationAnalysisCoach';
 import SoftPaywall from '../common/SoftPaywall';
 import GradingQuestions from '../common/GradingQuestions';
 import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
+import { takeGradeToken } from '../../utils/tryFirst';
 import {
   ACTIVATION_MOCK_ANALYSIS_MARKDOWN,
   ACTIVATION_OVERALL_SCORE,
@@ -2099,6 +2100,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             citationStyle: selectedCitationStyle,
             gradingStyle: selectedGradingStyle,
             rubricContent: rubricContent.trim() || undefined,
+            // A grade already made on the landing page before sign-up: the
+            // server reuses it instead of grading the same essay twice.
+            previewToken: takeGradeToken() || undefined,
           }),
           signal: abort.signal,
         });

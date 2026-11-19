@@ -2,7 +2,8 @@
  * Credits
  *
  * Every essay analysis, study pack and citation search costs 1 credit.
- *   Free     FREE_CREDITS essay grades per calendar month (current: 3)
+ *   Free     FREE_CREDITS credits per calendar month (current: 3), each
+ *            one essay grade or one study pack
  *   Trial    retired 2026-11-01 (TRIAL_DAYS = 0); constants kept for old copy
  *   Pro      99 credits per billing period
  *   Premium  199 credits per billing period
@@ -40,14 +41,26 @@ const TRIAL_CREDITS = 5;
 // trialPeriodDays a client still sends.
 const TRIAL_DAYS = 0;
 const MONTHLY_CREDITS = { pro: 99, premium: 199 };
-// Free essay grades per calendar month for accounts without a paid plan.
+// Free credits per calendar month for accounts without a paid plan. One
+// credit is one essay grade or one study pack.
 // FREE_CREDITS=0 in the environment turns the free tier off.
 const FREE_CREDITS = process.env.FREE_CREDITS != null && process.env.FREE_CREDITS !== '' && Number.isFinite(Number(process.env.FREE_CREDITS))
   ? Math.max(0, Math.floor(Number(process.env.FREE_CREDITS)))
-  : 1;
+  : 3;
 // Kept for the credit-state shape older clients read; the free tier no
 // longer expires after a week.
 const FREE_CREDIT_DAYS = 0;
+// Free for finals: until this moment (UTC) free accounts get
+// FINALS_FREE_CREDITS a month (9, not the usual 3) and whole essay reports. FINALS_FREE_UNTIL='' turns it off;
+// any ISO date moves it.
+const FINALS_FREE_UNTIL = process.env.FINALS_FREE_UNTIL != null
+  ? process.env.FINALS_FREE_UNTIL
+  : '2026-12-02T23:59:59Z';
+const FINALS_FREE_CREDITS = 9;
+const finalsFreeActive = (now = Date.now()) => {
+  const end = Date.parse(FINALS_FREE_UNTIL);
+  return Number.isFinite(end) && now < end;
+};
 // Free grades: shorter than a real essay is not worth a model call,
 // longer than this is a dissertation chapter. Paid plans go to 15,000.
 const FREE_GRADE_MIN_WORDS = 200;
@@ -234,21 +247,25 @@ function currentMonthWindow(now = new Date()) {
   return { start: start.toISOString(), end: end.toISOString() };
 }
 
-/** Essay grades run in [fromIso, toIso). Study packs and citations are Pro, so only analyses count here. */
+/**
+ * Free credits spent in [fromIso, toIso): essay grades plus study packs.
+ * Citation searches stay Pro, so they are not counted here.
+ */
 async function countFreeGradesUsed(userId, fromIso, toIso) {
-  const { count, error } = await supabaseServiceRole
-    .from('document_analyses')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('created_at', fromIso)
-    .lt('created_at', toIso);
-  if (error) throw error;
-  return count || 0;
+  const window = (q) => q.eq('user_id', userId).gte('created_at', fromIso).lt('created_at', toIso);
+  const [grades, packs] = await Promise.all([
+    window(supabaseServiceRole.from('document_analyses').select('id', { count: 'exact', head: true })),
+    window(supabaseServiceRole.from('quiz_usage').select('id', { count: 'exact', head: true }).eq('quiz_type', 'study_pack')),
+  ]);
+  if (grades.error) throw grades.error;
+  // A missing quiz_usage table must not block essay grades.
+  if (packs.error) console.error('Free study pack count failed:', packs.error.message || packs.error);
+  return (grades.count || 0) + (packs.error ? 0 : packs.count || 0);
 }
 
 /**
- * Accounts without a paid plan: FREE_CREDITS essay grades per calendar
- * month. Lapsed subscribers get the same allowance as anyone else, so
+ * Accounts without a paid plan: FREE_CREDITS credits per calendar month,
+ * spent on essay grades or study packs. Lapsed subscribers get the same allowance as anyone else, so
  * there is always a reason to come back.
  */
 async function freeCreditState(userId) {
@@ -258,16 +275,18 @@ async function freeCreditState(userId) {
   const { start, end } = currentMonthWindow();
   const used = await countFreeGradesUsed(userId, start, end);
   const daysUntilReset = Math.max(1, Math.ceil((Date.parse(end) - Date.now()) / DAY_MS));
+  const allowance = finalsFreeActive() ? Math.max(FREE_CREDITS, FINALS_FREE_CREDITS) : FREE_CREDITS;
   return {
     ...base,
-    allowance: FREE_CREDITS,
-    total: FREE_CREDITS,
-    used: Math.min(used, FREE_CREDITS),
-    remaining: Math.max(0, FREE_CREDITS - used),
+    allowance,
+    total: allowance,
+    used: Math.min(used, allowance),
+    remaining: Math.max(0, allowance - used),
     periodStart: start,
     periodEnd: end,
     daysUntilReset,
-    freeCredits: FREE_CREDITS,
+    freeCredits: allowance,
+    finalsFreeUntil: finalsFreeActive() ? FINALS_FREE_UNTIL : null,
     freeResetsAt: end,
     freeExpiresAt: null,
     freeDaysLeft: null,
@@ -391,6 +410,9 @@ module.exports = {
   FREE_CREDIT_DAYS,
   FREE_GRADE_MIN_WORDS,
   FREE_GRADE_MAX_WORDS,
+  FINALS_FREE_UNTIL,
+  FINALS_FREE_CREDITS,
+  finalsFreeActive,
   currentMonthWindow,
   getCreditState,
   countCreditsUsed,

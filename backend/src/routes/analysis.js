@@ -47,7 +47,32 @@ const {
 const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
-const { isGradedFeedback, redactAnalysisPayload, redactAnalysisRow } = require('../services/analysisRedaction');
+const { isGradedFeedback, redactAnalysisPayload, redactAnalysisRow, FREE_FULL_FLAG } = require('../services/analysisRedaction');
+const previewStore = require('../services/previewStore');
+const { finalsFreeActive } = require('../services/creditService');
+
+/** Free accounts see the whole report during the free-for-finals window. */
+const cutForFree = (isPaid) => !isPaid && !finalsFreeActive();
+
+/** True when this account has never had an essay graded. Fails closed. */
+async function hasNoGradesYet(userId) {
+  try {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+    const { count, error } = await supabase
+      .from('document_analyses')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+    if (error) throw error;
+    return (count || 0) === 0;
+  } catch (err) {
+    console.error('First grade check failed:', err?.message || err);
+    return false;
+  }
+}
 
 /** Paid analysis tier: 'pro' | 'premium'; else 'free'. */
 const isPaidAnalysisTier = (plan) => plan === 'pro' || plan === 'premium';
@@ -67,18 +92,17 @@ const outOfCreditsMessage = (limitCheck) => {
   }
   if (c?.freeCredits) {
     const resets = c.freeResetsAt ? new Date(c.freeResetsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'the 1st';
-    return `You've used your free grade${c.freeCredits === 1 ? '' : 's'} this month. ${c.freeCredits === 1 ? 'It resets' : 'They reset'} on ${resets}, or Pro gives you 99 credits a month, feedback on your whole essay and every rewrite.`;
+    return `You've used your ${c.freeCredits} free credits this month. They reset on ${resets}, or Pro gives you 99 a month with every comment and rewrite.`;
   }
   return 'This needs Pro. Pro is $19.99 a month for 99 credits, every rewrite and one-click fixes.';
 };
 
-// Study packs and citation searches are Pro features. Free accounts get
-// essay grades only (creditService.FREE_CREDITS a month), so a free
-// account never spends a model call on a 7-generator study pack.
+// Citation searches and citation reviews are Pro features. Free accounts
+// spend creditService.FREE_CREDITS a month on essay grades and study packs.
 const proOnlyResponse = (res, feature) =>
   res.status(403).json({
     success: false,
-    message: `${feature} are part of Pro. Your free plan covers essay grades; Pro adds study packs, citations and every rewrite for $19.99 a month.`,
+    message: `${feature} are part of Pro. Your free plan covers essay grades and study packs; Pro adds citations, every rewrite and 99 credits a month.`,
     upgrade: true,
     showPaywall: true,
     proOnly: true,
@@ -1590,7 +1614,7 @@ router.post('/revision-markers', authenticateToken, async (req, res) => {
  */
 router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent: requestedRubricContent, title: requestedTitle } = req.body;
+    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent: requestedRubricContent, title: requestedTitle, previewToken } = req.body;
     const userId = req.user.id;
     let rubricContent = requestedRubricContent;
 
@@ -1751,15 +1775,29 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     // Store original content for full analysis
     const originalContent = analysisContent;
 
+    // A free account's first ever essay grade is saved and returned whole.
+    const firstFreeGrade = !useCombined && isGradedFeedback(analysisType) && (await hasNoGradesYet(userId));
+
+    // A grade made on the landing page before sign-up is reused here, so
+    // the model runs once and the score they saw is the score they keep.
+    const previewed = isGradedFeedback(analysisType) ? previewStore.getPreview(previewToken, 'grade') : null;
+    // Compared without whitespace differences: saving the essay as a
+    // document can normalise line breaks.
+    const sameText = (a, b) => String(a || '').replace(/\s+/g, ' ').trim() === String(b || '').replace(/\s+/g, ' ').trim();
+    const reusePreview = !!previewed && sameText(previewed.content, analysisContent);
+
     // Perform AI analysis
-    const analysisResult = await aiAnalysisService.analyzeDocument(
-      analysisDocumentId,
-      analysisContent,
-      analysisType,
-      userId,
-      citationStyle,
-      gradingStyle
-    );
+    const analysisResult = reusePreview
+      ? previewed.analysisResult
+      : await aiAnalysisService.analyzeDocument(
+        analysisDocumentId,
+        analysisContent,
+        analysisType,
+        userId,
+        citationStyle,
+        gradingStyle
+      );
+    if (reusePreview) previewStore.dropPreview(previewToken);
 
     // Run rubric alignment analysis first if rubric content was provided (so we can save it)
     let rubricAlignment = null;
@@ -1791,7 +1829,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
         clarity_rating: analysisResult.clarity_rating ?? null,
         top_suggestions: analysisResult.top_suggestions ?? null,
         grade_rubric: analysisResult.grade_rubric ?? null,
-        specific_rewrites: analysisResult.specific_rewrites ?? null
+        specific_rewrites: analysisResult.specific_rewrites ?? null,
+        ...(firstFreeGrade ? { [FREE_FULL_FLAG]: true } : {})
       } : null;
 
       const savedAnalysis = await aiAnalysisService.saveAnalysis(
@@ -1825,7 +1864,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       annotations: analysisResult.annotations || [],
       isContentLimited: false,
       lockedFeatures: [],
-      rubricAlignment: rubricAlignment
+      rubricAlignment: rubricAlignment,
+      ...(firstFreeGrade ? { [FREE_FULL_FLAG]: true } : {})
     };
 
     res.json({
@@ -1833,7 +1873,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       message: 'Analysis completed successfully',
       // Free accounts get the preview: the grade, every rubric score, and
       // the first quarter of the essay fully marked (analysisRedaction.js).
-      data: !isPaidUser && isGradedFeedback(analysisType) ? redactAnalysisPayload(data, { content: originalContent }) : data
+      // Their first ever grade is whole (FREE_FULL_FLAG).
+      data: cutForFree(isPaidUser) && isGradedFeedback(analysisType) ? redactAnalysisPayload(data, { content: originalContent }) : data
     });
 
   } catch (error) {
@@ -1920,7 +1961,7 @@ router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req
 
     res.json({
       success: true,
-      data: isPaidUser ? analysisHistory : analysisHistory.map(redactAnalysisRow)
+      data: cutForFree(isPaidUser) ? analysisHistory.map(redactAnalysisRow) : analysisHistory
     });
 
   } catch (error) {
@@ -2210,7 +2251,7 @@ router.get('/:analysisId', authenticateToken, validateAnalysisId, async (req, re
 
     res.json({
       success: true,
-      data: isPaidAnalysisTier(getEffectivePlan(req)) ? analysis : redactAnalysisRow(analysis)
+      data: cutForFree(isPaidAnalysisTier(getEffectivePlan(req))) ? redactAnalysisRow(analysis) : analysis
     });
 
   } catch (error) {
@@ -2266,7 +2307,7 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
       throw error;
     }
 
-    const rows = isPaidAnalysisTier(getEffectivePlan(req)) ? data || [] : (data || []).map(redactAnalysisRow);
+    const rows = cutForFree(isPaidAnalysisTier(getEffectivePlan(req))) ? (data || []).map(redactAnalysisRow) : data || [];
 
     // Separate analyses by type and get the most recent of each
     const comprehensiveAnalyses = rows.filter(analysis =>
@@ -2851,8 +2892,16 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    // Study packs are Pro: free credits buy essay grades only.
-    if (!subscriptionService.isPaidSubscriptionTier(dbPlan)) return proOnlyResponse(res, 'Study packs');
+    // Free accounts spend their monthly credits on study packs too. An
+    // unverified email gets its first one straight away, like a grade.
+    if (!subscriptionService.isPaidSubscriptionTier(dbPlan)) {
+      const unverifiedGuard = require('../services/unverifiedGradeGuard');
+      const unverifiedCheck = await unverifiedGuard.checkUnverifiedGrade(req.user, req.ip);
+      if (!unverifiedCheck.allowed) {
+        return res.status(403).json(unverifiedGuard.verifyEmailResponse(req.user, unverifiedCheck.reason));
+      }
+      if (unverifiedCheck.unverified) unverifiedGuard.recordUnverifiedGrade(req.ip);
+    }
 
     // 1 credit per study pack.
     const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
@@ -2868,11 +2917,18 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       });
     }
 
-    const pack = await aiAnalysisService.generateStudyPack(
-      inputType === 'topic' ? topicText : notesText,
-      subscriptionService.isPaidSubscriptionTier(dbPlan) ? 'pro' : 'free',
-      { inputType }
-    );
+    // A pack built on the landing page before sign-up is saved as it was,
+    // not generated a second time.
+    const previewToken = typeof req.body.previewToken === 'string' ? req.body.previewToken : '';
+    const previewed = previewStore.getPreview(previewToken, 'pack');
+    const pack = previewed
+      ? previewed.pack
+      : await aiAnalysisService.generateStudyPack(
+        inputType === 'topic' ? topicText : notesText,
+        subscriptionService.isPaidSubscriptionTier(dbPlan) ? 'pro' : 'free',
+        { inputType }
+      );
+    if (previewed) previewStore.dropPreview(previewToken);
     // generateStudyPack sets pack.originalNotes (the resolved notes — for
     // topic mode, the AI-written notes), pack.inputType and pack.sourceTopic.
     // Meter and store against the resolved notes so topic packs record a
@@ -2885,6 +2941,8 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       quiz_type: 'study_pack',
       difficulty: 'mixed'
     }).then(() => {}).catch(err => console.error('Failed to record study pack usage:', err));
+    // Funnel: one row per pack made, whichever page or app made it.
+    require('./events').recordServerEvent('pack_created', userId, { kind: inputType, plan: dbPlan || 'free' });
 
     const isPaidUser = subscriptionService.isPaidSubscriptionTier(dbPlan);
     const expiresAt = isPaidUser ? null : (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })();

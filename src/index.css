@@ -46,11 +46,6 @@
   .landing-downstream-zoom {
     zoom: 0.9;
   }
-  /* Desktop hero 5% smaller again (0.945 × 0.95). Phones keep 0.945 so
-     the paste box text stays readable. */
-  .landing-hero-zoom {
-    zoom: 0.898;
-  }
 }
 
 /* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set */
@@ -1189,14 +1184,14 @@ html.dark .landing-hero-grid-animate {
 }
 .ws-box-glow {
   position: relative;
-  border-radius: 16px;
+  border-radius: 18px;
   animation: ws-glow-ring-box 2.2s ease-out infinite;
 }
 .ws-box-glow::after {
   content: '';
   position: absolute;
   inset: 2px;
-  border-radius: 14px;
+  border-radius: 16px;
   pointer-events: none;
   background: linear-gradient(100deg, transparent 38%, rgba(255, 255, 255, 0.65) 48%, transparent 58%);
   background-size: 260% 100%;
@@ -1205,11 +1200,10 @@ html.dark .landing-hero-grid-animate {
 .ws-box-glow:focus-within { animation: none; }
 .ws-box-glow:focus-within::after { display: none; }
 
-/* Upload button: keeps its hard ink shadow and adds a pulsing purple ring
-   and a purple glint. */
+/* Upload button: a pulsing purple ring and a purple glint. */
 @keyframes ws-glow-ring-ink {
-  0%, 100% { box-shadow: 4px 4px 0 #1C1917, 0 0 0 0 rgba(165, 96, 232, 0.55); }
-  55% { box-shadow: 4px 4px 0 #1C1917, 0 0 0 8px rgba(165, 96, 232, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(165, 96, 232, 0.55); }
+  55% { box-shadow: 0 0 0 8px rgba(165, 96, 232, 0); }
 }
 .ws-upload-glow {
   position: relative;

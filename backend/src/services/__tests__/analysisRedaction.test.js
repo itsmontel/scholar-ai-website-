@@ -3,7 +3,7 @@
  * of the essay is marked in full; the rest of the essay, most rubric
  * feedback, the extra top suggestions and every rewrite do not.
  */
-const { redactAnalysisPayload, redactAnalysisRow, previewCutoffIndex, LOCKED_FEATURES } = require('../analysisRedaction');
+const { redactAnalysisPayload, redactAnalysisRow, previewCutoffIndex, LOCKED_FEATURES, FREE_FULL_FLAG } = require('../analysisRedaction');
 
 // 8 sentences of exactly 40 characters = 320 characters. 25% is index 80,
 // the first letter of sentence 3, so the cut carries to the end of
@@ -121,4 +121,18 @@ test('redacts saved rows but leaves citation reviews whole', () => {
   expect(out.annotations[0].suggestion).toBe('');
   const citation = { id: 'b', analysis_type: 'citation_review', analysis_results: full };
   expect(redactAnalysisRow(citation)).toBe(citation);
+});
+
+test("a free account's first grade, marked full, is never cut", () => {
+  const sentence = (n) => `Sentence number ${n} of the essay.`.padEnd(40, ' ');
+  const content = Array.from({ length: 40 }, (_, i) => sentence(i)).join('');
+  const annotations = Array.from({ length: 40 }, (_, i) => ({ type: 'improve', text: sentence(i).trim(), comment: `note ${i}` }));
+  const payload = { annotations, original_content: content, grade_rubric: { a: { score: 10, feedback: 'x' } }, [FREE_FULL_FLAG]: true };
+  expect(redactAnalysisPayload(payload)).toBe(payload);
+  const row = { analysis_type: 'comprehensive', analysis_results: payload };
+  expect(redactAnalysisRow(row).analysis_results).toBe(payload);
+  // Without the flag the same report is a preview.
+  const cut = redactAnalysisPayload({ ...payload, [FREE_FULL_FLAG]: undefined });
+  expect(cut.isPreview).toBe(true);
+  expect(cut.annotations.length).toBeLessThan(annotations.length);
 });

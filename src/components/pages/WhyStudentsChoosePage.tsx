@@ -85,7 +85,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
                 { feature: 'Academic Source Finder', ws: true, grammarly: true, quillbot: false },
                 { feature: 'Focus Mode (Puzzle/Quiz to Unlock)', ws: true, grammarly: false, quillbot: false },
                 { feature: 'Free Tools Available', ws: '8 Tools', grammarly: 'Limited', quillbot: 'Several', alt: true },
-                { feature: 'Starting Price', ws: 'Free, then $19.99/mo (launch price)', grammarly: '$12/mo', quillbot: '$9.95/mo' },
+                { feature: 'Starting Price', ws: 'Free, then $19.99/mo ($9.99 first month)', grammarly: '$12/mo', quillbot: '$9.95/mo' },
               ].map((row, i) => (
                 <div key={i} className={`grid grid-cols-4 items-center ${row.alt ? 'bg-[#EAFFD6]/50 dark:bg-[#58CC02]/10' : ''}`}>
                   <div className="p-4 sm:p-6">
@@ -167,7 +167,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
               onClick={() => onNavigate('signup')}
               className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
             >
-              Try free
+              Sign up free
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

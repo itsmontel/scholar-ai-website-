@@ -32,6 +32,7 @@ interface StudyTool {
   title: string;
   quiz_type: string;
   questions: QuizQuestion[] | FlashCard[] | any;
+  created_at?: string;
 }
 
 type ReviewItem =
@@ -80,6 +81,60 @@ const isStreakAlive = (streak: StreakData): boolean => {
 
 const hasCompletedToday = (streak: StreakData): boolean =>
   streak.lastCompletedDate === getToday();
+
+// ── which packs feed the review ────────────────────────────────
+// The student ticks the packs they still need. A pack they have never
+// touched is in by default while it is recent, and out once it is older
+// than PACK_MAX_AGE_DAYS, so last semester's material drops out on its own.
+// Kept in this browser only.
+const PACK_MAX_AGE_DAYS = 60;
+const PICKS_KEY = 'ws_review_packs';
+type PackPicks = { on: string[]; off: string[] };
+
+const loadPicks = (): PackPicks => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PICKS_KEY) || 'null');
+    if (raw && Array.isArray(raw.on) && Array.isArray(raw.off)) return raw;
+  } catch { /* ignore */ }
+  return { on: [], off: [] };
+};
+
+const ageInDays = (iso?: string): number => {
+  const t = iso ? new Date(iso).getTime() : NaN;
+  return Number.isFinite(t) ? Math.floor((Date.now() - t) / 86_400_000) : 0;
+};
+
+const isOldPack = (tool: StudyTool) => ageInDays(tool.created_at) > PACK_MAX_AGE_DAYS;
+
+const isPicked = (tool: StudyTool, picks: PackPicks): boolean => {
+  if (picks.off.includes(tool.id)) return false;
+  if (picks.on.includes(tool.id)) return true;
+  return !isOldPack(tool);
+};
+
+/** Crosswords and lessons have nothing to quiz on, so they are never listed. */
+const canReview = (tool: StudyTool) => tool.quiz_type !== 'crossword' && tool.quiz_type !== 'lesson';
+
+const madeAgo = (iso?: string): string => {
+  const d = ageInDays(iso);
+  if (d <= 0) return 'Made today';
+  if (d === 1) return 'Made yesterday';
+  if (d < 14) return `Made ${d} days ago`;
+  if (d < 60) return `Made ${Math.floor(d / 7)} weeks ago`;
+  return `Made ${Math.floor(d / 30)} months ago`;
+};
+
+const packSize = (tool: StudyTool): string => {
+  const q = tool.questions as any;
+  if (tool.quiz_type === 'study_pack' && q && typeof q === 'object') {
+    const cards = Array.isArray(q.flashcards?.cards) ? q.flashcards.cards.length : 0;
+    const questions = Array.isArray(q.quiz?.questions) ? q.quiz.questions.length : 0;
+    const parts = [cards ? `${cards} ${cards === 1 ? 'card' : 'cards'}` : '', questions ? `${questions} ${questions === 1 ? 'question' : 'questions'}` : ''].filter(Boolean);
+    return parts.join(', ');
+  }
+  const n = Array.isArray(q) ? q.length : Array.isArray(q?.questions) ? q.questions.length : 0;
+  return n ? `${n} ${n === 1 ? 'item' : 'items'}` : '';
+};
 
 // ── XP calculation ─────────────────────────────────────────────
 const calcXP = (correct: number, total: number, streak: number): number => {
@@ -144,6 +199,40 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
   const [showConfetti, setShowConfetti] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
 
+  // The student's packs, and which of them feed the review.
+  const [tools, setTools] = useState<StudyTool[] | null>(null);
+  const [picks, setPicks] = useState<PackPicks>(loadPicks);
+  const loadTools = useCallback(async (): Promise<StudyTool[] | null> => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return null;
+      const res = await fetch(`${API_URL}/analysis/quiz-history`, {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const list = ((data.data || []) as StudyTool[]).filter(canReview).slice(0, 25).map((t) => ({ ...t, id: String(t.id) }));
+      setTools(list);
+      return list;
+    } catch {
+      return null;
+    }
+  }, []);
+  useEffect(() => { void loadTools(); }, [loadTools]);
+  const togglePack = (tool: StudyTool) => {
+    setPicks((prev) => {
+      const nowOn = !isPicked(tool, prev);
+      const next: PackPicks = {
+        on: nowOn ? [...prev.on.filter((x) => x !== tool.id), tool.id] : prev.on.filter((x) => x !== tool.id),
+        off: nowOn ? prev.off.filter((x) => x !== tool.id) : [...prev.off.filter((x) => x !== tool.id), tool.id],
+      };
+      try { localStorage.setItem(PICKS_KEY, JSON.stringify(next)); } catch { /* noop */ }
+      return next;
+    });
+    setNoContent(false);
+  };
+  const pickedCount = tools ? tools.filter((t) => isPicked(t, picks)).length : 0;
+
   // ── fetch & prepare review items ─────────────────────────────
   const startReview = async () => {
     setPhase('loading');
@@ -158,16 +247,9 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
     setNoContent(false);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) { setNoContent(true); setPhase('home'); return; }
-
-      const res = await fetch(`${API_URL}/analysis/quiz-history`, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
-      if (!res.ok) { setNoContent(true); setPhase('home'); return; }
-
-      const data = await res.json();
-      const tools: StudyTool[] = data.data || [];
+      const loaded = tools ?? await loadTools();
+      if (!loaded) { setNoContent(true); setPhase('home'); return; }
+      const chosen = loaded.filter((t) => isPicked(t, picks));
 
       const allItems: ReviewItem[] = [];
 
@@ -192,7 +274,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
           }));
       };
 
-      tools.slice(0, 25).forEach(tool => {
+      chosen.forEach(tool => {
         const t = tool.quiz_type;
         const title = tool.title || 'Study material';
 
@@ -355,186 +437,166 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
     const alive = isStreakAlive(streak);
     const displayStreak = alive ? streak.currentStreak : 0;
 
+    const hasPacks = !!tools && tools.length > 0;
+    const nonePicked = hasPacks && pickedCount === 0;
+    const card = 'rounded-[24px] border border-[#E4D4F8] bg-white shadow-[0_16px_34px_-26px_rgba(90,45,140,0.55)] dark:border-stone-700 dark:bg-stone-900';
+    const flame = (size: number) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2c1 3.5 4 5 4 9a4 4 0 0 1-1 2.6C15 11 13.5 10 13 8.5 11 10.5 8 12.5 8 16a5 5 0 0 0 9.5 2c.3 3-2.2 4-5.5 4-4 0-7-2.7-7-7C5 9.5 10 7 12 2z" /></svg>
+    );
+
+    // Monday to Sunday of this week.
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const week = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const isToday = dateStr === getToday();
+      let isDone = false;
+      if (streak.lastCompletedDate) {
+        const dayDiff = Math.round((new Date(streak.lastCompletedDate).getTime() - new Date(dateStr).getTime()) / 86_400_000);
+        isDone = dayDiff >= 0 && dayDiff < streak.currentStreak;
+      }
+      return { label, isToday, isDone };
+    });
+    const weekDone = week.filter((d) => d.isDone).length;
+
     return (
-      <section className="space-y-5">
-        {/* Hero card — premium gradient frame */}
-        <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
-          <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-6 sm:p-8 lg:p-10">
-            {/* Ambient glow + faint grid texture */}
-            <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
-            <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/10 blur-3xl" aria-hidden />
-            <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
-
-            {/* Mascot */}
-            <img
-              src="/mascot-study.webp"
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="hidden lg:block pointer-events-none absolute top-5 right-7 w-24 h-auto z-10 drop-shadow-[0_14px_28px_rgba(165,96,232,0.35)]"
-            />
-
-            <div className="relative text-center max-w-lg mx-auto">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#F3EAFF] to-[#E9DBFF] dark:from-[#A560E8]/15 dark:to-[#A560E8]/5 text-[#7733B5] border-2 border-[#A560E8]/30 text-[11px] font-extrabold uppercase tracking-[0.12em] mb-4 shadow-[0_6px_16px_-10px_rgba(165,96,232,0.9)]">
-                <span aria-hidden className="motion-safe:animate-pulse">🎯</span>
-                Daily Review
-              </span>
-
-              <h2
-                className="text-2xl sm:text-3xl lg:text-[2.2rem] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+      <section className="flex flex-col gap-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+        {/* ── TODAY ─────────────────────────────────────────────── */}
+        <div className="relative flex flex-wrap items-center gap-6 overflow-hidden rounded-[30px] bg-gradient-to-b from-[#A863EA] via-[#8E48CF] to-[#6A2AA6] px-5 py-6 text-white shadow-[0_30px_60px_-34px_rgba(90,45,140,0.8)] sm:px-[30px] sm:py-7">
+          <span aria-hidden className="pointer-events-none absolute -right-40 -top-[120px] h-[520px] w-[520px] rounded-full bg-[#9652D3]" />
+          <div className="relative flex min-w-0 flex-[3_1_420px] flex-col items-start gap-3">
+            <span className={`inline-flex min-h-[34px] items-center gap-[7px] rounded-full px-[13px] text-[14.5px] font-black ${displayStreak > 0 ? 'bg-[#FFC800] text-[#3D2F00]' : 'bg-[#5A1F8F] text-white'}`}>
+              {displayStreak > 0 && flame(16)}
+              {displayStreak > 0 ? `${displayStreak} day streak` : 'No streak yet'}
+            </span>
+            <h1 className="m-0 text-[28px] font-black leading-[1.05] tracking-[-0.02em] sm:text-[38px]">
+              {completedToday ? (
+                <>Done for <span className="text-[#FFD84D]">today</span>{firstName ? `, ${firstName}` : ''}</>
+              ) : (
+                <>Ready for today&apos;s <span className="text-[#FFD84D]">review</span>{firstName ? `, ${firstName}` : ''}?</>
+              )}
+            </h1>
+            <p className="m-0 text-[15px] font-bold text-[#F3EAFF] sm:text-[16.5px]">
+              {completedToday
+                ? 'Come back tomorrow to keep your streak going.'
+                : !hasPacks && tools
+                  ? 'Your review is built from your study packs. Make one to get started.'
+                  : nonePicked
+                    ? 'No packs are ticked below. Tick at least one to review.'
+                    : `Up to ${QUESTION_COUNT} questions and cards from ${pickedCount === 1 ? 'the pack' : `the ${pickedCount} packs`} you picked. ${displayStreak > 0 ? `Do it today to make it ${displayStreak + 1} days.` : 'About 3 minutes.'}`}
+            </p>
+            {(!hasPacks && tools) || noContent ? (
+              <button
+                type="button"
+                onClick={() => (onSwitchTool ? onSwitchTool('study_pack') : onNavigate('dashboard'))}
+                className="mt-1 inline-flex min-h-[62px] items-center gap-2.5 whitespace-nowrap rounded-[20px] border-2 border-b-[6px] border-[#46A302] bg-[#58CC02] px-[30px] text-[19px] font-black text-white transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2"
               >
-                {completedToday ? (
-                  <>You&apos;re done for today! <span className="text-[#A560E8]">🎉</span></>
-                ) : firstName ? (
-                  <>Ready to review, <span className="text-[#A560E8]">{firstName}</span>?</>
-                ) : (
-                  <>Ready for your <span className="text-[#A560E8]">daily review</span>?</>
-                )}
-              </h2>
-              <p className="mt-2 text-sm sm:text-base text-stone-500 dark:text-stone-400 font-bold">
-                {completedToday
-                  ? 'Come back tomorrow to keep your streak going.'
-                  : `${QUESTION_COUNT} questions from your study materials. Takes ~3 minutes.`}
-              </p>
-
-              {/* Streak + Stats row */}
-              <div className="flex items-center justify-center gap-3 mt-6">
-                {/* Streak badge */}
-                <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 ${
-                  displayStreak > 0
-                    ? 'bg-[#F3EAFF] border-[#A560E8]/40 dark:bg-[#A560E8]/10'
-                    : 'bg-stone-50 border-stone-200 dark:bg-stone-800 dark:border-stone-700'
-                }`}>
-                  <span className="text-2xl" aria-hidden>{displayStreak > 0 ? '🔥' : '❄️'}</span>
-                  <div className="text-left">
-                    <p className={`text-lg font-extrabold leading-none ${displayStreak > 0 ? 'text-[#A560E8]' : 'text-stone-400'}`}>
-                      {displayStreak}
-                    </p>
-                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
-                      day streak
-                    </p>
-                  </div>
-                </div>
-
-                {/* Total reviews */}
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 bg-[#F3EAFF] border-[#A560E8]/30 dark:bg-[#A560E8]/10">
-                  <span className="text-2xl" aria-hidden>📊</span>
-                  <div className="text-left">
-                    <p className="text-lg font-extrabold leading-none text-[#A560E8]">
-                      {streak.totalReviews}
-                    </p>
-                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
-                      reviews
-                    </p>
-                  </div>
-                </div>
-
-                {/* Longest streak */}
-                <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 bg-[#F3EAFF] border-[#A560E8]/30 dark:bg-[#A560E8]/10">
-                  <span className="text-2xl" aria-hidden>🏆</span>
-                  <div className="text-left">
-                    <p className="text-lg font-extrabold leading-none text-[#A560E8]">
-                      {streak.longestStreak}
-                    </p>
-                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
-                      best streak
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Start button */}
-              <div className="mt-8">
-                {noContent ? (
-                  <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-stone-50 dark:bg-stone-800 p-5">
-                    <img src="/mascot-thinking.webp" alt="" aria-hidden loading="lazy" className="w-16 h-auto mx-auto mb-3" />
-                    <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200 mb-1">No study materials yet</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 font-bold mb-4">
-                      Create some quizzes or flashcards first, then your daily review will be ready!
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => onSwitchTool ? onSwitchTool('study_pack') : onNavigate('dashboard')}
-                      className="px-6 py-2.5 bg-[#A560E8] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
-                    >
-                      Create a study pack →
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={startReview}
-                    className="group inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-[#A560E8] to-[#7733B5] hover:from-[#9450D8] hover:to-[#A560E8] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#7733B5] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all text-lg tracking-tight shadow-[0_14px_30px_-12px_rgba(165,96,232,0.9)]"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    {completedToday ? 'Practice again' : 'Start review'}
-                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                  </button>
-                )}
-              </div>
-            </div>
+                Make a study pack
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={startReview}
+                disabled={nonePicked}
+                className="mt-1 inline-flex min-h-[62px] items-center gap-2.5 whitespace-nowrap rounded-[20px] border-2 border-b-[6px] border-[#46A302] bg-[#58CC02] px-[30px] text-[19px] font-black text-white transition-all enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {completedToday ? 'Practise again' : 'Start today\'s review'}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </button>
+            )}
+            {noContent && hasPacks && (
+              <p className="m-0 text-[14.5px] font-extrabold text-[#FFE9A6]">The packs you ticked have no questions or cards to review. Tick another, or make a new pack.</p>
+            )}
           </div>
+          <img src={completedToday ? '/mascot-celebrating-still.webp' : '/mascot-pointing.webp'} alt="Scholar, the WriteScholar mascot" width={170} height={170} className="relative mx-auto hidden h-[170px] w-[170px] shrink-0 object-contain sm:block" />
         </div>
 
-        {/* Week calendar */}
-        <div className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 p-4 sm:p-5">
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-stone-400 dark:text-stone-500 mb-3">This week</p>
-          <div className="flex items-center justify-between gap-1">
-            {(() => {
-              const today = new Date();
-              const dayOfWeek = today.getDay(); // 0=Sun
-              const startOfWeek = new Date(today);
-              startOfWeek.setDate(today.getDate() - dayOfWeek);
-
-              return ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((label, i) => {
-                const d = new Date(startOfWeek);
-                d.setDate(startOfWeek.getDate() + i);
-                const dateStr = d.toISOString().slice(0, 10);
-                const isToday = dateStr === getToday();
-                const isPast = d < today && !isToday;
-                // Check if this day was completed (simple: if within streak range from lastCompleted going back)
-                let isDone = false;
-                if (streak.lastCompletedDate) {
-                  const lastDate = new Date(streak.lastCompletedDate);
-                  const dayDiff = Math.floor((lastDate.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-                  isDone = dayDiff >= 0 && dayDiff < streak.currentStreak;
-                }
-
+        {/* ── REVIEWING FROM ────────────────────────────────────── */}
+        {hasPacks && tools && (
+          <div className={`${card} flex flex-col gap-3 px-[22px] py-5`}>
+            <div className="flex flex-wrap items-baseline gap-2.5">
+              <h2 className="m-0 text-[22px] font-black text-stone-900 dark:text-stone-50">Reviewing from</h2>
+              <span className="text-[14.5px] font-extrabold text-stone-600 dark:text-stone-400">
+                {pickedCount} of {tools.length} {tools.length === 1 ? 'pack' : 'packs'}. Untick anything you no longer need.
+              </span>
+            </div>
+            <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+              {tools.map((tool) => {
+                const on = isPicked(tool, picks);
+                const leftOut = !on && isOldPack(tool) && !picks.off.includes(tool.id);
+                const size = packSize(tool);
                 return (
-                  <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
-                    <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase">{label}</span>
-                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-sm font-extrabold border-2 transition-all ${
-                      isDone
-                        ? 'bg-[#A560E8] border-[#7733B5] text-white border-b-4'
-                        : isToday
-                          ? completedToday
-                            ? 'bg-[#A560E8] border-[#7733B5] text-white border-b-4'
-                            : 'bg-[#F3EAFF] border-[#A560E8] text-[#A560E8] border-b-4'
-                          : isPast
-                            ? 'bg-stone-100 border-stone-200 text-stone-300 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-600'
-                            : 'bg-stone-50 border-stone-200 text-stone-400 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-500'
-                    }`}>
-                      {isDone || (isToday && completedToday) ? '✓' : d.getDate()}
-                    </div>
-                  </div>
+                  <li key={tool.id}>
+                    <label className={`flex min-h-[64px] cursor-pointer flex-wrap items-center gap-3.5 rounded-[18px] px-4 py-3 focus-within:ring-4 focus-within:ring-[#A560E8]/30 ${on ? 'border-2 border-[#A560E8] bg-[#FBF8FF] dark:bg-[#A560E8]/15' : 'border border-[#E4D4F8] bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
+                      <input type="checkbox" checked={on} onChange={() => togglePack(tool)} className="sr-only" />
+                      {on ? (
+                        <span aria-hidden className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[11px] bg-[#58CC02] text-white">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7" /></svg>
+                        </span>
+                      ) : (
+                        <span aria-hidden className="h-[34px] w-[34px] shrink-0 rounded-[11px] border-[3px] border-[#C9A0F0] bg-white dark:bg-stone-900" />
+                      )}
+                      <span className="min-w-0 flex-[1_1_260px]">
+                        <span className={`block truncate text-[17px] font-black leading-tight ${on ? 'text-stone-900 dark:text-stone-50' : 'text-stone-600 dark:text-stone-400'}`}>{tool.title || 'Study pack'}</span>
+                        <span className="block text-[13.5px] font-bold text-stone-600 dark:text-stone-400">{madeAgo(tool.created_at)}.{size ? ` ${size}.` : ''}</span>
+                      </span>
+                      {leftOut && (
+                        <span className="whitespace-nowrap rounded-full bg-[#FFF1C2] px-2.5 py-[3px] text-[12.5px] font-black text-[#5A4500]">Left out: older than {PACK_MAX_AGE_DAYS} days</span>
+                      )}
+                    </label>
+                  </li>
                 );
-              });
-            })()}
+              })}
+            </ul>
+            <p className="m-0 text-[14px] font-bold text-stone-600 dark:text-stone-400">New packs are added for you. Packs older than {PACK_MAX_AGE_DAYS} days are left out until you tick them.</p>
           </div>
+        )}
+
+        {/* ── THIS WEEK ─────────────────────────────────────────── */}
+        <div className={`${card} flex flex-col gap-3.5 px-[22px] py-5`}>
+          <div className="flex items-center gap-3">
+            <h2 className="m-0 text-[22px] font-black text-stone-900 dark:text-stone-50">This week</h2>
+            <span className="ml-auto text-[14.5px] font-extrabold text-stone-600 dark:text-stone-400">{weekDone} of 7 days done</span>
+          </div>
+          <ol className="m-0 flex list-none gap-2 p-0">
+            {week.map((d) => (
+              <li key={d.label} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
+                {d.isDone ? (
+                  <span className="flex h-[46px] w-[46px] items-center justify-center rounded-full bg-[#58CC02] text-white">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+                    <span className="sr-only">Done</span>
+                  </span>
+                ) : d.isToday ? (
+                  <span className="flex h-[46px] w-[46px] items-center justify-center rounded-full border-[3px] border-dashed border-[#A560E8] bg-[#F7F1FF] text-[12px] font-black text-[#5B2491] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0]">Now</span>
+                ) : (
+                  <span className="h-[46px] w-[46px] rounded-full bg-[#F3EAFF] dark:bg-stone-800" />
+                )}
+                <span className={`text-[13.5px] font-black ${d.isToday ? 'text-[#5B2491] dark:text-[#C9A0F0]' : 'text-stone-600 dark:text-stone-400'}`}>{d.label}</span>
+              </li>
+            ))}
+          </ol>
         </div>
 
-        {/* Tip card */}
-        <div className="rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 p-4 sm:p-5">
-          <div className="flex items-start gap-3">
-            <span className="text-2xl flex-shrink-0" aria-hidden>💡</span>
-            <div>
-              <p className="text-sm font-extrabold text-[#A560E8] mb-0.5">Pro tip</p>
-              <p className="text-xs text-stone-600 dark:text-stone-300 font-bold leading-relaxed">
-                The more study packs you create, the better your daily reviews get. Each review pulls from all your materials using spaced repetition to focus on what you need to practice most.
-              </p>
-            </div>
+        {/* ── NUMBERS ───────────────────────────────────────────── */}
+        <div className="flex flex-wrap gap-[18px]">
+          <div className="flex flex-[1_1_150px] flex-col gap-0.5 rounded-[24px] border border-[#F1DC8A] bg-[#FFF7DA] p-[18px]">
+            <span className="text-[38px] font-black leading-none text-[#5A4500]">{displayStreak}</span>
+            <span className="text-[14.5px] font-extrabold text-[#5A4500]">day streak</span>
+          </div>
+          <div className={`${card} flex flex-[1_1_150px] flex-col gap-0.5 p-[18px]`}>
+            <span className="text-[38px] font-black leading-none text-stone-900 dark:text-stone-50">{streak.totalReviews}</span>
+            <span className="text-[14.5px] font-extrabold text-stone-600 dark:text-stone-400">{streak.totalReviews === 1 ? 'review done' : 'reviews done'}</span>
+          </div>
+          <div className={`${card} flex flex-[1_1_150px] flex-col gap-0.5 p-[18px]`}>
+            <span className="text-[38px] font-black leading-none text-stone-900 dark:text-stone-50">{streak.longestStreak}</span>
+            <span className="text-[14.5px] font-extrabold text-stone-600 dark:text-stone-400">best streak</span>
+          </div>
+          <div className="flex flex-[2_1_300px] items-center gap-3.5 rounded-[24px] border-2 border-dashed border-[#C9A0F0] bg-[#F7F1FF] p-[18px] dark:bg-[#A560E8]/10">
+            <img src="/mascot-study-still.webp" alt="" width={64} height={64} className="h-16 w-16 shrink-0 object-contain" />
+            <p className="m-0 text-[15px] font-extrabold leading-[1.4] text-stone-900 dark:text-stone-100">A few minutes every day beats one long session the night before.</p>
           </div>
         </div>
       </section>

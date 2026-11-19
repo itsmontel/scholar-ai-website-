@@ -953,7 +953,7 @@ class EmailService {
       const valueRows = [
         { emoji: '📝', title: 'Your drafts are still here', desc: 'Nothing was deleted — pick up exactly where you stopped.', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
         { emoji: '🔁', title: 'One-click revisions', desc: 'Accept a suggested rewrite and it lands in your draft.', color: EMAIL_COLORS.green, soft: EMAIL_COLORS.greenSoft, dark: EMAIL_COLORS.greenDark },
-        { emoji: '📚', title: 'Unlimited study packs', desc: 'Notes → flashcards, quizzes and games on tap.', color: EMAIL_COLORS.blue, soft: EMAIL_COLORS.blueSoft, dark: EMAIL_COLORS.blueDark },
+        { emoji: '📚', title: '99 credits a month', desc: 'Study packs and essay grades all term.', color: EMAIL_COLORS.blue, soft: EMAIL_COLORS.blueSoft, dark: EMAIL_COLORS.blueDark },
       ];
       const valueRowsHtml = valueRows.map((f) => `
                           <tr>
@@ -1110,13 +1110,16 @@ class EmailService {
           body: 'Earlier, WriteScholar found real, citable sources for your topic — most are still locked. Unlock the full list and your bibliography writes itself.',
           preheader: 'WriteScholar found sources for your topic — the full list is still waiting.',
         },
+        // Free packs are complete now, so this is a nudge to use it, not an upsell.
         'study pack': {
           subject: firstName
-            ? `${firstName}, your study pack is still waiting`
-            : 'Your study pack is still waiting',
+            ? `${firstName}, your study pack is ready when you are`
+            : 'Your study pack is ready when you are',
           headline: `Your pack is ready${greetingName} 🃏`,
-          body: 'Earlier, WriteScholar turned your notes into a lesson, a quiz and flashcards. The rest of your deck, the crossword and the study games are still locked. Unlock them and drill it until it sticks before the exam.',
-          preheader: 'Your study pack is built — the quiz and full deck are still waiting.',
+          body: 'Earlier, WriteScholar built you a study pack: a lesson, flashcards, a quiz, a crossword and three games. It is saved on your dashboard. Ten minutes on it today does more than an hour the night before.',
+          preheader: 'Your study pack is saved on your dashboard. Ten minutes today is all it takes.',
+          cta: 'Open my study pack',
+          free: true,
         },
       };
       // Essay grade with real numbers: lead with their score and the count
@@ -1142,11 +1145,29 @@ class EmailService {
           preheader: `${plural(hiddenTotal, 'comment', 'comments')} on the rest of your essay ${hiddenTotal === 1 ? 'is' : 'are'} still locked.`,
         };
       }
+      // The first free report is complete: nothing is locked, so point them
+      // back to it instead of telling them to unlock it.
+      if (feature === 'analysis' && report && report.full) {
+        const scoreText = report.score != null
+          ? `${report.score}/100${report.grade ? ` (${report.grade})` : ''}`
+          : report.grade || '';
+        hooks.analysis = {
+          subject: scoreText ? `Your essay scored ${scoreText}. Here is what to fix first` : 'Your essay report is ready',
+          headline: scoreText ? `Your essay scored ${scoreText}${greetingName}` : `Your report is ready${greetingName}`,
+          body: 'Your full report is saved on your dashboard: every rubric score and a comment on each sentence that needs work. Fix the top two and grade it again to see the score move.',
+          preheader: 'Your full report is saved. Fix the top two things and grade it again.',
+          cta: 'Open my report',
+          free: true,
+        };
+      }
       const hook = hooks[feature] || hooks.analysis;
+      // Nothing to unlock: link to the dashboard without the upgrade prompt.
+      const ctaUrl = hook.free ? `${frontendUrl}/dashboard` : dashboardUrl;
+      const ctaLabel = hook.cta || 'Unlock my results';
 
       const valueRows = [
         { emoji: '📝', title: 'Every fix, applied',     desc: 'Full line-by-line annotations + one-click apply into your draft.', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
-        { emoji: '🃏', title: 'Full study packs',        desc: 'The whole flashcard deck, the crossword and the arcade games, unlocked.',     color: EMAIL_COLORS.orange, soft: EMAIL_COLORS.orangeSoft, dark: EMAIL_COLORS.orangeDark },
+        { emoji: '🃏', title: '99 credits a month',      desc: 'Study packs and essay grades all term, instead of 3 a month.',     color: EMAIL_COLORS.orange, soft: EMAIL_COLORS.orangeSoft, dark: EMAIL_COLORS.orangeDark },
         { emoji: '📚', title: 'Complete source lists',   desc: 'Every citation for your topic, plus PDF & Word export.',           color: EMAIL_COLORS.blue,   soft: EMAIL_COLORS.blueSoft,   dark: EMAIL_COLORS.blueDark },
       ];
       const valueRowsHtml = valueRows.map((f) => `
@@ -1205,21 +1226,23 @@ class EmailService {
                           ${hook.body}
                         </p>
 
-                        <!-- What unlocks with Pro -->
+                        ${hook.free ? '' : `<!-- What unlocks with Pro -->
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 22px;">
                           ${valueRowsHtml}
-                        </table>
+                        </table>`}
 
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                           <tr>
                             <td align="center" style="padding: 0 0 14px 0;">
-                              ${ctaButton(dashboardUrl, 'Unlock my results')}
+                              ${ctaButton(ctaUrl, ctaLabel)}
                             </td>
                           </tr>
                         </table>
 
                         <p style="margin: 0; font-size: 12.5px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
-                          Pro starts at <strong style="color: ${EMAIL_COLORS.text};">$9.99 for your first month</strong> with the NEWCUSTOMER discount — cancel anytime.
+                          ${hook.free
+                            ? 'Your free plan gives you 3 credits a month. Each one makes a study pack or grades an essay.'
+                            : `Pro starts at <strong style="color: ${EMAIL_COLORS.text};">$9.99 for your first month</strong> with the NEWCUSTOMER discount. Cancel anytime.`}
                         </p>
 
                         <p style="margin: 16px 0 0 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.5;">
@@ -1267,7 +1290,7 @@ class EmailService {
         from: `"WriteScholar" <${fromAddress}>`,
         to: email,
         replyTo: replyToAddress,
-        subject: 'Verify your email to keep your free essay grades',
+        subject: 'Verify your email to keep your free credits',
         html: `
           <!DOCTYPE html>
           <html>
@@ -1289,7 +1312,7 @@ class EmailService {
                           Confirm your account
                         </h1>
                         <p style="margin: 0 0 24px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
-                          Your first report is saved to your account. Verify this email to confirm it, and you get a free grade every month, so you can grade your next essay and see how you improve.
+                          Your account is ready and your work is saved to it. Verify this email to confirm it and keep your 3 free credits every month. Each credit makes a study pack or grades an essay.
                         </p>
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                           <tr>
@@ -1313,10 +1336,10 @@ class EmailService {
                     <tr>
                       <td style="background-color: ${EMAIL_COLORS.surfaceSoft}; padding: 20px 32px; border-top: 2px solid ${EMAIL_COLORS.border};">
                         <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
-                          Your free plan: 1 essay grade a month, with your score, every rubric score and line-by-line feedback on the first part of your essay.
+                          Your free plan: 3 credits a month. Each one makes a full study pack or grades an essay.
                         </p>
                         <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
-                          If you did not grade an essay with us, ignore this email and nothing happens.
+                          If you did not sign up to WriteScholar, ignore this email and nothing happens.
                         </p>
                       </td>
                     </tr>

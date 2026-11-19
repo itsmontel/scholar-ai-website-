@@ -36,12 +36,12 @@ export const TOOL_SEO_META = {
   citations: {
     title: 'Citation Finder — APA, MLA, Chicago | WriteScholar',
     description:
-      'Find peer-reviewed sources for research papers in seconds and export APA, MLA, Chicago, or Harvard citations. Part of Pro, $19.99/mo at the student launch price.',
+      'Find peer-reviewed sources for research papers in seconds and export APA, MLA, Chicago, or Harvard citations. Part of Pro: $9.99 for your first month, then $19.99/mo.',
   },
   'study-pack': {
     title: 'AI Study Pack — Flashcards, Quiz & Lesson | WriteScholar',
     description:
-      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. Part of Pro, $19.99/mo at the student launch price.',
+      'Type an exam topic or paste your notes and get a lesson, flashcards, a quiz and study games. Free to try: 3 a month, no card.',
   },
   summarizer: {
     title: 'AI Summarizer for Papers & Readings | WriteScholar',

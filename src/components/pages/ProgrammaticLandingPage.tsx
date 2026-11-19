@@ -1091,8 +1091,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 </h2>
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
                   {config.type === 'subject'
-                    ? 'Pro is $19.99/mo at the student launch price. See the gaps before the exam does. Cancel anytime.'
-                    : 'Three essay grades a month are free, no card. Used by 50,000+ college students.'}
+                    ? 'Pro is $19.99/mo. See the gaps before the exam does. Cancel anytime.'
+                    : 'Three study packs or essay grades a month are free, no card. Used by 50,000+ college students.'}
                 </p>
               </div>
               <a
@@ -1101,7 +1101,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 className="hidden sm:inline-flex flex-shrink-0 items-center gap-1.5 px-5 py-2.5 rounded-2xl font-extrabold text-white border-2 border-b-4 text-[14px] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2"
                 style={{ backgroundColor: accent, borderColor: accent === '#A560E8' ? '#8A48C7' : accent }}
               >
-                Try free
+                Sign up free
                 <span aria-hidden>→</span>
               </a>
             </div>
@@ -1210,8 +1210,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               {config.type === 'subject'
                 ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Your first grade each month is free.'
                 : config.type === 'landing'
-                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Your first grade each month is free, no card; Pro is $19.99/mo at the student launch price for the rewrites. Cancel anytime.'
-                  : 'Three essay grades a month are free; Pro is $19.99/mo at the student launch price. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
+                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Your first grade each month is free, no card; Pro is $19.99/mo for the rewrites. Cancel anytime.'
+                  : 'Three study packs or essay grades a month are free; Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

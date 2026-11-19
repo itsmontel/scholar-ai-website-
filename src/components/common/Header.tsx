@@ -198,18 +198,11 @@ const Header: React.FC<HeaderProps> = ({
     // signed-out picks this variant up automatically.
     const isLandingPurple = true;
 
-    // "Try it free" means "grade an essay": the paste box is the front door,
-    // and signing up first skipped it for 7 in 10 new accounts. On the
-    // landing page, scroll to the box; anywhere else, go there.
-    const goToGrader = () => {
-      const box = typeof document !== 'undefined' ? document.getElementById('hero-essay') : null;
-      if (currentPage === 'landing' && box) {
-        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.setTimeout(() => (box as HTMLTextAreaElement).focus({ preventScroll: true }), 450);
-        return;
-      }
-      try { sessionStorage.setItem('ws_focus_grader', '1'); } catch { /* ignore */ }
-      onNavigate?.('landing');
+    // "Sign up free" goes to the sign-up form. The landing page's box needs
+    // no account, so there is nothing to protect by sending people to it
+    // first, and doing so cost sign-ups from people with nothing to paste.
+    const goToSignup = () => {
+      onNavigate?.('signup');
     };
 
     const publicNavActiveCls = isLandingPurple
@@ -288,10 +281,10 @@ const Header: React.FC<HeaderProps> = ({
                 Log in
               </button>
               <button
-                onClick={goToGrader}
+                onClick={goToSignup}
                 className={`inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
               >
-                Try it free
+                Sign up free
               </button>
               <button
                 type="button"
@@ -343,10 +336,10 @@ const Header: React.FC<HeaderProps> = ({
                   Log in
                 </button>
                 <button
-                  onClick={() => { goToGrader(); setIsMobileMenuOpen(false); }}
+                  onClick={() => { goToSignup(); setIsMobileMenuOpen(false); }}
                   className={`block text-center px-4 py-2.5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
                 >
-                  Try it free
+                  Sign up free
                 </button>
               </div>
               </div>

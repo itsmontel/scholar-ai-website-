@@ -15,7 +15,10 @@ import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
 import HeroEssayGrader, { type EssayFacts } from '../landing/HeroEssayGrader';
 import FreeGradeGate, { clearPendingEssay, readPendingEssay, stashPendingEssay, type GateUser } from '../common/FreeGradeGate';
-import { FREE_GRADE_FLOW_KEY } from '../../config/pricing';
+import { FREE_GRADE_FLOW_KEY, FINALS_FREE_LABEL, finalsFreeActive, FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE, TRY_BEFORE_SIGNUP } from '../../config/pricing';
+import { visitSource, rememberDoor, type PackRequest } from '../../utils/tryFirst';
+import DoorsHero from '../landing/DoorsHero';
+import TryFlow, { type TryRequest } from '../landing/TryFlow';
 import { trackEvent } from '../../utils/analytics';
 // Below-the-fold landing sections are lazy-loaded so the hero paints
 // fast. Each chunk is hundreds-of-lines + transitive deps; loading
@@ -623,20 +626,39 @@ const useWideHero = () => {
 };
 
 const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps) => {
-  // Every "start free" button on this page means "grade an essay". Sending
-  // visitors to the sign-up form instead made accounts that never graded,
-  // so 'signup' from anywhere on the landing page goes to the paste box.
-  const onNavigate = (page: string) => {
-    if (page === 'signup') {
-      const box = document.getElementById('hero-essay');
-      if (box) {
-        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        window.setTimeout(() => (box as HTMLTextAreaElement).focus({ preventScroll: true }), 450);
-        return;
-      }
+  // With TRY_BEFORE_SIGNUP on, the hero box needs no account, so every
+  // "start free" button on this page opens it. With it off (the default),
+  // they all go to the sign-up form.
+  const onNavigate = (page: string, slug?: string, options?: unknown) => {
+    if (page === 'signup' && TRY_BEFORE_SIGNUP) {
+      // Open the hero's box for the door they last used (exams by default).
+      window.dispatchEvent(new CustomEvent('writescholar-hero-door', { detail: {} }));
+      return;
     }
-    navigateRaw(page);
+    (navigateRaw as (page: string, slug?: string, options?: unknown) => void)(page, slug, options);
   };
+  // The finals banner waits until the hero has scrolled away.
+  const [pastHero, setPastHero] = useState(false);
+  /** Where the pinned header ends, so the finals banner sits flush beneath it. */
+  const [headerBottom, setHeaderBottom] = useState(60);
+  useEffect(() => {
+    const update = () => {
+      setPastHero(window.scrollY > 520);
+      const header = document.querySelector('header');
+      if (header) setHeaderBottom(Math.max(0, Math.round(header.getBoundingClientRect().bottom)));
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    document.addEventListener('scroll', update, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+      document.removeEventListener('scroll', update, true);
+    };
+  }, []);
+  /** What the try-first overlay is making right now (null = closed). */
+  const [tryRequest, setTryRequest] = useState<TryRequest | null>(null);
   // ─── Free first grade: paste box in the hero, one-field gate, then the report ───
   const [gateOpen, setGateOpen] = useState(false);
   const [pendingMeta, setPendingMeta] = useState<{ text: string; facts: EssayFacts } | null>(null);
@@ -645,17 +667,15 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
   const [restoredEssay] = useState(() => readPendingEssay()?.text ?? '');
   const wideHero = useWideHero();
   useEffect(() => {
-    trackEvent('landing_view');
+    trackEvent('landing_view', visitSource());
     // Arrived from a "Try it free" button on another page: put the cursor
     // in the paste box.
     try {
       if (sessionStorage.getItem('ws_focus_grader') === '1') {
         sessionStorage.removeItem('ws_focus_grader');
-        window.setTimeout(() => {
-          const box = document.getElementById('hero-essay');
-          box?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          (box as HTMLTextAreaElement | null)?.focus({ preventScroll: true });
-        }, 700);
+        // "Try it free" on an essay page means the essay door.
+        window.dispatchEvent(new CustomEvent('writescholar-hero-door', { detail: { door: 'essay' } }));
+
       }
     } catch { /* ignore */ }
   }, []);
@@ -672,14 +692,28 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
     clearPendingEssay();
     onNavigate('analysis');
   };
+  /**
+   * Essay door. A signed-in account goes straight to its report. A visitor
+   * gets the real grade first (TryFlow) and signs up to see every comment.
+   */
   const handleHeroSubmit = (text: string, facts: EssayFacts) => {
+    rememberDoor('essay');
     stashPendingEssay(text, { words: facts.words, fileName: facts.fileName });
     if (user?.id) {
       startGrade(text);
       return;
     }
     setPendingMeta({ text, facts });
-    setGateOpen(true);
+    setTryRequest({ kind: 'grade', text, facts });
+  };
+  /** Exam door: build the study pack, then open it in the pack viewer. */
+  const handlePackSubmit = (req: PackRequest) => {
+    rememberDoor('exam');
+    setTryRequest({ kind: 'pack', req });
+  };
+  const closeTryFlow = () => {
+    setTryRequest(null);
+    setGateResetSignal((n) => n + 1);
   };
   const closeGate = () => {
     setGateOpen(false);
@@ -1331,7 +1365,26 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
   return (
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader={false} />
+      {/* Free for finals: hidden while the hero is on screen, then it
+          slides in and stays pinned just under the header for the rest of
+          the page (the same behaviour as the old gold offer bar). */}
+      {pastHero && finalsFreeActive() && (
+        <p
+          role="note"
+          className="landing-promo-slide fixed inset-x-0 z-[110] m-0 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-0.5 border-b-2 border-[#D4A300] bg-[#FFC800] px-3 py-2.5 text-center text-[13px] font-black leading-snug text-[#5A4500] min-h-[48px] sm:min-h-[54px] sm:py-3 sm:text-[16px]"
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif', top: headerBottom }}
+        >
+          <span className="rounded-md bg-white px-2 py-0.5 text-[11px] uppercase tracking-[0.08em]">Finals</span>
+          <span>Finals are on us. Study packs and full essay reports are free until {FINALS_FREE_LABEL}. No card needed.</span>
+        </p>
+      )}
       <style>{`
+        @keyframes landingPromoSlide {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .landing-promo-slide { animation: landingPromoSlide 0.28s ease-out; }
+        @media (prefers-reduced-motion: reduce) { .landing-promo-slide { animation: none; } }
         @keyframes landingScholarRing {
           0% { transform: scale(0.85); opacity: 0.7; }
           100% { transform: scale(1.25); opacity: 0; }
@@ -1342,125 +1395,19 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
         }
       `}</style>
       <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
-      {/* HERO (design E): one centred column. Big promise, then the
-          paste box as the centrepiece. Four real screenshots float in
-          the corners on wide screens only; phones and tablets get the
-          title and the box with nothing competing. Lavender ground,
-          ink outlines and hard purple offset shadows, no blur. */}
-      <section
-        className="landing-hero-zoom relative overflow-hidden bg-[#FAF7FF] dark:bg-stone-950"
-        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-      >
-        {wideHero && (
-          <div aria-hidden className="pointer-events-none">
-            <HeroCornerTile label="Grade and rubric" tilt="-rotate-[5deg]" position="left-[3.5%] top-20 2xl:left-[4.5%]" delay="0s">
-              <video src="/hero-tiles/grade-rubric.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover object-top" />
-            </HeroCornerTile>
-            <HeroCornerTile label="Every sentence marked" tilt="rotate-[5deg]" position="right-[3.5%] top-16 2xl:right-[4.5%]" delay="1.2s">
-              <img src="/hero-tiles/sentence-notes.webp" alt="" loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-cover object-right-top" />
-            </HeroCornerTile>
-            {/* The real rubric card from a report, as its own sticker. */}
-            <div
-              className="absolute bottom-20 left-[3.5%] w-[220px] 2xl:bottom-16 motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite] 2xl:left-[4.5%] 2xl:w-[255px]"
-              style={{ animationDelay: '2.4s' }}
-            >
-              <figure
-                className="m-0 rotate-[4deg] overflow-hidden rounded-2xl border-2 border-[#1C1917] bg-white"
-                style={{ boxShadow: '6px 6px 0 #7733B5' }}
-              >
-                <figcaption className="border-b-2 border-[#1C1917] bg-white px-3 py-2 text-left text-[14px] font-black text-[#1C1917]">Rubric breakdown</figcaption>
-                <img src="/hero-tiles/rubric-card.webp" alt="" width={520} height={908} loading="eager" decoding="async" className="block h-auto w-full" />
-              </figure>
-            </div>
-                        {/* Two real comments from a report, each with its revision button. */}
-            <div
-              className="absolute bottom-20 right-[3.5%] w-[220px] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite] 2xl:bottom-16 2xl:right-[4.5%] 2xl:w-[255px]"
-              style={{ animationDelay: '3.4s' }}
-            >
-              <figure
-                className="m-0 -rotate-[4deg] overflow-hidden rounded-2xl border-2 border-[#1C1917] bg-white"
-                style={{ boxShadow: '6px 6px 0 #7733B5' }}
-              >
-                <figcaption className="border-b-2 border-[#1C1917] bg-white px-3 py-2 text-left text-[14px] font-black text-[#1C1917]">One-click fixes</figcaption>
-                <img src="/hero-tiles/feedback-card.webp" alt="" width={520} height={794} loading="eager" decoding="async" className="block h-auto w-full" />
-              </figure>
-            </div>
-            {SHOW_HERO_STUDY_TILES && (
-            <>
-            <HeroCornerTile label="Fun study games" tilt="rotate-[4deg]" position="left-[2%] bottom-72 2xl:bottom-80" delay="2.4s">
-              <HeroStudyGamesVideo />
-            </HeroCornerTile>
-            <HeroCornerTile label="Notes to flashcards" tilt="-rotate-[4deg]" position="right-[2%] bottom-64 2xl:bottom-72" delay="3.4s">
-              <video src="/hero-flashcards-hq.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover object-left-top" />
-            </HeroCornerTile>
-            </>
-            )}
-          </div>
-        )}
-
-        <div className="relative z-10 mx-auto flex w-full max-w-[860px] flex-col items-center gap-4 px-4 pt-9 pb-12 text-center opacity-0 animate-hero-card-enter sm:gap-5 sm:px-6 sm:pt-12 sm:pb-16 lg:pt-14 lg:pb-20">
-          <p className="m-0 inline-flex items-center gap-2 whitespace-nowrap rounded-full border-2 border-[#1C1917] bg-white px-3.5 py-1.5 text-[11px] font-black uppercase tracking-[0.06em] min-[390px]:text-[12px] sm:tracking-[0.08em] text-[#1C1917] sm:text-[13px]">
-            <span className="inline-block h-2 w-2 rounded-full bg-[#58CC02]" aria-hidden />
-            <span>Trusted by <span className="tabular-nums text-[#7733B5]">50,000+</span> students worldwide</span>
-          </p>
-
-          <h1 className="m-0 text-[2.6rem] font-black leading-[0.98] [text-wrap:balance] tracking-[-0.025em] text-[#1C1917] dark:text-stone-50 min-[390px]:text-[2.85rem] sm:text-[3.75rem] lg:text-[4.25rem]">
-            Turn B essays into{' '}
-            <span
-              className="inline-block -rotate-[1.5deg] rounded-[12px] border-2 border-[#1C1917] bg-[#A560E8] px-2.5 text-white sm:rounded-[16px] sm:px-3.5"
-              style={{ boxShadow: '4px 4px 0 #1C1917' }}
-            >
-              A&apos;s
-            </span>{' '}
-            with WriteScholar
-          </h1>
-
-          {/* H1 and H2 mirror the page title and meta description
-              (src/constants/landingSeo.ts, index.html) so a searcher sees
-              the same promise on Google and on the page. */}
-          <h2 className="m-0 max-w-[50rem] text-[17px] font-bold leading-[1.45] text-[#44403C] dark:text-stone-300 sm:text-[19px] lg:text-[20px]">
-            Paste your essay into our free AI essay grader. Get a professor-style grade, every rubric score and line-by-line feedback in about a minute.
-          </h2>
-
-          <div className="relative mt-1 w-full sm:mt-2">
-            {wideHero && (
-              <img
-                src="/hero-tiles/mascot-paper.webp"
-                alt=""
-                aria-hidden
-                width={260}
-                height={260}
-                decoding="async"
-                className="pointer-events-none absolute -right-[150px] -top-[110px] z-20 h-[150px] w-[150px] rotate-[10deg] object-contain 2xl:-right-[170px] 2xl:-top-[130px] 2xl:h-[170px] 2xl:w-[170px]"
-              />
-            )}
-            <HeroEssayGrader onSubmit={handleHeroSubmit} initialText={restoredEssay} resetSignal={gateResetSignal} />
-          </div>
-
-          <p className="m-0 mt-1 text-[13.5px] font-bold text-[#57534E] dark:text-stone-400">
-            Already have an account?{' '}
-            <button
-              type="button"
-              onClick={() => onNavigate('login')}
-              className="font-extrabold text-[#7733B5] underline decoration-2 underline-offset-[3px] hover:text-[#5F2594]"
-            >
-              Log in
-            </button>
-          </p>
-        </div>
-
-        {/* Rubric strip: what every free report scores. */}
-        <div className="relative z-10 border-y-2 border-[#1C1917] bg-[#7733B5] py-3 text-white">
-          <p className="m-0 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 text-center text-[13.5px] font-black tracking-wide sm:gap-x-5 sm:text-[15px]">
-            <span>Thesis</span><span aria-hidden>·</span>
-            <span>Evidence</span><span aria-hidden>·</span>
-            <span>Analysis</span><span aria-hidden>·</span>
-            <span>Structure</span><span aria-hidden>·</span>
-            <span>Style</span><span aria-hidden>·</span>
-            <span>Every sentence commented</span>
-          </p>
-        </div>
-      </section>
+      {/* HERO: two doors on the purple ground. Exams lead; the essay
+          grader is one tap away. Either result is made before any account
+          is asked for (TryFlow below). Corner tiles and the mascot render
+          on wide screens only, so phones get the headline and the box. */}
+      <DoorsHero
+        wide={wideHero}
+        onNavigate={onNavigate}
+        onPackSubmit={handlePackSubmit}
+        onEssaySubmit={handleHeroSubmit}
+        restoredEssay={restoredEssay}
+        resetSignal={gateResetSignal}
+        signedIn={!!user?.id}
+      />
 
       {/* Downstream-content wrapper — sits outside the hero section so
           section backgrounds span the full viewport width (not clipped by
@@ -2234,7 +2181,7 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
               Stop losing marks you could have kept
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              One essay grade a month is free, with the score, every rubric score and full feedback on the first quarter of your essay. Pro opens the whole essay, the rewrites and one-click fixes at the student launch price: $19.99 a month, not $39.99.
+              Three study packs or essay grades a month are free, and your first essay report is complete. Pro opens every essay in full, the rewrites and one-click fixes: $9.99 for your first month, then $19.99 a month.
             </p>
           </div>
 
@@ -2273,19 +2220,19 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Pro</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Hand in your best work, every time</p>
-              {/* Price block — struck-through "was" $39.99 sits above
-                  the active $19.99 (matches the pricing + billing pages
-                  so all three surfaces tell the same discount story). */}
+              {/* Price block: the real monthly price struck through above
+                  the first-month price (matches the pricing page; prices
+                  come from src/config/pricing.ts). */}
               <div className="mb-1 flex flex-col items-start">
                 <span className="text-lg font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
-                  $39.99
+                  ${STANDARD_MONTHLY_PRICE.pro}
                 </span>
                 <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
-                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$19.99</span>
-                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month</span>
+                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">${FIRST_MONTH_PRICE.pro}</span>
+                  <span className="text-stone-500 dark:text-stone-400 text-sm">first month</span>
                 </div>
                 <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">
-                  or <span className="line-through decoration-1 text-stone-400 dark:text-stone-500">$299.99</span> <span className="font-bold text-stone-700 dark:text-stone-200">$199.99</span>/year
+                  then ${STANDARD_MONTHLY_PRICE.pro}/month, or <span className="font-bold text-stone-700 dark:text-stone-200">$199.99</span>/year
                 </span>
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
@@ -2337,19 +2284,18 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Premium</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">For dissertation and heavy-research terms</p>
-              {/* Price block — struck-through "was" $59.99 sits above
-                  the active $39.99 (matches Pro card + pricing/billing
-                  pages). */}
+              {/* Price block: the real monthly price struck through above
+                  the first-month price (matches the Pro card). */}
               <div className="mb-1 flex flex-col items-start">
                 <span className="text-lg font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
-                  $59.99
+                  ${STANDARD_MONTHLY_PRICE.premium}
                 </span>
                 <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
-                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$39.99</span>
-                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month</span>
+                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">${FIRST_MONTH_PRICE.premium}</span>
+                  <span className="text-stone-500 dark:text-stone-400 text-sm">first month</span>
                 </div>
                 <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">
-                  or <span className="line-through decoration-1 text-stone-400 dark:text-stone-500">$499.99</span> <span className="font-bold text-stone-700 dark:text-stone-200">$399.99</span>/year
+                  then ${STANDARD_MONTHLY_PRICE.premium}/month, or <span className="font-bold text-stone-700 dark:text-stone-200">$399.99</span>/year
                 </span>
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
@@ -2383,7 +2329,7 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            Your first grade each month is free, no card. Pro and Premium are at the student launch price with monthly or yearly billing.{' '}
+            Three study packs or essay grades a month are free, no card. Pro is $9.99 for your first month, then $19.99, with monthly or yearly billing.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
@@ -2682,7 +2628,7 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
                 </span>
                 <div>
                   <p className="text-amber-800 font-semibold text-sm">{FREE_PLAN_STUDY_PACK_LINE}</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Part of Pro, $19.99/mo at the launch price</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Free to try: 3 a month</p>
                 </div>
               </div>
             </div>
@@ -2831,6 +2777,14 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
         </div>
       )}
 
+      <TryFlow
+        request={tryRequest}
+        user={user}
+        onClose={closeTryFlow}
+        onNavigate={onNavigate}
+        onAuth={onAuth}
+        onStartGrade={(text) => { setTryRequest(null); startGrade(text); }}
+      />
       <FreeGradeGate
         open={gateOpen}
         words={pendingMeta?.facts.words ?? 0}

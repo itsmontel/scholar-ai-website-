@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const COPY: Record<VerifyEmailDetail['reason'], { title: string; body: string }> = {
   verify: {
     title: 'Verify your email to keep grading',
-    body: 'Your first grade was on us. Click the link we emailed you to confirm your account, and your free grade each month is yours to keep.',
+    body: 'Your first grade was on us. Click the link we emailed you to confirm your account, and your 3 free credits each month are yours to keep.',
   },
   ip_limit: {
     title: 'Verify your email to keep grading',

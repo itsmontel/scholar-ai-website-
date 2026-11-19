@@ -160,18 +160,18 @@ router.post('/onboarding-survey', authenticateToken, async (req, res) => {
     // The question-by-question onboarding (web and iOS). Same allowlist
     // rule: unknown keys and values are dropped.
     const ANSWER_OPTIONS = {
-      level: ['underclass', 'upperclass', 'masters', 'other'],
+      level: ['highschool', 'underclass', 'upperclass', 'masters', 'other'],
       pressure: ['essay', 'exam', 'both'],
       current: ['A', 'B', 'C', 'D'],
       target: ['A', 'Aminus', 'B', 'pass'],
       confidence: ['1', '2', '3', '4', '5'],
-      deadline: ['week', 'twoweeks', 'month', 'none'],
+      deadline: ['week', 'twoweeks', 'month', 'later', 'none'],
       // The two questions asked while the first free grade runs.
       purpose: ['assignment', 'application', 'exam', 'curious'],
-      due: ['today', 'tomorrow', 'week', 'none'],
+      due: ['today', 'tomorrow', 'week', 'later', 'none'],
     };
     const ANSWER_MULTI = {
-      struggles: ['marker', 'structure', 'start', 'refs', 'remember', 'time'],
+      struggles: ['marker', 'structure', 'start', 'refs', 'remember', 'time', 'understand', 'predict', 'focus', 'nerves'],
       life: ['sleep', 'friends', 'gym', 'work', 'off'],
     };
     let cleanAnswers = null;

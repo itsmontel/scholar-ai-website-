@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { trackEvent } from '../../utils/analytics';
+import { readDoor } from '../../utils/tryFirst';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import { AuthMarketingSide } from '../common/AuthMarketingSide';
 
@@ -16,6 +18,11 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Funnel: the form was seen (door = which landing button brought them).
+  useEffect(() => {
+    trackEvent('signup_view', { door: readDoor() ?? 'none' });
+  }, []);
 
   const handleSubmit = async () => {
     if (!formData.email || !formData.password || !formData.confirmPassword) {
@@ -55,6 +62,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
 
       setError('');
       setSuccess(true);
+      trackEvent('signed_up', { method: 'email', door: readDoor() ?? 'none' });
     } catch (error) {
       console.error('Registration error:', error);
       setError(error instanceof Error ? error.message : 'Registration failed. Please try again.');
@@ -147,6 +155,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   type="button"
                   onClick={() => {
                     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+                    trackEvent('signup_google_click', { door: readDoor() ?? 'none' });
                     window.location.href = `${apiUrl}/auth/google`;
                   }}
                   className="w-full flex items-center justify-center px-4 py-3.5 bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-600 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5 transition-all font-bold text-stone-800 dark:text-stone-100"

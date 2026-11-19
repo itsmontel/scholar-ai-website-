@@ -18,6 +18,7 @@ const streakRoutes = require('./routes/streaks');
 const friendsRoutes = require('./routes/friends');
 const focusModeRoutes = require('./routes/focusMode');
 const eventRoutes = require('./routes/events');
+const previewRoutes = require('./routes/preview');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { connectDB } = require('./database/connection');
@@ -138,6 +139,8 @@ app.use('/api/streaks', streakRoutes);
 app.use('/api/friends', friendsRoutes);
 app.use('/api/focus-mode', focusModeRoutes);
 app.use('/api/events', eventRoutes);
+// First result before sign-up (no auth; limits in services/previewStore.js).
+app.use('/api/preview', analysisLimiter, previewRoutes);
 // Webhooks already registered before body parser (line 45)
 
 // 404 handler

@@ -2493,7 +2493,9 @@ CRITICAL REQUIREMENTS:
           clarity_rating: structuredData?.clarity_rating ?? null,
           top_suggestions: structuredData?.top_suggestions ?? null,
           grade_rubric: structuredData?.grade_rubric ?? null,
-          specific_rewrites: structuredData?.specific_rewrites ?? null
+          specific_rewrites: structuredData?.specific_rewrites ?? null,
+          // A free account's first grade, kept whole (analysisRedaction.js).
+          ...(structuredData?.ws_free_full === true ? { ws_free_full: true } : {})
         },
         processing_time_ms: Math.floor(Date.now() / 1000), // Convert to seconds
         created_at: new Date().toISOString(),
