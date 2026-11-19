@@ -11,6 +11,8 @@ export interface BlogPostMeta {
   title: string;
   description: string;
   date: string;
+  /** Date of the last real revision (YYYY-MM-DD). Shown as "Updated" and used as dateModified. */
+  updated?: string;
   author: string;
   readTime: string;
   /** Hero badge, e.g. Tips, Guides */
@@ -26,6 +28,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
   'WriteScholar helps students get professor-style feedback, cite sources correctly, and study smarter, without losing academic integrity.';
 
 export const blogPostList: BlogPostMeta[] = [
+  {
+    slug: 'how-to-memorize-things-fast',
+    title: 'How to Memorize Things Fast: 9 Techniques That Actually Work',
+    description:
+      'How to memorize things fast for a test: active recall, spaced repetition, chunking, mnemonics and the memory palace, plus a plan for the night before an exam.',
+    date: '2026-11-19',
+    author: 'WriteScholar Team',
+    readTime: '12 min read',
+    category: 'Study skills',
+    keyTakeaways: [
+      'Test yourself instead of rereading: closing the book and recalling builds memory, while rereading only builds familiarity.',
+      'Three short sessions spread over days beat one long one, and sleep between study and the test is part of the method.',
+      'Shrink and anchor the material: chunk it, use a mnemonic or memory palace for lists, and attach a picture or meaning to anything abstract.',
+    ],
+  },
   {
     slug: 'how-to-write-a-conclusion',
     title: 'How to Write a Conclusion for an Essay (With Examples)',
@@ -296,9 +313,10 @@ export const blogPostList: BlogPostMeta[] = [
   },
   {
     slug: 'how-to-study-effectively-complete-guide',
-    title: 'How to Study Effectively: The Complete Guide for College Students',
-    description: 'Stop cramming and start learning. Evidence-based study strategies, from active recall to the Pomodoro technique, that actually work for college students.',
+    title: 'How to Study Effectively: 6 Science-Backed Methods That Work',
+    description: 'How to study effectively: test yourself instead of rereading, space your sessions, work in 25-minute blocks and sleep. 6 methods backed by research, with examples.',
     date: '2026-03-08',
+    updated: '2026-11-19',
     author: 'WriteScholar Team',
     readTime: '13 min read',
     category: 'Study skills',

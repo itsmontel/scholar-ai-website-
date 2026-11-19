@@ -73,6 +73,203 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-memorize-things-fast':
+      return (
+        <>
+          <p className={p}>
+            You have a test coming, a page of terms you have read four times, and none of it is sticking. So you read it a fifth time. It feels like work, the page looks more and more familiar, and the next morning half of it is gone.
+          </p>
+          <p className={p}>
+            Memorizing faster is not about a better brain or more hours. It is about swapping the methods that feel productive for the ones that actually build memory. This guide covers nine techniques that work, when to use each one, and a plan for the night before a test.
+          </p>
+
+          <h2 className={h2}>How to memorize things fast: the short version</h2>
+          <p className={p}>
+            <strong>1. Test yourself</strong> instead of rereading: close the book and recall. <strong>2. Space it out</strong>: three short sessions beat one long one. <strong>3. Shrink it</strong>: group facts into chunks and use mnemonics for lists. <strong>4. Make it vivid</strong>: attach a picture, a place or a meaning to anything abstract. <strong>5. Sleep</strong> before the test. Everything below is detail on how to do those five things well.
+          </p>
+
+          <h2 className={h2}>Why you forget what you just read</h2>
+          <p className={p}>
+            Memory fades fastest right after you learn something. Hermann Ebbinghaus measured this in the 1880s and drew what is now called the forgetting curve: a steep drop in the first hours and days, which then levels off. Without any review, most new material is lost within a few days.
+          </p>
+          <p className={p}>
+            Rereading does little to stop that drop. Each pass makes the text easier to read, and your brain mistakes that ease for knowing it. But recognising a sentence when you see it is not the same as producing it on a blank exam page. The techniques that work all have one thing in common: they make you pull information out of your head, or give it something to hold on to.
+          </p>
+
+          <StudyEffectivelyHeroIllustration />
+
+          <h2 className={h2}>9 memorization techniques that actually work</h2>
+          <h3 className={h3}>1. Active recall: close the book and pull it out</h3>
+          <p className={p}>
+            This is the single most effective change you can make. After reading a section, cover it and write down or say everything you can remember. Then check, and go again on what you missed. In a well-known 2006 study by Roediger and Karpicke, students who practised recalling a passage remembered more of it a week later than students who spent the same time rereading it, even though the rereaders felt more confident.
+          </p>
+          <p className={p}>
+            Recall feels harder than rereading, and that difficulty is the point. Flashcards, practice questions and blank-page summaries are all forms of it. If you want to go deeper on this, our guide to <a href="/blog/how-to-study-effectively-complete-guide" className={internalLink}>how to study effectively</a> covers it in full.
+          </p>
+          <h3 className={h3}>2. Spaced repetition: review just before you forget</h3>
+          <p className={p}>
+            Reviewing something ten times in one evening is far less effective than reviewing it three times across a week. Each time you recall a fact after a gap, the memory lasts longer before it fades again. A simple schedule is: the same day, the next day, three days later, then a week later.
+          </p>
+          <p className={p}>
+            You do not need special software. Sort your flashcards into three piles: know it, shaky, no idea. Review the last pile every day, the shaky pile every other day, and the first pile once a week. Cards move up a pile when you get them right and back down when you miss them.
+          </p>
+          <h3 className={h3}>3. Chunking: turn many items into a few</h3>
+          <p className={p}>
+            Working memory holds only a handful of items at once. The classic figure is seven, give or take two, and more recent research puts it closer to four. Chunking gets around the limit by grouping. A phone number is easier as three blocks than as ten digits, and twelve terms are easier as three groups of four with a label on each.
+          </p>
+          <p className={p}>
+            Before you memorize a list, sort it. Group terms by cause, by system, by date range or by whatever structure the subject has. You then memorize the few group names first and the contents of each group second.
+          </p>
+          <h3 className={h3}>4. Mnemonics: acronyms and silly sentences</h3>
+          <p className={p}>
+            For lists that have to be recalled in order, build a hook from the first letters. Students have used &quot;Please Excuse My Dear Aunt Sally&quot; for the order of operations and &quot;HOMES&quot; for the Great Lakes for generations, because they work. A sentence you make up yourself works better than one you are handed, and the stranger it is, the better it sticks.
+          </p>
+          <p className={p}>
+            Mnemonics help you retrieve a list. They do not help you understand it, so use them for the parts that are simply arbitrary: orders, names, sequences.
+          </p>
+          <h3 className={h3}>5. The memory palace: put facts in places</h3>
+          <p className={p}>
+            Also called the method of loci, this goes back to ancient Greece and is still what memory competitors use. Pick a route you know by heart, such as the walk through your home. Place one vivid image for each item at a spot along the route: the front door, the hallway, the sofa. To recall the list, walk the route in your mind.
+          </p>
+          <p className={p}>
+            It sounds like more work than it is. Our memory for places and images is much stronger than our memory for words, so borrowing it makes long ordered lists, speech points and essay plans far easier to hold.
+          </p>
+          <h3 className={h3}>6. Make it mean something</h3>
+          <p className={p}>
+            Facts with no connection to anything else are the hardest to keep. Ask &quot;why is this true?&quot; and &quot;how does this link to what I already know?&quot; for each one. A date becomes easier when you know what caused the event. A formula becomes easier when you can say what each part does.
+          </p>
+          <p className={p}>
+            One explained fact is worth several memorized ones, because understanding gives you a way to rebuild the detail if you forget it.
+          </p>
+          <h3 className={h3}>7. Pair words with pictures</h3>
+          <p className={p}>
+            Information stored as both a word and an image has two routes back to it. Sketch a quick diagram, a timeline or a labelled drawing next to your notes. It does not need to be good. Drawing a cell and labelling it from memory will teach you more than reading a description of one three times.
+          </p>
+          <h3 className={h3}>8. Say it out loud and teach it</h3>
+          <p className={p}>
+            Reading silently is the weakest way to take something in. Saying it aloud makes it more distinct in memory, and explaining it to someone else is better still, because the places where you stumble are exactly the gaps in what you know. No one to teach? Explain it to an empty chair, or record yourself and listen back.
+          </p>
+          <h3 className={h3}>9. Sleep on it</h3>
+          <p className={p}>
+            Sleep is when the brain stabilises what you learned during the day. Material reviewed in the evening and tested again the next morning holds much better than the same material crammed through the night. Staying up until 4 a.m. costs you both the consolidation and your concentration in the exam.
+          </p>
+
+          <FlashcardsIllustration />
+
+          <h2 className={h2}>How to memorize for a test in one night</h2>
+          <p className={p}>
+            Starting earlier is always better, but if the test is tomorrow, this is the plan that gets the most out of the hours you have.
+          </p>
+          <p className={p}>
+            <strong>Step 1: Cut.</strong> You cannot learn everything tonight. Use the syllabus, past papers and whatever your teacher stressed to pick what is most likely to come up, and leave the rest.
+          </p>
+          <p className={p}>
+            <strong>Step 2: Turn it into questions.</strong> Rewrite each fact as a question with the answer on the back, or let a tool do it for you. Questions force recall; notes invite rereading.
+          </p>
+          <p className={p}>
+            <strong>Step 3: Cycle.</strong> Go through the questions and answer each from memory. Right answers go in one pile, wrong ones go back in the deck. Keep going until the deck is empty, then take a break.
+          </p>
+          <p className={p}>
+            <strong>Step 4: Hook the stubborn ones.</strong> Whatever is still not sticking gets a mnemonic, a picture or a place in a memory palace.
+          </p>
+          <p className={p}>
+            <strong>Step 5: Stop and sleep.</strong> Do one last pass, then go to bed. In the morning, run through the whole deck once more from memory. For a longer run-up, see our plan for <a href="/blog/how-to-study-for-finals" className={internalLink}>how to study for finals</a>.
+          </p>
+
+          <h2 className={h2}>How to memorize different kinds of material</h2>
+          <h3 className={h3}>Definitions and vocabulary</h3>
+          <p className={p}>
+            Flashcards with spaced repetition. Test yourself in both directions, term to definition and definition to term, and say each answer aloud before you flip the card.
+          </p>
+          <h3 className={h3}>Formulas</h3>
+          <p className={p}>
+            Write the formula from memory, then use it straight away on a problem. Knowing what each symbol stands for and when the formula applies matters more than the letters themselves.
+          </p>
+          <h3 className={h3}>Dates, lists and sequences</h3>
+          <p className={p}>
+            Chunk first, then use a mnemonic or a memory palace. Tie each date to a cause and an effect so it is part of a story, not a number on its own.
+          </p>
+          <h3 className={h3}>Speeches, quotes and essay plans</h3>
+          <p className={p}>
+            Memorize the structure before the words. Learn the order of your points with a memory palace, then learn each section by reciting it aloud, adding one line at a time.
+          </p>
+          <h3 className={h3}>Diagrams and processes</h3>
+          <p className={p}>
+            Draw it from memory on a blank page, compare it with the original, and fix what you got wrong. Repeat until you can draw it without looking.
+          </p>
+
+          <QuizIllustration />
+
+          <h2 className={h2}>What does not work</h2>
+          <p className={p}>
+            <strong>Rereading.</strong> It builds familiarity, not recall. One careful read followed by self-testing beats five reads.
+          </p>
+          <p className={p}>
+            <strong>Highlighting.</strong> Marking a line feels like progress but asks nothing of your memory. If you highlight, turn each highlighted line into a question afterwards.
+          </p>
+          <p className={p}>
+            <strong>Copying notes out neatly.</strong> With the original open in front of you, this is slow rereading. With it closed, it is recall, and it works.
+          </p>
+          <p className={p}>
+            <strong>All-nighters.</strong> You lose the sleep that fixes the memory in place, and you sit the exam tired.
+          </p>
+          <p className={p}>
+            <strong>Studying with your phone next to you.</strong> Memorizing needs unbroken attention. Twenty-five focused minutes with the phone in another room will do more than an hour of half-attention.
+          </p>
+
+          <h2 className={h2}>A 20-minute routine you can use tonight</h2>
+          <p className={p}>
+            Read the section once, carefully, for five minutes. Close everything and spend five minutes writing down all you can remember. Spend five minutes checking against your notes and marking what you missed. Spend the last five minutes turning the missed parts into questions. Tomorrow, start by answering those questions before you learn anything new.
+          </p>
+          <p className={p}>
+            That is active recall and spaced repetition in one small loop, and it works for almost any subject.
+          </p>
+
+          <h2 className={h2}>Let your notes test you</h2>
+          <p className={p}>
+            The slowest part of all this is making the questions. <a href="/" onClick={handleNavigate('landing')} className={internalLink}>WriteScholar</a> turns a topic or your own notes into flashcards, a quiz, a crossword and memory games in about a minute, so you can spend your time recalling instead of preparing. You can read more about how <a href="/blog/ai-study-tools-flashcards-quizzes-crosswords" className={internalLink}>flashcards, quizzes and crosswords work together</a>, or try it now.
+          </p>
+          <a href="/" onClick={handleNavigate('landing')} className={ctaButton}>
+            Make a free study pack →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: "What is the fastest way to memorize something?",
+                answer:
+                  "Test yourself instead of rereading. Read the material once, close it, and write or say everything you can remember, then check what you missed and repeat for the gaps. Two or three rounds of this, spaced a few hours apart, beats an hour of rereading.",
+              },
+              {
+                question: "How can I memorize things fast for a test tomorrow?",
+                answer:
+                  "Cut the material down to what is most likely to be tested, turn it into questions, and cycle through them: answer from memory, check, and put the ones you missed back in the pile. Use a mnemonic for any list or sequence, stop at a reasonable hour, and do one quick self-test in the morning after sleeping.",
+              },
+              {
+                question: "How many times do I need to review something to remember it?",
+                answer:
+                  "There is no fixed number, but timing matters more than count. Reviewing from memory after about a day, then a few days later, then a week later keeps most material in place with only a few short sessions.",
+              },
+              {
+                question: "Does writing things down help you memorize?",
+                answer:
+                  "Yes, when you write from memory. Copying notes out with the page open is slow rereading. Closing the book and writing what you recall is retrieval practice, which is one of the most effective study methods there is.",
+              },
+              {
+                question: "What is the memory palace technique?",
+                answer:
+                  "It is a way of memorizing an ordered list by placing a vivid image for each item at a spot along a route you know well, such as the rooms of your home. To recall the list, you walk the route in your head and collect the images in order.",
+              },
+              {
+                question: "Is it better to memorize at night or in the morning?",
+                answer:
+                  "Either works. What matters is that you sleep between learning and the test, because sleep is when new memories are stabilised. A short review before bed followed by a quick self-test the next morning is a strong combination.",
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-write-a-conclusion':
       return (
         <>
@@ -2650,6 +2847,14 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <p className={p}>
             This guide covers evidence-based study strategies that actually work for college students. We will look at why active recall beats passive review, how to structure your study sessions so they stick, and which tools can help you study smarter instead of longer.
+          </p>
+
+          <h2 className={h2}>How to study effectively: the short version</h2>
+          <p className={p}>
+            <strong>1. Test yourself</strong> instead of rereading: close your notes and recall. <strong>2. Space it out</strong>: several short sessions across the week beat one long one. <strong>3. Work in focused blocks</strong> of about 25 minutes with short breaks. <strong>4. Study in the same place</strong> with your phone out of reach. <strong>5. Sleep</strong>, because that is when memory is fixed in place. <strong>6. Mix your tools</strong>: flashcards, quizzes and practice problems each train recall in a different way. The rest of this guide explains how to do each one.
+          </p>
+          <p className={p}>
+            If you mainly need facts to stick before a test, see our guide to <a href="/blog/how-to-memorize-things-fast" className={internalLink}>how to memorize things fast</a>.
           </p>
 
           <StudyEffectivelyHeroIllustration />

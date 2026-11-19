@@ -320,6 +320,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Study by subject</p>
               <ul className="space-y-2">
                 <li><a href="/blog/how-to-study-for-finals" className="text-stone-400 hover:text-white text-sm transition-colors">How to study for finals</a></li>
+                <li><a href="/blog/how-to-memorize-things-fast" className="text-stone-400 hover:text-white text-sm transition-colors">How to memorize things fast</a></li>
                 <li><a href="/study/biology" className="text-stone-400 hover:text-white text-sm transition-colors">Biology study tools</a></li>
                 <li><a href="/study/chemistry" className="text-stone-400 hover:text-white text-sm transition-colors">Chemistry study tools</a></li>
                 <li><a href="/study/anatomy" className="text-stone-400 hover:text-white text-sm transition-colors">Anatomy flashcards</a></li>

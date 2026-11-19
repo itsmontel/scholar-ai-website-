@@ -98,7 +98,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       description: post.description,
       image: ogImage,
       datePublished: isoDate,
-      dateModified: isoDate,
+      dateModified: `${post.updated ?? post.date}T12:00:00.000Z`,
       author: {
         '@type': 'Organization',
         name: post.author,
@@ -172,6 +172,30 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
               text: 'On most campuses, feedback on a draft you wrote is treated differently from generated text. Read your syllabus. Never submit prose you could not explain, and never invent sources.',
             },
           },
+        ],
+      });
+    } else if (post.slug === 'how-to-study-effectively-complete-guide') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: "How many hours per day should I study?", acceptedAnswer: { '@type': 'Answer', text: "Quality matters more than quantity. Two hours of focused, active study (quizzing yourself, using flashcards) will beat six hours of passive rereading. Start with 2 to 3 hours of real focus per day and adjust based on your course load. Use the Pomodoro technique to make sure those hours are actually focused." } },
+          { '@type': 'Question', name: "Is it better to study in the morning or at night?", acceptedAnswer: { '@type': 'Answer', text: "It depends on when you are most alert. Some people focus best in the morning; others hit their stride in the evening. The important thing is consistency. Pick a time that works for you and stick with it. Your brain will adapt." } },
+          { '@type': 'Question', name: "Can I use AI tools to study without it being cheating?", acceptedAnswer: { '@type': 'Answer', text: "Yes. Using AI to generate practice quizzes, flashcards, or study materials is no different from using a textbook or study guide. You are still doing the learning. The AI just helps you create better practice materials faster. WriteScholar's tools are designed to help you learn, not to do your work for you." } },
+          { '@type': 'Question', name: "What if I have too much material and not enough time?", acceptedAnswer: { '@type': 'Answer', text: "Prioritize. Focus on the concepts that show up most often in past exams or that your professor emphasized. Use active recall on the high-yield material first. A quiz on the most important 20 percent of the content will help more than passive reading of everything. WriteScholar can generate quizzes and flashcards quickly so you can test yourself on the material that matters most." } },
+        ],
+      });
+    } else if (post.slug === 'how-to-memorize-things-fast') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: "What is the fastest way to memorize something?", acceptedAnswer: { '@type': 'Answer', text: "Test yourself instead of rereading. Read the material once, close it, and write or say everything you can remember, then check what you missed and repeat for the gaps. Two or three rounds of this, spaced a few hours apart, beats an hour of rereading." } },
+          { '@type': 'Question', name: "How can I memorize things fast for a test tomorrow?", acceptedAnswer: { '@type': 'Answer', text: "Cut the material down to what is most likely to be tested, turn it into questions, and cycle through them: answer from memory, check, and put the ones you missed back in the pile. Use a mnemonic for any list or sequence, stop at a reasonable hour, and do one quick self-test in the morning after sleeping." } },
+          { '@type': 'Question', name: "How many times do I need to review something to remember it?", acceptedAnswer: { '@type': 'Answer', text: "There is no fixed number, but timing matters more than count. Reviewing from memory after about a day, then a few days later, then a week later keeps most material in place with only a few short sessions." } },
+          { '@type': 'Question', name: "Does writing things down help you memorize?", acceptedAnswer: { '@type': 'Answer', text: "Yes, when you write from memory. Copying notes out with the page open is slow rereading. Closing the book and writing what you recall is retrieval practice, which is one of the most effective study methods there is." } },
+          { '@type': 'Question', name: "What is the memory palace technique?", acceptedAnswer: { '@type': 'Answer', text: "It is a way of memorizing an ordered list by placing a vivid image for each item at a spot along a route you know well, such as the rooms of your home. To recall the list, you walk the route in your head and collect the images in order." } },
+          { '@type': 'Question', name: "Is it better to memorize at night or in the morning?", acceptedAnswer: { '@type': 'Answer', text: "Either works. What matters is that you sleep between learning and the test, because sleep is when new memories are stabilised. A short review before bed followed by a quick self-test the next morning is a strong combination." } },
         ],
       });
     } else if (post.slug === 'how-to-write-a-conclusion') {
@@ -446,7 +470,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   const authorRole = post.authorRole ?? BLOG_DEFAULT_AUTHOR_ROLE;
   const authorBio = post.authorBio ?? BLOG_DEFAULT_AUTHOR_BIO;
   const hasArt = hasBlogArt(post.slug);
-  const updatedLabel = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  const updatedLabel = new Date(post.updated ?? post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
     <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="blog">
@@ -501,7 +525,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           </h1>
           <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed mb-3">{post.description}</p>
           <p className="text-sm text-stone-500 dark:text-stone-400">
-            Updated <time dateTime={post.date}>{updatedLabel}</time>
+            Updated <time dateTime={post.updated ?? post.date}>{updatedLabel}</time>
             <span className="mx-2 text-stone-300 dark:text-stone-600">·</span>
             {post.readTime}
           </p>

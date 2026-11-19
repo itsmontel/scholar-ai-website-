@@ -80,6 +80,13 @@ function readBlogPosts() {
   while ((m = slugDateRe.exec(src)) !== null) {
     posts.push({ slug: m[1], date: m[2] });
   }
+  // A post revised after publishing carries `updated`; use it as lastmod.
+  for (const post of posts) {
+    const start = src.indexOf(`slug: '${post.slug}'`);
+    const end = src.indexOf('\n  },', start);
+    const u = /updated:\s*'([^']+)'/.exec(src.slice(start, end === -1 ? undefined : end));
+    if (u) post.date = u[1];
+  }
   return posts;
 }
 
