@@ -41,8 +41,16 @@ function shuffleQuestionOptions(q: QuizQuestion): QuizQuestion {
   const correctIdx = q.correctAnswer?.length === 1 && q.correctAnswer >= 'A' && q.correctAnswer <= 'Z'
     ? q.correctAnswer.charCodeAt(0) - 65
     : opts.findIndex(o => o === q.correctAnswer || o.startsWith(q.correctAnswer + '.') || o.startsWith(q.correctAnswer + ')'));
-  const correctText = opts[Math.max(0, correctIdx)];
-  const shuffled = shuffleArray(opts);
+  // The model writes options as "A) ...", "B) ...". Once shuffled, that
+  // letter no longer matches the A to D shown beside each option, so it is
+  // dropped — only when every option carries its own letter in order.
+  const lettered = opts.every((o, i) => new RegExp(`^\\s*${String.fromCharCode(65 + i)}[).]\\s+\\S`, 'i').test(o));
+  const stripped = opts.map((o) => o.replace(/^\s*[A-Za-z][).]\s+/, '').trim());
+  // A one-letter answer ("A", "B", "AB", "O") would be read as an option
+  // letter by the checks below, so those keep their prefix.
+  const clean = lettered && stripped.every((o) => o.length > 1) ? stripped : opts;
+  const correctText = clean[Math.max(0, correctIdx)];
+  const shuffled = shuffleArray(clean);
   return { ...q, options: shuffled, correctAnswer: correctText };
 }
 
