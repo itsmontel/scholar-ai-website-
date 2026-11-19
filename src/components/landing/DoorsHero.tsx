@@ -182,13 +182,13 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
           </h2>
 
           {/* The two doors. */}
-          <div className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-14 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
+          <div className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-14 sm:w-auto md:flex-row md:items-center md:gap-4">
             <button
               type="button"
               onClick={() => openDoor('exam')}
-              className="group/btn inline-flex items-center justify-center rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#58CC02] px-8 py-4 text-[19px] font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#61E002] active:translate-y-0.5 active:border-b-2 sm:px-10 sm:py-[20px] sm:text-[21px] lg:text-[23px]"
+              className="group/btn inline-flex items-center justify-center whitespace-nowrap rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#58CC02] px-8 py-4 text-[19px] font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#61E002] active:translate-y-0.5 active:border-b-2 sm:px-8 sm:py-[20px] sm:text-[21px] lg:px-10 lg:text-[23px]"
             >
-              Study for an exam
+              Study for an exam free
               <svg className="ml-2.5 h-5 w-5 transition-transform duration-200 group-hover/btn:translate-x-1 sm:h-6 sm:w-6" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -196,9 +196,9 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
             <button
               type="button"
               onClick={() => openDoor('essay')}
-              className="group/btn inline-flex items-center justify-center rounded-2xl border-2 border-b-4 border-stone-300 bg-white px-8 py-4 text-[19px] font-extrabold text-[#6B27A3] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FBF7FF] active:translate-y-0.5 active:border-b-2 sm:px-10 sm:py-[20px] sm:text-[21px] lg:text-[23px]"
+              className="group/btn inline-flex items-center justify-center whitespace-nowrap rounded-2xl border-2 border-b-4 border-stone-300 bg-white px-8 py-4 text-[19px] font-extrabold text-[#6B27A3] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FBF7FF] active:translate-y-0.5 active:border-b-2 sm:px-8 sm:py-[20px] sm:text-[21px] lg:px-10 lg:text-[23px]"
             >
-              Grade my essay
+              Grade my essay free
               <svg className="ml-2.5 h-5 w-5 transition-transform duration-200 group-hover/btn:translate-x-1 sm:h-6 sm:w-6" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -206,7 +206,7 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
           </div>
 
           <p className="m-0 mt-4 text-[12px] font-bold text-[#EBDDFB] sm:mt-5 sm:text-[13px]">
-            About 30 seconds to get started. No payment today.
+            About 30 seconds to get started. No card needed.
           </p>
 
           {/* Stats strip. */}
