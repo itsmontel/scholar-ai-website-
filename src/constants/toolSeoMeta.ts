@@ -26,7 +26,7 @@ export const TOOL_SEO_META = {
   analyze: {
     title: 'AI Essay Checker — Feedback in Seconds | WriteScholar',
     description:
-      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. Your first grade each month is free, no card.',
+      'Paste your essay and get an estimated grade, a score for each part of the rubric and feedback on your sentences. Free to start, no card.',
   },
   'ai-essay-editor': {
     title: 'Essay Grader: Grade My Essay Online | WriteScholar',
@@ -46,17 +46,17 @@ export const TOOL_SEO_META = {
   summarizer: {
     title: 'AI Summarizer for Papers & Readings | WriteScholar',
     description:
-      'Turn long research papers, articles, and textbook chapters into key points for exams and discussion posts. Free to try.',
+      'Paste a paper, an article or a chapter and get the key points as a short summary. A free account covers 5,000 words a month, no card.',
   },
   'quiz-generator': {
-    title: 'AI Quiz Generator from Notes | WriteScholar',
+    title: 'AI Quiz Generator from a Topic or Notes | WriteScholar',
     description:
-      'Paste lecture notes or readings and get multiple-choice, true/false, and fill-in-the-blank quizzes in seconds. A strong supplement to flashcards for exams.',
+      'Type a topic or paste your notes and get a practice quiz with the reason for each answer: multiple choice, true or false, fill in the blank. Free, no card.',
   },
   'create-flashcards': {
-    title: 'AI Flashcard Maker — Decks from Notes | WriteScholar',
+    title: 'AI Flashcard Maker from a Topic or Notes | WriteScholar',
     description:
-      'Create decks by hand or auto-generate flashcards from your notes in seconds. Fast exam prep without 30 minutes of typing.',
+      'Type an exam topic or paste your notes and get a flashcard deck, plus a quiz, a crossword and games on the same material. Free to start, no card.',
   },
   'word-counter': {
     title: 'Essay Word Counter — Words, Characters & Pages | WriteScholar',

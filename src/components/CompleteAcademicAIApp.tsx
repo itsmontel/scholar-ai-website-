@@ -80,6 +80,7 @@ const ThesisGeneratorPage = lazyWithRetry(() => import('./pages/tools/ThesisGene
 const GrammarCheckerPage = lazyWithRetry(() => import('./pages/tools/GrammarCheckerPage'));
 const SummarizerPage = lazyWithRetry(() => import('./pages/tools/SummarizerPage'));
 const QuizGeneratorPage = lazyWithRetry(() => import('./pages/tools/QuizGeneratorPage'));
+const StudyToolLanding = lazyWithRetry(() => import('./pages/tools/StudyToolLanding'));
 const GPACalculatorPage = lazyWithRetry(() => import('./pages/tools/GPACalculatorPage'));
 const PomodoroTimerPage = lazyWithRetry(() => import('./pages/tools/PomodoroTimerPage'));
 const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'));
@@ -1688,12 +1689,15 @@ const AcademicAIApp = () => {
         if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return renderDocumentsWorkspace();
       case 'analyze':
+        if (!user) return <StudyToolLanding key="essay" variant="essay" onNavigate={navigateTo} />;
         if (shouldGateToOnboarding) return renderOnboarding('analyze');
         return <AnalyzeEssayPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'citations':
         if (shouldGateToOnboarding) return renderOnboarding('citations');
         return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack':
+        // Signed-out visitors (search, blog links) get the public page in the current flow.
+        if (!user) return <StudyToolLanding key="study-pack" variant="study-pack" onNavigate={navigateTo} />;
         if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return <StudyPackPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-hub':
@@ -1850,10 +1854,13 @@ const AcademicAIApp = () => {
       case 'grammar-checker':
         return <GrammarCheckerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'summarizer':
+        if (!user) return <StudyToolLanding key="summarizer" variant="summarizer" onNavigate={navigateTo} />;
         return <SummarizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'quiz-generator':
+        if (!user) return <StudyToolLanding key="quiz" variant="quiz" onNavigate={navigateTo} />;
         return <QuizGeneratorPage key="quiz-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="quiz" />;
       case 'create-flashcards':
+        if (!user) return <StudyToolLanding key="flashcards" variant="flashcards" onNavigate={navigateTo} />;
         return <CreateFlashcardsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'crossword-generator':
         return <QuizGeneratorPage key="crossword-generator" onNavigate={navigateTo} user={user} onLogout={handleLogout} initialStudyToolMode="crossword" />;

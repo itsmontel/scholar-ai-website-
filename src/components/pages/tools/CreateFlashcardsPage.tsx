@@ -3,8 +3,6 @@ import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import FlashcardViewer from '../../common/FlashcardViewer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
-import ToolPageSeoContent from '../../common/ToolPageSeoContent';
-import { flashcardsSeo } from '../../../data/toolSeoContent';
 import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface CreateFlashcardsPageProps {
@@ -861,7 +859,6 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
         </div>
       </section>
 
-      <ToolPageSeoContent {...flashcardsSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </LoggedInPageShell>

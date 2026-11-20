@@ -384,7 +384,7 @@ export const ExpandedStraightAs: React.FC<{ handleNavigate: NavigateHandler }> =
       Sleep, movement, and regular meals stabilize attention and mood. Chronic exhaustion lowers working memory and makes everything feel harder than it is. Students who sustain high performance treat basic health as part of the study plan, not something to &quot;earn&quot; after finals. That does not mean perfect routines. It means refusing the story that suffering equals virtue.
     </p>
     <p className={p}>
-      When workload spikes, use tools that reduce friction: <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> for distraction control, <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quizzes</a> for fast retrieval practice, and the <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>essay analyzer</a> for papers, so feedback arrives while you still have time to revise.
+      When workload spikes, use tools that reduce friction: <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> for distraction control, <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quizzes</a> for fast retrieval practice, and the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay analyzer</a> for papers, so feedback arrives while you still have time to revise.
     </p>
 
     <h3 className={h3}>Reality check</h3>
@@ -454,7 +454,7 @@ export const ExpandedFreeWritingTools: React.FC<{ handleNavigate: NavigateHandle
       No tool is perfect. Grammar checkers disagree; citation generators sometimes mishandle unusual sources. When stakes are high, run two passes with different tools or verify edge cases against your style manual. Keep a short personal checklist of errors your tools miss, maybe hyphenation in compound adjectives or your discipline&apos;s preferred capitalization, and scan for those manually.
     </p>
     <p className={p}>
-      Pair lightweight utilities with deeper ones: use a <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a> and <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability analysis</a> for length and clarity, then <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>full essay feedback</a> when you need thesis-level critique.
+      Pair lightweight utilities with deeper ones: use a <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a> and <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability analysis</a> for length and clarity, then <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>full essay feedback</a> when you need thesis-level critique.
     </p>
 
     <h2 className={h2}>Teaching yourself style, not just accepting suggestions</h2>
@@ -506,7 +506,7 @@ export const ExpandedThesisStatement: React.FC<{ handleNavigate: NavigateHandler
       Each body paragraph should advance the thesis. Topic sentences should mini-argue, not merely introduce topics. If a paragraph could appear in a different paper without change, it is probably too generic. Tie evidence back explicitly: show how the quote or data supports your specific wording in the thesis. When revision feels stuck, rewrite the thesis to match your best paragraphs, then adjust weaker paragraphs upward to match. Sometimes the thesis is what needs to move.
     </p>
     <p className={p}>
-      After drafting, run <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>essay analysis</a> to surface places where your argument thins or where the thesis and body diverge. Fix those mismatches before line editing.
+      After drafting, run <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay analysis</a> to surface places where your argument thins or where the thesis and body diverge. Fix those mismatches before line editing.
     </p>
 
     <h2 className={h2}>Thesis patterns by assignment type</h2>
@@ -563,7 +563,7 @@ export const ExpandedApaResearchPaper: React.FC<{ handleNavigate: NavigateHandle
       Heading levels skip or jump inconsistently. In-text citations omit years or use &quot;&amp;&quot; outside parentheses. Reference lists mix database names with publishers incorrectly. DOIs and URLs are formatted inconsistently or left hyperlinked with poor retrieval dates. Quotations over forty words need block format. Statistical reporting has specific patterns (means, SDs, test statistics, degrees of freedom, p-values). Keep a style cheat sheet beside you while drafting.
     </p>
     <p className={p}>
-      Use a <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> for references, then manually verify unusual sources. Run <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>structure and clarity feedback</a> on your discussion section to ensure claims stay proportional to evidence.
+      Use a <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> for references, then manually verify unusual sources. Run <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>structure and clarity feedback</a> on your discussion section to ensure claims stay proportional to evidence.
     </p>
 
     <h2 className={h2}>Revision order for APA papers</h2>
@@ -765,7 +765,7 @@ export const ExpandedGrammarAcademic: React.FC<{ handleNavigate: NavigateHandler
       Comma splices and run-ons obscure logical relationships. Faulty parallelism in lists annoys careful readers. Dangling modifiers attach actions to the wrong subject. Pronoun agreement errors confuse who did what. Subject-verb disagreement across long sentences makes prose feel amateurish even when ideas are strong. Tackle these patterns systematically rather than accepting every generic &quot;clarity&quot; suggestion without understanding why.
     </p>
     <p className={p}>
-      Pair grammar passes with <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability checks</a> when assignments cap sentence length or target general audiences. Then use <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>essay-level feedback</a> to ensure sentence-level fixes did not flatten your argument.
+      Pair grammar passes with <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability checks</a> when assignments cap sentence length or target general audiences. Then use <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay-level feedback</a> to ensure sentence-level fixes did not flatten your argument.
     </p>
 
     <h2 className={h2}>ESL and multilingual writers</h2>
@@ -941,7 +941,7 @@ export const ExpandedAiWritingAssistant: React.FC<{ handleNavigate: NavigateHand
       Write a one-paragraph standard for yourself: which tools you will use, for what tasks, and how you will verify output. Revisit each semester. A clear personal policy keeps you consistent across courses with different rules and reduces anxiety about &quot;accidentally&quot; crossing a line.
     </p>
     <p className={p}>
-      WriteScholar focuses on <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>feedback you implement yourself</a> rather than ghostwritten text, aligned with how many institutions prefer students use AI. Review <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>plans</a> if you need higher monthly limits during heavy writing terms.
+      WriteScholar focuses on <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>feedback you implement yourself</a> rather than ghostwritten text, aligned with how many institutions prefer students use AI. Review <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>plans</a> if you need higher monthly limits during heavy writing terms.
     </p>
 
     <h2 className={h2}>Documentation for your own learning</h2>
@@ -1014,7 +1014,7 @@ export const ExpandedEssayStudentGoogleSearchGuide: React.FC<{ handleNavigate: N
 
     <h2 className={h2}>“AI homework helper” and “AI essay writer”: read the syllabus twice</h2>
     <p className={p}>
-      Institutions distinguish between assistance that strengthens your skills and submission of machine-generated work. Feedback on a draft you wrote (structure, rubric alignment, missing citations) is widely accepted when policies allow tools at all. Submitting text a model composed for you usually is not. When in doubt, ask your instructor before the deadline. WriteScholar is built around <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>feedback on your draft</a> and <a href="/features" onClick={handleNavigate('features')} className={internalLink}>academic workflows</a>, not ghostwriting; see <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for plans that match how many papers you run per month.
+      Institutions distinguish between assistance that strengthens your skills and submission of machine-generated work. Feedback on a draft you wrote (structure, rubric alignment, missing citations) is widely accepted when policies allow tools at all. Submitting text a model composed for you usually is not. When in doubt, ask your instructor before the deadline. WriteScholar is built around <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>feedback on your draft</a> and <a href="/features" onClick={handleNavigate('features')} className={internalLink}>academic workflows</a>, not ghostwriting; see <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for plans that match how many papers you run per month.
     </p>
 
     <h2 className={h2}>Turn searches into a repeatable workflow</h2>
