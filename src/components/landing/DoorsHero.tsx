@@ -27,17 +27,23 @@ const TOPIC_MAX_CHARS = 200;
 const TOPIC_EXAMPLES = ["Aristotle's ethics", 'Statistics 101', 'Cell respiration', 'The French Revolution'];
 
 /** A corner tile: real product media in a white card with a gold lip. */
-function Tile({ label, position, tilt, delay, children }: { label: string; position: string; tilt: string; delay: string; children: ReactNode }) {
+function Tile({ label, position, tilt, delay, onClick, children }: { label: string; position: string; tilt: string; delay: string; onClick: () => void; children: ReactNode }) {
   return (
-    <div
-      className={`absolute w-[13rem] motion-safe:animate-[hero-tile-drift_8.5s_ease-in-out_infinite] lg:w-[15rem] ${position}`}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`${label}: get started`}
+      className={`group pointer-events-auto absolute block w-[13rem] cursor-pointer border-0 bg-transparent p-0 text-left hover:z-30 motion-safe:animate-[hero-tile-drift_8.5s_ease-in-out_infinite] lg:w-[15rem] ${position}`}
       style={{ animationDelay: delay }}
     >
+      {/* Hovering a tile enlarges it a little so the product is easier to see. */}
+      <div className="transition-transform duration-200 ease-out group-hover:scale-[1.3] motion-reduce:transition-none">
       <figure className={`m-0 overflow-hidden rounded-[20px] border-[3px] border-b-[6px] border-[#FFC800] bg-white shadow-[0_20px_46px_-12px_rgba(255,200,0,0.55)] ${tilt}`}>
         <div className="relative aspect-[16/10] w-full bg-[#1C1030]">{children}</div>
         <figcaption className="border-t-2 border-[#FFF1B8] px-3 py-1.5 text-center text-[13px] font-black text-[#3C3C3C]">{label}</figcaption>
       </figure>
-    </div>
+      </div>
+    </button>
   );
 }
 
@@ -137,18 +143,18 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
         </p>
 
         <div className="relative mx-auto w-full max-w-[1400px] px-0 pb-2 sm:px-2 sm:pb-3">
-          <div aria-hidden className="pointer-events-none hidden md:block">
-            <Tile label="Essay Analyzer" position="left-0 -top-10 lg:left-2 lg:-top-12" tilt="-rotate-[4deg]" delay="0s">
+          <div className="pointer-events-none hidden md:block">
+            <Tile label="Essay Analyzer" onClick={() => openDoor('essay')} position="left-0 -top-10 lg:left-2 lg:-top-12" tilt="-rotate-[4deg]" delay="0s">
               <img src="/hero-tiles/sentence-notes.webp" alt="" loading="eager" decoding="async" className={`${media} object-right-top`} />
             </Tile>
-            <Tile label="Fun Study Games" position="left-4 top-[34%] lg:left-8 lg:top-[36%]" tilt="rotate-[4deg]" delay="2.4s">
+            <Tile label="Fun Study Games" onClick={() => openDoor('exam')} position="left-4 top-[34%] lg:left-8 lg:top-[36%]" tilt="rotate-[4deg]" delay="2.4s">
               <video src="/hero-word-tower.mp4" poster="/hero-tiles/word-tower.webp" autoPlay muted loop playsInline preload="metadata" className={media} />
             </Tile>
-            <Tile label="Notes to Quiz" position="right-0 -top-10 lg:right-2 lg:-top-12" tilt="rotate-[4deg]" delay="1.6s">
-              <video src="/hero-quiz.mp4" poster="/hero-tiles/quiz.webp" autoPlay muted loop playsInline preload="metadata" className={media} />
+            <Tile label="Notes to Quiz" onClick={() => openDoor('exam')} position="right-0 -top-10 lg:right-2 lg:-top-12" tilt="rotate-[4deg]" delay="1.6s">
+              <video src="/hero-quiz-new.mp4" poster="/hero-tiles/quiz-new.webp" autoPlay muted loop playsInline preload="metadata" className={`${media} object-top`} />
             </Tile>
-            <Tile label="Notes to Flashcards" position="right-4 top-[34%] lg:right-8 lg:top-[36%]" tilt="-rotate-[4deg]" delay="0.8s">
-              <video src="/hero-flashcards.mp4" poster="/hero-tiles/flashcards.webp" autoPlay muted loop playsInline preload="metadata" className={media} />
+            <Tile label="Notes to Flashcards" onClick={() => openDoor('exam')} position="right-4 top-[34%] lg:right-8 lg:top-[36%]" tilt="-rotate-[4deg]" delay="0.8s">
+              <video src="/hero-flashcards-new.mp4" poster="/hero-tiles/flashcards-new.webp" autoPlay muted loop playsInline preload="metadata" className={media} />
             </Tile>
           </div>
 
