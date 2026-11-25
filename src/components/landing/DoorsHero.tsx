@@ -1,9 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { trackEvent } from '../../utils/analytics';
 import { TRY_BEFORE_SIGNUP } from '../../config/pricing';
-import { hasPendingNotes, readDoor, rememberDoor, takePendingNotes, type Door, type PackRequest } from '../../utils/tryFirst';
+import { hasPendingNotes, readAnswers, readDoor, rememberDoor, saveAnswer, stashLandingEssay, stashLandingTopic, takePendingNotes, type Door, type PackRequest } from '../../utils/tryFirst';
+import { handOffEssayQuestion } from '../../utils/essayPlan';
+import { ESSAY_FILE_ACCEPT, EssayFileError, readEssayFile } from '../../utils/readEssayFile';
+import { stashWorkspaceView } from '../workspace/workspaceNavigate';
 import HeroFeatureRow from './HeroFeatureRow';
 import HeroEssayGrader, { countWords, type EssayFacts } from './HeroEssayGrader';
+import DoorFlow, { type FlowAsk } from './DoorFlow';
 import { BTN_GREEN, BTN_WHITE, FONT } from './webStyle';
 
 interface DoorsHeroProps {
@@ -26,21 +30,63 @@ const NOTES_MAX_WORDS = 5000;
 const TOPIC_MAX_CHARS = 200;
 const TOPIC_EXAMPLES = ["Aristotle's ethics", 'Statistics 101', 'Cell respiration', 'The French Revolution'];
 
+/** The strip under the box ("50,000+ students", "91% report better grades", "60 sec to your first grade"). Hidden until the numbers can be backed up. */
+const SHOW_HERO_STATS = false;
+
+/** The three things the landing box can start. */
+type Ask = 'write' | 'exam' | 'grade';
+const ASKS: Ask[] = ['write', 'exam', 'grade'];
+const ASK: Record<Ask, { label: string; short: string; icon: string; field: string; placeholder: string; cta: string; examples: string[]; note: string }> = {
+  write: {
+    label: 'Write an essay',
+    short: 'Essay',
+    icon: '/icons/write.webp',
+    field: 'Your essay question',
+    placeholder: 'Paste your essay question here',
+    cta: 'Start my essay',
+    examples: ['Was the Treaty of Versailles too harsh?', 'Should social media be regulated?'],
+    note: '',
+  },
+  exam: {
+    label: 'Study for an exam',
+    short: 'Exam',
+    icon: '/icons/study-pack.webp',
+    field: 'What the exam is on',
+    placeholder: 'What is the exam on? A course, a chapter or one idea',
+    cta: 'Make my pack',
+    examples: ['Statistics 101', 'Cell respiration', 'The French Revolution'],
+    note: '',
+  },
+  grade: {
+    label: 'Grade my essay',
+    short: 'Grade',
+    icon: '/icons/grade-essay.webp',
+    field: 'Your essay',
+    placeholder: 'Paste your essay here, or upload the file',
+    cta: 'Grade my essay',
+    examples: [],
+    note: 'An estimated grade, every rubric score and what to fix first. PDF or Word, or paste it.',
+  },
+};
+
 /** A corner tile: real product media in a white card with a gold lip. */
-function Tile({ label, position, tilt, delay, onClick, children }: { label: string; position: string; tilt: string; delay: string; onClick: () => void; children: ReactNode }) {
+function Tile({ label, position, tilt, delay, onClick, isNew = false, children }: { label: string; position: string; tilt: string; delay: string; onClick: () => void; isNew?: boolean; children: ReactNode }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={`${label}: get started`}
-      className={`group pointer-events-auto absolute block w-[13rem] cursor-pointer border-0 bg-transparent p-0 text-left hover:z-30 motion-safe:animate-[hero-tile-drift_8.5s_ease-in-out_infinite] lg:w-[15rem] ${position}`}
+      className={`group pointer-events-auto absolute block w-[12rem] cursor-pointer border-0 bg-transparent p-0 text-left hover:z-30 motion-safe:animate-[hero-tile-drift_8.5s_ease-in-out_infinite] xl:w-[13.5rem] min-[1400px]:w-[14.5rem] ${position}`}
       style={{ animationDelay: delay }}
     >
       {/* Hovering a tile enlarges it a little so the product is easier to see. */}
       <div className="transition-transform duration-200 ease-out group-hover:scale-[1.3] motion-reduce:transition-none">
       <figure className={`m-0 overflow-hidden rounded-[20px] border-[3px] border-b-[6px] border-[#FFC800] bg-white shadow-[0_20px_46px_-12px_rgba(255,200,0,0.55)] ${tilt}`}>
         <div className="relative aspect-[16/10] w-full bg-[#1C1030]">{children}</div>
-        <figcaption className="border-t-2 border-[#FFF1B8] px-3 py-1.5 text-center text-[13px] font-black text-[#3C3C3C]">{label}</figcaption>
+        <figcaption className="border-t-2 border-[#FFF1B8] px-3 py-1.5 text-center text-[13px] font-black text-[#3C3C3C]">
+          {label}
+          {isNew && <span className="ml-1.5 rounded-full bg-[#FFC800] px-2 py-px align-[1px] text-[10px] font-black text-[#3A2A00]">New</span>}
+        </figcaption>
       </figure>
       </div>
     </button>
@@ -50,10 +96,10 @@ function Tile({ label, position, tilt, delay, onClick, children }: { label: stri
 const media = 'absolute inset-0 h-full w-full object-cover';
 
 /**
- * The landing hero, laid out like the purple hero the site had in October
- * 2026: one headline, one sentence, two buttons, the stats and the six
- * feature icons, with four tilted product tiles at the sides and nothing
- * heavy in the middle.
+ * The landing hero: one headline, one line, and one box that starts any of
+ * the three jobs (write an essay, study for an exam, grade an essay), then
+ * the stats and the six feature icons, with four tilted product tiles at
+ * the sides. What is typed in the box is kept through sign-up.
  *
  * The two buttons are the two doors. "Study for an exam" opens the topic
  * box and "Grade my essay" opens the essay box, each in a pop-up, so the
@@ -74,12 +120,104 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
     return null;
   });
 
+  /** The essay door, knowing where the essay is: not started opens Start an essay, a draft opens the grader. */
+  const openEssay = (stage: 'start' | 'draft') => {
+    saveAnswer({ stage });
+    if (stage === 'start' && !TRY_BEFORE_SIGNUP) stashWorkspaceView('write');
+    openDoor('essay');
+  };
+
+  /** The landing box: which job it is set to, and what is typed for each. */
+  const [ask, setAsk] = useState<Ask>(() => {
+    const d = readDoor();
+    if (d === 'exam') return 'exam';
+    if (d === 'essay' && readAnswers().stage === 'draft') return 'grade';
+    return 'write';
+  });
+  const [asks, setAsks] = useState<Record<Ask, string>>({ write: '', exam: '', grade: '' });
+  const [askHint, setAskHint] = useState('');
+  const [askShake, setAskShake] = useState(false);
+  /** An essay typed in the box, for the grader pop-up when results come before sign-up. */
+  const [gradeSeed, setGradeSeed] = useState('');
+  const askRef = useRef<HTMLTextAreaElement | null>(null);
+  const askText = asks[ask];
+  /** Grade mode: an essay read from a file. */
+  const [essayFile, setEssayFile] = useState<string | null>(null);
+  const [essayReading, setEssayReading] = useState(false);
+  const [essayDrag, setEssayDrag] = useState(false);
+  const essayFileRef = useRef<HTMLInputElement | null>(null);
+  const essayWords = ask === 'grade' ? (askText.trim() ? askText.trim().split(/\s+/).length : 0) : 0;
+
+  const loadEssayFile = async (file: File) => {
+    if (essayReading) return;
+    setEssayReading(true);
+    setAskHint('');
+    try {
+      const text = await readEssayFile(file);
+      setAsks((all) => ({ ...all, grade: text }));
+      setEssayFile(file.name);
+      trackEvent('essay_pasted', { words: text.split(/\s+/).length, source: 'file', where: 'hero_box' });
+    } catch (e) {
+      setAskHint(e instanceof EssayFileError ? e.message : 'We could not read that file. Paste the text instead.');
+    } finally {
+      setEssayReading(false);
+    }
+  };
+
+  const pickAsk = (next: Ask) => {
+    setAsk(next);
+    setAskHint('');
+    window.setTimeout(() => askRef.current?.focus(), 30);
+  };
+  const nudgeAsk = (message: string) => {
+    setAskHint(message);
+    setAskShake(true);
+    window.setTimeout(() => setAskShake(false), 460);
+    askRef.current?.focus();
+  };
+  const next = signedIn ? 'dashboard' : 'signup';
+  /** The pop-up that asks the free questions before sign-up (DoorFlow). */
+  const [flow, setFlow] = useState<{ ask: FlowAsk; value: string } | null>(null);
+
+  /** Keep what was typed, then on to sign-up (or the account), opening on the right screen. */
+  const submitAsk = () => {
+    const value = askText.trim();
+    if (ask === 'write' && value.length < 12) { nudgeAsk('Paste your essay question first.'); return; }
+    if (ask === 'exam' && value.length < 2) { nudgeAsk('Type what the exam is on first, for example "Statistics 101".'); return; }
+    setAskHint('');
+    trackEvent('door_selected', { door: ask === 'exam' ? 'exam' : 'essay', source: 'hero_box', ask, typed: value.length > 0 });
+    if (!TRY_BEFORE_SIGNUP) { setFlow({ ask, value }); return; }
+
+    if (ask === 'write') {
+      // Start an essay opens with the question in and goes straight to its questions.
+      handOffEssayQuestion(value, 1500);
+      saveAnswer({ stage: 'start' });
+      rememberDoor('essay');
+      stashWorkspaceView('write');
+      onNavigate(next);
+      return;
+    }
+    if (ask === 'exam') {
+      if (TRY_BEFORE_SIGNUP) { onPackSubmit({ inputType: 'topic', input: value.slice(0, TOPIC_MAX_CHARS) }); return; }
+      stashLandingTopic(value.slice(0, TOPIC_MAX_CHARS));
+      rememberDoor('exam');
+      onNavigate(next);
+      return;
+    }
+    if (TRY_BEFORE_SIGNUP) { setGradeSeed(value); rememberDoor('essay'); setOpen('essay'); return; }
+    if (value) stashLandingEssay(value);
+    saveAnswer({ stage: 'draft' });
+    rememberDoor('essay');
+    if (signedIn) stashWorkspaceView('analyze');
+    onNavigate(next);
+  };
+
   const openDoor = (door: Door) => {
     rememberDoor(door);
     trackEvent('door_selected', { door });
     if (!TRY_BEFORE_SIGNUP) {
-      // The door is remembered, so the dashboard opens on the right side after sign-up.
-      onNavigate(signedIn ? 'dashboard' : 'signup');
+      // The free questions first, in the pop-up; the door is remembered for after sign-up.
+      setFlow({ ask: door === 'exam' ? 'exam' : readAnswers().stage === 'draft' ? 'grade' : 'write', value: '' });
       return;
     }
     setOpen(door);
@@ -92,7 +230,7 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
       const door = want === 'essay' || want === 'exam' ? want : readDoor() ?? 'exam';
       if (!TRY_BEFORE_SIGNUP) {
         if (want) rememberDoor(door);
-        onNavigate(signedIn ? 'dashboard' : 'signup');
+        setFlow({ ask: door === 'exam' ? 'exam' : readAnswers().stage === 'draft' ? 'grade' : 'write', value: '' });
         return;
       }
       setOpen(door);
@@ -101,6 +239,19 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
     return () => window.removeEventListener('writescholar-hero-door', onDoor);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn]);
+
+  // Sections further down ("Start an essay", "Make a study pack") send people back up to the box in the right mode.
+  useEffect(() => {
+    const onAsk = (e: Event) => {
+      const want = (e as CustomEvent<{ ask?: Ask }>).detail?.ask;
+      if (want === 'write' || want === 'exam' || want === 'grade') { setAsk(want); setAskHint(''); }
+      const box = document.getElementById('hero-ask');
+      box?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+      window.setTimeout(() => askRef.current?.focus({ preventScroll: true }), 450);
+    };
+    window.addEventListener('writescholar-hero-ask', onAsk);
+    return () => window.removeEventListener('writescholar-hero-ask', onAsk);
+  }, []);
 
   // Pop-up: Escape closes it, and the page behind does not scroll.
   useEffect(() => {
@@ -129,7 +280,7 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
         <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(to_bottom,rgba(231,214,243,0)_0%,rgba(231,214,243,0)_40%,rgba(231,214,243,0.18)_62%,rgba(231,214,243,0.55)_82%,#E7D6F3_100%)] sm:h-28 lg:h-32" />
       </div>
 
-      <div className="relative z-10 px-4 pb-4 pt-24 sm:px-6 sm:pb-0 sm:pt-28 lg:px-8 lg:pt-32">
+      <div className="relative z-10 px-4 pb-4 pt-20 sm:px-6 sm:pb-0 sm:pt-24 lg:px-8 lg:pt-24">
         {/* Trust pill, as on the previous purple hero. */}
         <p className="absolute left-1/2 top-8 z-20 sm:top-10 lg:top-12 m-0 inline-flex -translate-x-1/2 items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-b-[3px] border-stone-300 bg-white py-0.5 pl-1 pr-2.5 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.32)] sm:gap-2 sm:py-1 sm:pr-3">
           <span aria-hidden className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-b-[3px] border-[#46A302] bg-[#58CC02] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] sm:h-6 sm:w-6">
@@ -143,22 +294,25 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
         </p>
 
         <div className="relative mx-auto w-full max-w-[1400px] px-0 pb-2 sm:px-2 sm:pb-3">
-          <div className="pointer-events-none hidden md:block">
-            <Tile label="Essay Analyzer" onClick={() => openDoor('essay')} position="left-0 -top-10 lg:left-2 lg:-top-12" tilt="-rotate-[4deg]" delay="0s">
-              <img src="/hero-tiles/sentence-notes.webp" alt="" loading="eager" decoding="async" className={`${media} object-right-top`} />
+          {/* Product tiles. The top pair sit beside the headline from 1024px; the lower pair need the width beside the box. */}
+          <div className="pointer-events-none hidden lg:block">
+            <Tile label="Essay Writer" isNew onClick={() => openEssay('start')} position="left-0 -top-4 xl:left-2 xl:-top-6" tilt="-rotate-[4deg]" delay="0s">
+              <img src="/hero-tiles/essay-writer.webp" alt="" loading="eager" decoding="async" className={`${media} object-right-top`} />
             </Tile>
-            <Tile label="Fun Study Games" onClick={() => openDoor('exam')} position="left-4 top-[34%] lg:left-8 lg:top-[36%]" tilt="rotate-[4deg]" delay="2.4s">
-              <video src="/hero-word-tower.mp4" poster="/hero-tiles/word-tower.webp" autoPlay muted loop playsInline preload="metadata" className={media} />
-            </Tile>
-            <Tile label="Notes to Quiz" onClick={() => openDoor('exam')} position="right-0 -top-10 lg:right-2 lg:-top-12" tilt="rotate-[4deg]" delay="1.6s">
+            <Tile label="Notes to Quiz" onClick={() => openDoor('exam')} position="right-0 -top-4 xl:right-2 xl:-top-6" tilt="rotate-[4deg]" delay="1.6s">
               <video src="/hero-quiz-new.mp4" poster="/hero-tiles/quiz-new.webp" autoPlay muted loop playsInline preload="metadata" className={`${media} object-top`} />
             </Tile>
-            <Tile label="Notes to Flashcards" onClick={() => openDoor('exam')} position="right-4 top-[34%] lg:right-8 lg:top-[36%]" tilt="-rotate-[4deg]" delay="0.8s">
+          </div>
+          <div className="pointer-events-none hidden xl:block">
+            <Tile label="Essay Analyzer" onClick={() => openEssay('draft')} position="left-0 top-[324px] min-[1400px]:left-2" tilt="rotate-[4deg]" delay="2.4s">
+              <img src="/hero-tiles/sentence-notes.webp" alt="" loading="lazy" decoding="async" className={`${media} object-right-top`} />
+            </Tile>
+            <Tile label="Notes to Flashcards" onClick={() => openDoor('exam')} position="right-0 top-[324px] min-[1400px]:right-2" tilt="-rotate-[4deg]" delay="0.8s">
               <video src="/hero-flashcards-new.mp4" poster="/hero-tiles/flashcards-new.webp" autoPlay muted loop playsInline preload="metadata" className={media} />
             </Tile>
           </div>
 
-        <div className="relative mx-auto flex w-full max-w-[46rem] flex-col items-center text-center opacity-0 animate-hero-card-enter">
+        <div className="relative mx-auto flex w-full max-w-[48rem] flex-col items-center text-center opacity-0 animate-hero-card-enter">
           <h1 className="m-0 w-full font-black leading-[0.98] tracking-[-0.035em]">
             <span className="block whitespace-nowrap text-[1.85rem] min-[390px]:text-[2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.55rem] xl:text-[4.15rem]">
               Turn your grades from
@@ -180,42 +334,124 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
             </span>
           </h1>
 
-          <h2 className="m-0 mt-8 max-w-[38rem] text-base font-semibold leading-snug text-white sm:mt-10 sm:text-lg lg:text-[1.15rem]">
-            <span className="font-extrabold text-[#FFC800]">WriteScholar</span> the all-in-one AI study system to{' '}
-            <span className="font-extrabold">study for any exam</span>,{' '}
-            <span className="font-extrabold">write better essays</span>, and{' '}
-            <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
+          <h2 className="m-0 mt-8 max-w-[40rem] text-base font-semibold leading-snug text-white sm:mt-10 sm:text-lg lg:text-[1.15rem]">
+            <span className="font-extrabold">WriteScholar</span> the all-in-one AI study system to{' '}
+            <span className="font-extrabold text-[#FFC800]">study for any exam</span>,{' '}
+            <span className="font-extrabold text-[#FFC800]">write better essays</span>, and{' '}
+            <span className="font-extrabold text-[#FFC800]">get higher grades</span>.
           </h2>
 
-          {/* The two doors. */}
-          <div className="mt-10 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-14 sm:w-auto md:flex-row md:items-center md:gap-4">
-            <button
-              type="button"
-              onClick={() => openDoor('exam')}
-              className="group/btn inline-flex items-center justify-center whitespace-nowrap rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#58CC02] px-8 py-4 text-[19px] font-extrabold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#61E002] active:translate-y-0.5 active:border-b-2 sm:px-8 sm:py-[20px] sm:text-[21px] lg:px-10 lg:text-[23px]"
-            >
-              Study for an exam free
-              <svg className="ml-2.5 h-5 w-5 transition-transform duration-200 group-hover/btn:translate-x-1 sm:h-6 sm:w-6" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={() => openDoor('essay')}
-              className="group/btn inline-flex items-center justify-center whitespace-nowrap rounded-2xl border-2 border-b-4 border-stone-300 bg-white px-8 py-4 text-[19px] font-extrabold text-[#6B27A3] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FBF7FF] active:translate-y-0.5 active:border-b-2 sm:px-8 sm:py-[20px] sm:text-[21px] lg:px-10 lg:text-[23px]"
-            >
-              Grade my essay free
-              <svg className="ml-2.5 h-5 w-5 transition-transform duration-200 group-hover/btn:translate-x-1 sm:h-6 sm:w-6" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
+          {/* One box for all three jobs: pick one, type, go. */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); submitAsk(); }}
+            onDragOver={(e) => { if (ask !== 'grade') return; e.preventDefault(); if (!essayDrag) setEssayDrag(true); }}
+            onDragLeave={() => setEssayDrag(false)}
+            onDrop={(e) => { if (ask !== 'grade') return; e.preventDefault(); setEssayDrag(false); const f = e.dataTransfer.files?.[0]; if (f) void loadEssayFile(f); }}
+            className={`mt-8 w-full rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-3 text-left text-[#1C1917] shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)] transition-shadow focus-within:ring-4 focus-within:ring-[#FFD84D]/60 sm:mt-9 sm:rounded-[28px] sm:p-4 sm:pl-5 ${essayDrag ? 'ring-4 ring-[#FFD84D]' : ''}`}
+          >
+            {/* Phones: the three jobs first, as one row of short buttons. */}
+            <div role="radiogroup" aria-label="What are you working on" className="grid grid-cols-3 gap-1.5 sm:hidden">
+              {ASKS.map((k) => {
+                const on = ask === k;
+                return (
+                  <button key={k} type="button" role="radio" aria-checked={on} onClick={() => pickAsk(k)} className={`inline-flex min-h-[46px] items-center justify-center gap-1.5 rounded-[14px] border-2 border-b-4 px-1 text-[14px] transition-colors ${on ? 'border-[#8A48C7] bg-[#A560E8] font-black text-white' : 'border-[#E4D4F8] bg-[#F7F1FF] font-extrabold text-[#1C1917]'}`}>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${on ? 'bg-white' : ''}`}><img src={ASK[k].icon} alt="" width={22} height={22} className="h-[22px] w-[22px] object-contain" /></span>
+                    {ASK[k].short}
+                  </button>
+                );
+              })}
+            </div>
+
+            <label htmlFor="hero-ask" className="sr-only">{ASK[ask].field}</label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+            <textarea
+              id="hero-ask"
+              ref={askRef}
+              value={askText}
+              onChange={(e) => { const v = e.target.value; setAsks((all) => ({ ...all, [ask]: v })); if (askHint) setAskHint(''); if (ask === 'grade' && !v.trim()) setEssayFile(null); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && ask !== 'grade') { e.preventDefault(); submitAsk(); } }}
+              rows={ask === 'grade' ? 4 : 2}
+              maxLength={ask === 'exam' ? TOPIC_MAX_CHARS : ask === 'write' ? 2000 : undefined}
+              placeholder={ASK[ask].placeholder}
+              autoComplete="off"
+              className="mt-3 block w-full min-w-0 flex-1 resize-none border-0 bg-transparent px-1 text-[18px] font-extrabold leading-[1.35] text-[#1C1917] placeholder:font-bold placeholder:text-[#8A8580] focus:outline-none sm:mt-1 sm:text-[21px]"
+            />
+            {ask === 'grade' && (
+              <div className="order-first flex shrink-0 flex-col items-stretch gap-1 sm:order-none sm:items-end">
+                <input ref={essayFileRef} type="file" accept={ESSAY_FILE_ACCEPT} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void loadEssayFile(f); e.currentTarget.value = ''; }} />
+                {essayFile && !essayReading ? (
+                  <span className="mt-3 inline-flex min-h-[46px] max-w-full items-center gap-2 rounded-2xl border-2 border-[#BFE89A] bg-[#F4FCEB] pl-3 pr-1 text-[14px] font-extrabold text-[#14532D] sm:mt-0 sm:max-w-[240px]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+                    <span className="min-w-0 flex-1 truncate">{essayFile}</span>
+                    <button type="button" onClick={() => { setEssayFile(null); setAsks((all) => ({ ...all, grade: '' })); askRef.current?.focus(); }} aria-label={`Remove ${essayFile}`} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl hover:bg-[#E1F6CC]">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" aria-hidden><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={essayReading}
+                    onClick={() => essayFileRef.current?.click()}
+                    className={`mt-3 min-h-[48px] whitespace-nowrap px-4 text-[15px] sm:mt-0 ${BTN_WHITE} ${!askText.trim() && !essayReading ? 'ws-upload-glow' : ''}`}
+                  >
+                    {essayReading ? (
+                      <><svg className="h-[18px] w-[18px] animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden><circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} /><path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" /></svg>Reading…</>
+                    ) : (
+                      <><svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4M7 9l5-5 5 5M4 20h16" /></svg>Upload essay</>
+                    )}
+                  </button>
+                )}
+                <span className="hidden text-[12px] font-extrabold text-[#8A8580] sm:block">{essayWords > 0 ? `${essayWords.toLocaleString('en-US')} words` : 'PDF or Word'}</span>
+              </div>
+            )}
+            </div>
+
+            <div className="mt-2 flex flex-col gap-2.5 lg:flex-row lg:items-center">
+              <div role="radiogroup" aria-label="What are you working on" className="hidden shrink-0 flex-nowrap items-center gap-1.5 sm:-ml-2 sm:flex">
+                {ASKS.map((k) => {
+                  const on = ask === k;
+                  return (
+                    <button key={k} type="button" role="radio" aria-checked={on} onClick={() => pickAsk(k)} className={`inline-flex min-h-[46px] items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-b-4 pl-1.5 pr-3 text-[13.5px] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 ${on ? 'border-[#8A48C7] bg-[#A560E8] font-black text-white' : 'border-[#E4D4F8] bg-[#F7F1FF] font-extrabold text-[#1C1917] hover:border-[#C9A0F0]'}`}>
+                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${on ? 'bg-white' : ''}`}><img src={ASK[k].icon} alt="" width={26} height={26} className="h-[26px] w-[26px] object-contain" /></span>
+                      {ASK[k].label}
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="hidden flex-1 lg:block" />
+              <button type="submit" className={`group/btn min-h-[56px] w-full whitespace-nowrap px-6 text-[17.5px] lg:w-auto ${BTN_GREEN} ${askShake ? 'ws-shake' : ''}`}>
+                {ASK[ask].cta}
+                <svg className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </button>
+            </div>
+
+            {askHint && (
+              <p role="alert" className="m-0 mt-3 rounded-2xl border border-[#F3D9A8] bg-[#FFF4E5] px-3.5 py-2.5 text-[13.5px] font-extrabold leading-snug text-[#9A3412]">{askHint}</p>
+            )}
+          </form>
+
+          {/* Examples for the chosen job, one tap to fill the box. */}
+          <div className="mt-3.5 flex min-h-[40px] flex-wrap items-center justify-center gap-2">
+            {ASK[ask].examples.length > 0 ? (
+              <>
+                <span className="text-[13.5px] font-black text-[#EBDDFB]">Try</span>
+                {ASK[ask].examples.map((ex) => (
+                  <button key={ex} type="button" onClick={() => { setAsks((all) => ({ ...all, [ask]: ex })); setAskHint(''); askRef.current?.focus(); }} className="inline-flex min-h-[40px] items-center rounded-full border-2 border-white/25 bg-[#5A1F8F] px-3.5 text-[13.5px] font-extrabold text-white transition-colors hover:bg-[#4A1778]">
+                    {ex}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <span className="text-[14px] font-extrabold text-[#EBDDFB]">{ASK[ask].note}</span>
+            )}
           </div>
 
-          <p className="m-0 mt-4 text-[12px] font-bold text-[#EBDDFB] sm:mt-5 sm:text-[13px]">
+          <p className="m-0 mt-3 text-[12px] font-bold text-[#EBDDFB] sm:text-[13px]">
             About 30 seconds to get started. No card needed.
           </p>
 
           {/* Stats strip. */}
+          {SHOW_HERO_STATS && (
           <div className="mt-7 flex w-full flex-col items-center gap-y-1 sm:mt-10 sm:w-max sm:flex-row sm:justify-center sm:gap-x-5 sm:gap-y-0">
             <div className="flex items-center justify-center gap-x-2.5 min-[380px]:gap-x-3 sm:gap-x-5">
               {[
@@ -233,15 +469,17 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
               <span className="text-[10.5px] font-bold text-[#EBDDFB] sm:text-[12px]">to your first grade</span>
             </div>
           </div>
+          )}
         </div>
 
         {/* The six things it does. */}
-        <div className="relative z-10 mx-auto mt-6 w-full max-w-5xl px-4 pb-16 sm:mt-8 sm:pb-20 lg:pb-24">
+        <div className="relative z-10 mx-auto mt-6 w-full max-w-5xl px-4 pb-16 sm:mt-9 sm:pb-20 lg:pb-24">
           <HeroFeatureRow onPick={openDoor} />
         </div>
         </div>
       </div>
 
+      {flow && <DoorFlow ask={flow.ask} initial={flow.value} signedIn={signedIn} onClose={() => setFlow(null)} onNavigate={onNavigate} />}
       {open && (
         <div className="fixed inset-0 z-[220] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="hero-door-title">
           <div className="absolute inset-0 min-h-full bg-[#2A1540]/80" onClick={() => setOpen(null)} aria-hidden />
@@ -281,7 +519,7 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
               {open === 'exam' ? (
                 <TopicBox onSubmit={(req) => { setOpen(null); onPackSubmit(req); }} />
               ) : (
-                <HeroEssayGrader onSubmit={(text, facts) => { setOpen(null); onEssaySubmit(text, facts); }} initialText={restoredEssay} resetSignal={resetSignal} instant />
+                <HeroEssayGrader onSubmit={(text, facts) => { setOpen(null); onEssaySubmit(text, facts); }} initialText={gradeSeed || restoredEssay} resetSignal={resetSignal} instant />
               )}
             </div>
           </div>
@@ -315,14 +553,16 @@ function DoorTab({ active, onClick, label, children }: { active: boolean; onClic
  * idea. Notes are optional and make every question come from the
  * student's own course. Reads a dropped .docx or .txt in the browser.
  */
-export function TopicBox({ onSubmit, idPrefix = 'hero', flat = false }: {
+export function TopicBox({ onSubmit, idPrefix = 'hero', flat = false, initialTopic = '' }: {
   onSubmit: (req: PackRequest) => void;
+  /** A topic to start with (one typed on the landing page before sign-up). */
+  initialTopic?: string;
   /** Keeps field ids unique when the box appears twice on one page. */
   idPrefix?: string;
   /** A quieter card for use on a light page, without the deep hero shadow. */
   flat?: boolean;
 }) {
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState(initialTopic);
   const [notesOpen, setNotesOpen] = useState(false);
   const [notes, setNotes] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);

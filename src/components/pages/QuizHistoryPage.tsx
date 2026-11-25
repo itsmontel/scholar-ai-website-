@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Icon3D from '../common/Icon3D';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
@@ -253,12 +254,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   }, [currentPage]);
 
   const getToolIcon = (type: string) => {
-    if (type === 'study_pack') return '📚';
-    if (type === 'flashcards') return '🃏';
-    if (type === 'crossword') return '🧩';
-    if (type === 'crater_blast') return '💥';
-    if (type === 'lesson') return '🎓';
-    return '📝';
+    if (type === 'study_pack') return 'study-pack';
+    if (type === 'flashcards') return 'flashcards';
+    if (type === 'crossword') return 'crossword';
+    if (type === 'crater_blast') return 'crater-blast';
+    if (type === 'lesson') return 'graduation';
+    return 'quiz';
   };
 
   const formatDate = (dateString: string) => {
@@ -1357,7 +1358,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             return expiringSoonCount > 0 && urgencyText && (
               <div className={`mb-6 p-4 rounded-xl border ${expiringSoonCount <= 2 ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'}`}>
                 <div className="flex items-start sm:items-center gap-3">
-                  <span className="text-xl flex-shrink-0">{expiringSoonCount <= 2 ? '⚠️' : '⏰'}</span>
+                  <Icon3D name="alarm" size={34} />
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-bold ${expiringSoonCount <= 2 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
                       {urgencyText}
@@ -1521,7 +1522,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         {filteredTools.length === 0 ? (
           <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-12 sm:p-16 text-center shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)]">
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-[#F3EAFF]">
-              🧠
+              <Icon3D name="brain" size={56} />
             </div>
             <h2 className="text-xl font-extrabold text-stone-900 mb-2">
               No study sets yet
@@ -1567,7 +1568,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                             className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 text-white shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)] border-2 border-white/25"
                             style={{ background: `linear-gradient(168deg, ${styles.tint} 0%, ${styles.tintDark} 100%)` }}
                           >
-                            {toolIcon}
+                            <Icon3D name={toolIcon} size={30} />
                           </div>
                           <div className="min-w-0 flex-1">
                             {renamingId === tool.id ? (
@@ -1634,7 +1635,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
                                 <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-[#F3EAFF] text-[#7733B5] border-2 border-[#A560E8]/30">
-                                  🎯 Quiz
+                                  <Icon3D name="target" size={14} className="mr-1 inline-block align-[-2px]" />Quiz
                                 </span>
                               )}
                               {daysRemaining === null ? (

@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import HeroEssayGrader from '../landing/HeroEssayGrader';
 import { TopicBox } from '../landing/DoorsHero';
 import { BTN_GREEN, BTN_PURPLE, BTN_WHITE, CARD, EYEBROW, FONT } from '../landing/webStyle';
-import { readDoor, rememberDoor, type Door, type PackRequest } from '../../utils/tryFirst';
+import { readAnswers, readDoor, rememberDoor, clearLandingEssay, clearLandingTopic, peekLandingEssay, peekLandingTopic, takeAutoStart, peekPendingExamDate, clearPendingExamDate, type Door, type PackRequest } from '../../utils/tryFirst';
+import { GRADE_READY_SHARE, handOffEssayQuestion, planFromHtml, readEssayPlan, saveEssayPlan, sectionDone, sectionWords, type EssayPlan } from '../../utils/essayPlan';
+import { FREE_GRADE_MIN_WORDS } from '../../config/pricing';
 import { trackEvent } from '../../utils/analytics';
+import { CostLine, LowCreditsStrip } from '../common/CreditNudges';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -34,6 +37,12 @@ interface TodayHomeProps {
   onOpenDoc: (id: string) => void;
   /** Hand an essay to the analysis page. */
   onGradeEssay: (text: string) => void;
+  /** Open the Start an essay screen. */
+  onWriteEssay: () => void;
+  /** Open the grader's own page, to paste or upload a finished essay. */
+  onOpenGrader: () => void;
+  /** Open a draft and grade it straight away. */
+  onGradeDoc: (id: string) => void;
   /** Build a study pack from a topic or notes (spends a credit). */
   onMakePack: (req: PackRequest) => void;
   /** Open the Daily Review session: step 1 of today's plan. */
@@ -160,20 +169,77 @@ function gradeFromRow(row: any): LatestGrade | null {
  * The dashboard's home. It follows what the student is working on:
  *   - exams: their study pack, a countdown once they give the exam date,
  *     and three steps for today (flashcards, the quiz, a game);
- *   - essays: their latest grade, the fixes to make first and where the
- *     marks went.
+ *   - essays: the essay they are writing (words against the outline), or
+ *     their latest grade, the fixes to make first and where the marks went.
  * A new account with nothing yet gets the same box as the landing page
  * for the door it came through. The switch at the top is theirs to flip
  * and is remembered on this device.
  *
  * Exam dates and today's ticks are kept in this browser only.
  */
-export default function TodayHome({ userName, topBar, packs, packsLoading, docs, docsLoaded, onOpenPack, onOpenDoc, onGradeEssay, onMakePack, onStartReview, userId }: TodayHomeProps) {
+export default function TodayHome({ userName, topBar, packs, packsLoading, docs, docsLoaded, onOpenPack, onOpenDoc, onGradeEssay, onWriteEssay, onOpenGrader, onGradeDoc, onMakePack, onStartReview, userId }: TodayHomeProps) {
   // Daily Review is step 1 of the plan: its own record says whether today's
   // review is done and how long the streak is.
   const review = readReviewStreak(userId);
   const hasPack = packs.length > 0;
   const hasGrade = docs.some((d) => d.hasAnalysis);
+
+  /* ─── Essay being written ─── */
+  // The newest ungraded draft that was started from an outline on this device.
+  const [planRev, setPlanRev] = useState(0);
+  const writing = useMemo(() => {
+    for (const d of docs) {
+      if (d.hasAnalysis) continue;
+      const plan = readEssayPlan(d.id);
+      if (plan) return { id: d.id, title: d.title, plan };
+    }
+    return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docs, planRev]);
+  // On a device that has never opened the essay, the outline is still in
+  // the draft: look in the two newest ungraded drafts and remember it here.
+  useEffect(() => {
+    if (writing || !docsLoaded) return;
+    const candidates = docs.filter((d) => !d.hasAnalysis).slice(0, 2);
+    if (candidates.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const token = localStorage.getItem('authToken') || '';
+      for (const d of candidates) {
+        try {
+          const res = await fetch(`${API_URL}/documents/${d.id}`, { headers: { Authorization: `Bearer ${token}` } });
+          const json = await res.json().catch(() => null);
+          const doc = json?.data?.document;
+          const plan = planFromHtml(String(doc?.contentHtml ?? doc?.content_html ?? ''));
+          if (cancelled) return;
+          if (plan) { saveEssayPlan(d.id, plan); setPlanRev((n) => n + 1); return; }
+        } catch { /* try the next draft */ }
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docsLoaded, docs.length, !!writing]);
+  /** Words under each outline heading; null until the draft has been read. */
+  const [written, setWritten] = useState<number[] | null>(null);
+  useEffect(() => {
+    setWritten(null);
+    if (!writing) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('authToken') || '';
+        const res = await fetch(`${API_URL}/documents/${writing.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        const json = await res.json().catch(() => null);
+        const d = json?.data?.document;
+        const html = String(d?.contentHtml ?? d?.content_html ?? '');
+        if (!cancelled) setWritten(sectionWords(html, writing.plan.sections));
+      } catch {
+        if (!cancelled) setWritten(writing.plan.sections.map(() => 0));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [writing]);
+
 
   const [mode, setMode] = useState<HomeMode>(() => {
     try {
@@ -188,10 +254,28 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
   });
   useEffect(() => {
     if (modeChosen || !docsLoaded || packsLoading) return;
-    if (hasPack && hasGrade) setMode('both');
-    else if (hasGrade && !hasPack) setMode('essay');
+    const hasEssay = hasGrade || !!writing;
+    if (hasPack && hasEssay) setMode('both');
+    else if (hasEssay && !hasPack) setMode('essay');
     else if (hasPack) setMode('exam');
-  }, [modeChosen, docsLoaded, packsLoading, hasPack, hasGrade]);
+  }, [modeChosen, docsLoaded, packsLoading, hasPack, hasGrade, writing]);
+
+  // A topic typed in the landing box before sign-up fills the study pack box once.
+  const [landingTopic] = useState(() => peekLandingTopic());
+  const makePack = (req: PackRequest) => { clearLandingTopic(); onMakePack(req); };
+
+  // The landing pop-up was finished before sign-up: start that job now, once.
+  useEffect(() => {
+    const job = takeAutoStart();
+    if (job === 'pack') {
+      const topic = peekLandingTopic();
+      if (topic) { trackEvent('tool_next_step', { tool: 'study_pack', from: 'landing_flow' }); makePack({ inputType: 'topic', input: topic }); }
+    } else if (job === 'grade') {
+      const essay = peekLandingEssay();
+      if (essay) { trackEvent('tool_next_step', { tool: 'grader', from: 'landing_flow' }); clearLandingEssay(); onGradeEssay(essay); }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pickMode = (next: HomeMode) => {
     setMode(next);
@@ -218,6 +302,16 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
     writeJson(EXAM_DATES_KEY, next);
   };
   const [editingDate, setEditingDate] = useState(false);
+  // The exam date picked in the landing pop-up goes on the pack that pop-up made.
+  useEffect(() => {
+    const pending = peekPendingExamDate();
+    if (!pending || !pack) return;
+    const made = Date.parse(pack.createdAt);
+    if (!Number.isFinite(made) || made < pending.at - 60_000) return;
+    if (!examDates[pack.id]) setExamDate(pending.value);
+    clearPendingExamDate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pack?.id]);
 
   const [ticked, setDone] = useState<StepKey[]>(() => {
     const saved = readJson<{ day?: string; pack?: string; done?: StepKey[] }>(PLAN_KEY, {});
@@ -293,6 +387,7 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
 
   return (
     <div className="mx-auto w-full max-w-[1180px] pb-2" style={FONT}>
+      <div className="mb-5 empty:hidden"><LowCreditsStrip /></div>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-[14.5px] font-extrabold text-[#57534E] dark:text-stone-400">I&apos;m working on</span>
@@ -400,6 +495,7 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
                 <div className="grid grid-cols-1 gap-[18px] md:grid-cols-3">
                   <PlanCard
                     n={1}
+                    icon="daily-review"
                     title="Do today's review"
                     note="A short recall session from your packs"
                     active={nextStep === 'review'}
@@ -418,6 +514,7 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
 
                   <PlanCard
                     n={2}
+                    icon="quiz"
                     title={`Take the ${parts.questions.length || 10}-question quiz`}
                     note="Every miss comes with the reason why"
                     active={nextStep === 'quiz'}
@@ -435,6 +532,7 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
 
                   <PlanCard
                     n={3}
+                    icon="games"
                     title="Win a round of a game"
                     note="A fast game on the same topic to lock it in"
                     active={nextStep === 'game'}
@@ -468,10 +566,10 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
                   </div>
                   <ul className="m-0 grid list-none grid-cols-1 gap-2.5 p-0 sm:grid-cols-2">
                     {[
-                      { tab: 'lesson', label: 'A short lesson', detail: 'Read this first if the topic is new' },
-                      { tab: 'flashcards', label: `${parts.cards.length || ''} flashcards`.trim(), detail: 'Flip, then mark what you know' },
-                      { tab: 'quiz', label: `${parts.questions.length || ''} quiz questions`.trim(), detail: 'With the reason behind each answer' },
-                      ...(parts.hasCrossword ? [{ tab: 'crossword', label: 'A crossword', detail: 'The key terms, as clues' }] : []),
+                      { tab: 'lesson', icon: 'lesson', label: 'A short lesson', detail: 'Read this first if the topic is new' },
+                      { tab: 'flashcards', icon: 'flashcards', label: `${parts.cards.length || ''} flashcards`.trim(), detail: 'Flip, then mark what you know' },
+                      { tab: 'quiz', icon: 'quiz', label: `${parts.questions.length || ''} quiz questions`.trim(), detail: 'With the reason behind each answer' },
+                      ...(parts.hasCrossword ? [{ tab: 'crossword', icon: 'crossword', label: 'A crossword', detail: 'The key terms, as clues' }] : []),
                     ].map((item) => (
                       <li key={item.tab}>
                         <button
@@ -479,7 +577,8 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
                           onClick={() => { try { sessionStorage.setItem(VIEWER_TAB_KEY, item.tab); } catch { /* ignore */ } onOpenPack(pack); }}
                           className="flex min-h-[60px] w-full items-center justify-between gap-3 rounded-2xl border border-[#E4D4F8] bg-[#FBF8FF] px-4 py-2.5 text-left hover:border-[#C9A0F0] dark:border-stone-700 dark:bg-stone-800"
                         >
-                          <span className="min-w-0">
+                          <img src={`/icons/${item.icon}.webp`} alt="" width={38} height={38} loading="lazy" className="h-[38px] w-[38px] shrink-0 object-contain" />
+                          <span className="min-w-0 flex-1">
                             <span className="block text-[15.5px] font-black text-[#1C1917] dark:text-stone-50">{item.label}</span>
                             <span className="block truncate text-[13px] font-bold text-[#57534E] dark:text-stone-400">{item.detail}</span>
                           </span>
@@ -492,18 +591,20 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
 
                 <SideCard
                   mascot="/mascot-paper-still.webp"
-                  title={hasGrade ? 'Your essay report' : 'Essay due as well?'}
-                  body={hasGrade && latest
-                    ? `${latest.title}: ${latest.grade || 'graded'}${latest.score != null ? `, ${latest.score} out of 100` : ''}.`
-                    : 'Paste it in for an estimated grade and the fixes worth the most marks.'}
-                  cta={hasGrade ? 'Open my report' : 'Grade an essay'}
-                  onClick={hasGrade ? openReport : () => pickMode('essay')}
+                  title={writing ? 'Your essay' : hasGrade ? 'Your essay report' : 'Essay due as well?'}
+                  body={writing
+                    ? `${writing.title}: carry on where you stopped.`
+                    : hasGrade && latest
+                      ? `${latest.title}: ${latest.grade || 'graded'}${latest.score != null ? `, ${latest.score} out of 100` : ''}.`
+                      : 'Start it from the question, or paste a draft for a grade and what to fix first.'}
+                  cta={writing ? 'Carry on writing' : hasGrade ? 'Open my report' : 'Start or grade an essay'}
+                  onClick={writing ? () => onOpenDoc(writing.id) : hasGrade ? openReport : () => pickMode('essay')}
                 />
               </div>
 
               <section aria-label="Start a new study pack" className="flex flex-col gap-3.5">
                 <SectionTitle title="Something else coming up?" />
-                <TopicBox onSubmit={onMakePack} idPrefix="today" flat />
+                <><TopicBox onSubmit={makePack} idPrefix="today" flat initialTopic={landingTopic} /><CostLine kind="pack" source="home_pack" className="mt-2 px-1" /></>
               </section>
             </>
           ) : (
@@ -512,11 +613,46 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
               body="Type a course, a chapter or one idea. Scholar builds flashcards, a practice quiz and study games for it."
               mascot="/mascot-study-still.webp"
             >
-              <TopicBox onSubmit={onMakePack} idPrefix="today" />
+              <><TopicBox onSubmit={makePack} idPrefix="today" initialTopic={landingTopic} /><CostLine kind="pack" source="home_pack" className="mt-2 px-1" /></>
             </StartBanner>
           ))}
 
-          {showEssay && (hasGrade ? (
+          {showEssay && (writing ? (
+            <>
+              <WritingBanner writing={writing} written={written} onOpen={() => onOpenDoc(writing.id)} onGrade={() => onGradeDoc(writing.id)} />
+
+              <div className="flex flex-wrap items-stretch gap-[18px]">
+                <OutlineCard plan={writing.plan} written={written} onOpen={() => onOpenDoc(writing.id)} />
+                <div className="flex min-w-0 flex-[2_1_300px] flex-col gap-[18px]">
+                  {hasGrade && latest && (
+                    <section aria-label="Your last report" className={`flex flex-1 flex-col items-start gap-2.5 p-5 sm:p-6 ${CARD} dark:border-stone-700 dark:bg-stone-900`}>
+                      <span className={EYEBROW}>Your last report</span>
+                      <h2 className="m-0 text-[19px] font-black leading-tight text-[#1C1917] dark:text-stone-50">{latest.title}</h2>
+                      <div className="flex items-center gap-3">
+                        {latest.grade && (
+                          <span aria-hidden className="inline-flex h-[54px] min-w-[54px] shrink-0 items-center justify-center rounded-2xl bg-[#F3EAFF] px-2 text-[24px] font-black text-[#7733B5] dark:bg-stone-800 dark:text-[#C9A0F0]">{latest.grade.split(/[\s(]/)[0]}</span>
+                        )}
+                        <span className="text-[15px] font-extrabold leading-snug text-[#57534E] dark:text-stone-400">
+                          {latest.score != null ? `${latest.score} out of 100. ` : latest.grade ? `Estimated ${latest.grade}. ` : ''}
+                          {latest.fixes.length > 0 ? `${latest.fixes.length} ${latest.fixes.length === 1 ? 'fix is' : 'fixes are'} waiting.` : ''}
+                        </span>
+                      </div>
+                      <button type="button" onClick={openReport} className="mt-auto inline-flex min-h-[44px] items-center text-[15px] font-black text-[#7733B5] underline decoration-2 underline-offset-[3px] dark:text-[#C9A0F0]">Open my report</button>
+                    </section>
+                  )}
+                  <SideCard
+                    mascot="/mascot-study-still.webp"
+                    title={hasPack ? 'Your study pack' : 'Exam coming up too?'}
+                    body={hasPack && pack ? `${pack.title}: flashcards, a quiz and games are waiting.` : 'Type the topic and get flashcards, a quiz and games for it.'}
+                    cta={hasPack ? 'Open my pack' : 'Make a study pack'}
+                    onClick={hasPack && pack ? () => onOpenPack(pack) : () => pickMode('exam')}
+                  />
+                </div>
+              </div>
+
+              <AnotherEssay onWrite={onWriteEssay} onGrade={onOpenGrader} />
+            </>
+          ) : hasGrade ? (
             <>
               <Banner
                 eyebrow="Your essay"
@@ -596,20 +732,226 @@ export default function TodayHome({ userName, topBar, packs, packsLoading, docs,
                 />
               </div>
 
-              <section aria-label="Grade another essay" className="flex flex-col gap-3.5">
-                <SectionTitle title="Another essay to check?" />
-                <HeroEssayGrader onSubmit={(text) => onGradeEssay(text)} instant />
-              </section>
+              <AnotherEssay onWrite={onWriteEssay} onGrade={onOpenGrader} />
             </>
           ) : (
             <StartBanner
-              title={userName ? <>Paste your essay, <span className="text-[#FFD84D]">{userName}</span></> : 'Paste your essay'}
-              body="In about a minute you will see your estimated grade, every rubric score and what to fix first."
+              title={userName ? <>Where are you with your essay, <span className="text-[#FFD84D]">{userName}</span>?</> : 'Where are you with your essay?'}
+              body="Start from the question or bring a draft. Either way you can have it graded before you hand it in."
               mascot="/mascot-paper-still.webp"
             >
-              <HeroEssayGrader onSubmit={(text) => onGradeEssay(text)} instant />
+              <EssayStart onWrite={onWriteEssay} onGradeEssay={onGradeEssay} />
             </StartBanner>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+type Writing = { id: string; title: string; plan: EssayPlan };
+
+const TICK = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12l5 5L20 7" /></svg>
+);
+
+/** The essay being written: how far along it is and the way back in. */
+function WritingBanner({ writing, written, onOpen, onGrade }: { writing: Writing; written: number[] | null; onOpen: () => void; onGrade: () => void }) {
+  const { plan } = writing;
+  const target = plan.wordTarget || plan.sections.reduce((a, x) => a + (x.words || 0), 0);
+  const total = written ? written.reduce((a, b) => a + b, 0) : 0;
+  const doneCount = written ? plan.sections.filter((x, i) => sectionDone(written[i] ?? 0, x.words)).length : 0;
+  const nextIndex = written ? plan.sections.findIndex((x, i) => !sectionDone(written[i] ?? 0, x.words)) : -1;
+  const next = nextIndex === -1 ? null : plan.sections[nextIndex];
+  const allDone = !!written && nextIndex === -1;
+  const pct = target > 0 ? Math.max(3, Math.min(100, Math.round((total / target) * 100))) : 0;
+  return (
+    <Banner
+      eyebrow="Your essay"
+      title={written ? <>{writing.title}: <span className="text-[#FFD84D]">{total.toLocaleString()} of {target.toLocaleString()} words</span></> : writing.title}
+      mascot="/mascot-pointing.webp"
+      bubbleTitle={!written ? 'Your outline is waiting.' : allDone ? 'Every paragraph is written.' : `Next up: paragraph ${nextIndex + 1}.`}
+      bubbleBody={!written
+        ? 'Open it and carry on where you stopped.'
+        : allDone
+          ? 'Grade it to see what to fix before you hand it in.'
+          : `${next?.heading}. You have ${(written[nextIndex] ?? 0).toLocaleString()} ${(written[nextIndex] ?? 0) === 1 ? 'word' : 'words'}. Aim for ${(next?.words ?? 0).toLocaleString()}.`}
+    >
+      {written && (
+        <div className="flex w-full max-w-[520px] flex-wrap items-center gap-3">
+          <div role="img" aria-label={`${total} of ${target} words written`} className="h-4 min-w-[200px] flex-1 overflow-hidden rounded-full bg-[#5A1F8F]">
+            <div className="h-full rounded-full bg-[#FFD84D]" style={{ width: `${pct}%` }} />
+          </div>
+          <span className="text-[15.5px] font-black">{doneCount} of {plan.sections.length} paragraphs done</span>
+        </div>
+      )}
+      <div className="mt-1 flex flex-wrap items-center gap-3.5">
+        <button type="button" onClick={onOpen} className={`min-h-[62px] px-8 text-[19px] ${BTN_GREEN}`}>
+          Carry on writing
+          <Arrow />
+        </button>
+        {/* The full grade marks a finished essay, so it is offered once the draft is nearly there. */}
+        {total >= FREE_GRADE_MIN_WORDS && total >= target * GRADE_READY_SHARE && (
+          <button type="button" onClick={onGrade} className={`min-h-[62px] px-6 text-[17px] ${BTN_WHITE}`}>
+            Grade this draft
+          </button>
+        )}
+      </div>
+    </Banner>
+  );
+}
+
+/** The outline, with the words written under each heading. */
+function OutlineCard({ plan, written, onOpen }: { plan: EssayPlan; written: number[] | null; onOpen: () => void }) {
+  const nextIndex = written ? plan.sections.findIndex((x, i) => !sectionDone(written[i] ?? 0, x.words)) : -1;
+  return (
+    <section aria-label="Your outline" className={`flex min-w-0 flex-[3_1_420px] flex-col gap-3 p-5 sm:p-6 ${CARD} dark:border-stone-700 dark:bg-stone-900`}>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="m-0 text-[20px] font-black text-[#1C1917] dark:text-stone-50">Your outline</h2>
+        <button type="button" onClick={onOpen} className="inline-flex min-h-[44px] items-center text-[14px] font-black text-[#7733B5] underline decoration-2 underline-offset-[3px] dark:text-[#C9A0F0]">Open the essay</button>
+      </div>
+      <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+        {plan.sections.map((section, i) => {
+          const words = written?.[i] ?? 0;
+          const done = !!written && sectionDone(words, section.words);
+          const active = i === nextIndex;
+          return (
+            <li key={`${section.heading}-${i}`}>
+              <button
+                type="button"
+                onClick={onOpen}
+                className={`flex min-h-[56px] w-full items-center gap-3 rounded-2xl px-3.5 py-2 text-left transition-colors ${
+                  active
+                    ? 'border-2 border-[#A560E8] bg-white dark:bg-stone-900'
+                    : 'border border-[#E4D4F8] bg-[#FBF8FF] hover:border-[#C9A0F0] dark:border-stone-700 dark:bg-stone-800'
+                }`}
+              >
+                <span aria-hidden className={`inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-full text-[13.5px] font-black ${done ? 'bg-[#58CC02] text-white' : active ? 'bg-[#A560E8] text-white' : 'border-[3px] border-[#C9A0F0] bg-white dark:bg-stone-900'}`}>
+                  {done ? TICK : active ? i + 1 : null}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className={`block text-[15.5px] leading-snug text-[#1C1917] dark:text-stone-50 ${done || active ? 'font-black' : 'font-extrabold'}`}>{section.heading}</span>
+                  {active && (
+                    <span aria-hidden className="mt-1.5 block h-2 overflow-hidden rounded-full bg-[#F3EAFF] dark:bg-stone-800">
+                      <span className="block h-full rounded-full bg-[#A560E8]" style={{ width: `${Math.min(100, Math.round((words / Math.max(1, section.words)) * 100))}%` }} />
+                    </span>
+                  )}
+                </span>
+                <span className={`shrink-0 text-[14px] tabular-nums ${done ? 'font-black text-[#3A8A00]' : active ? 'font-black text-[#7733B5] dark:text-[#C9A0F0]' : 'font-extrabold text-[#57534E] dark:text-stone-400'}`}>
+                  {written ? `${words.toLocaleString()} of ${section.words.toLocaleString()}` : `${section.words.toLocaleString()} words`}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+/** Two ways into the next essay: start it from the question, or grade one that is written. */
+function AnotherEssay({ onWrite, onGrade }: { onWrite: () => void; onGrade: () => void }) {
+  const card = `group flex min-w-0 flex-[1_1_320px] items-center gap-4 p-5 text-left transition-transform hover:-translate-y-0.5 ${CARD} dark:border-stone-700 dark:bg-stone-900`;
+  const icon = 'inline-flex h-[66px] w-[66px] shrink-0 items-center justify-center rounded-[20px] bg-[#F3EAFF] dark:bg-stone-800';
+  return (
+    <section aria-label="Start another essay" className="flex flex-col gap-3.5">
+      <SectionTitle title="Another essay?" />
+      <div className="flex flex-wrap gap-[18px]">
+        <button type="button" onClick={onWrite} className={card}>
+          <span aria-hidden className={icon}>
+            <img src="/icons/new-essay.webp" alt="" width={52} height={52} loading="lazy" className="h-[52px] w-[52px] object-contain transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[18px] font-black text-[#1C1917] dark:text-stone-50">Start a new essay</span>
+            <span className="block text-[14.5px] font-bold leading-snug text-[#57534E] dark:text-stone-400">Paste the question. Get a thesis and an outline.</span>
+          </span>
+          <span className="shrink-0 text-[15px] font-black text-[#7733B5] dark:text-[#C9A0F0]">Start</span>
+        </button>
+        <button type="button" onClick={onGrade} className={card}>
+          <span aria-hidden className={icon}>
+            <img src="/icons/grade-essay.webp" alt="" width={52} height={52} loading="lazy" className="h-[52px] w-[52px] object-contain transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[18px] font-black text-[#1C1917] dark:text-stone-50">Grade a finished essay</span>
+            <span className="block text-[14.5px] font-bold leading-snug text-[#57534E] dark:text-stone-400">Paste it in. Get a grade and what to fix first.</span>
+          </span>
+          <span className="shrink-0 text-[15px] font-black text-[#7733B5] dark:text-[#C9A0F0]">Grade</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * A new account's essay box. "I have not started" takes the question and
+ * hands it to the Start an essay screen, which builds the outline;
+ * "I have a draft" is the grader's paste box.
+ */
+function EssayStart({ onWrite, onGradeEssay }: { onWrite: () => void; onGradeEssay: (text: string) => void }) {
+  // An essay pasted in the landing box before sign-up arrives here, ready to grade.
+  const [landingEssay] = useState(() => peekLandingEssay());
+  const [tab, setTab] = useState<'start' | 'draft'>(() => (landingEssay || readAnswers().stage === 'draft' ? 'draft' : 'start'));
+  const [question, setQuestion] = useState('');
+  // The length is chosen on the outline screen; this is only its starting value.
+  const length = 1500;
+  const [hint, setHint] = useState('');
+
+  const submit = () => {
+    const q = question.trim();
+    if (q.length < 12) {
+      setHint('Paste the full question first, as it was set.');
+      document.getElementById('home-essay-question')?.focus();
+      return;
+    }
+    trackEvent('tool_next_step', { tool: 'essay_plan', from: 'dashboard', length });
+    handOffEssayQuestion(q, length);
+    onWrite();
+  };
+
+  const tabClass = (on: boolean) =>
+    `inline-flex min-h-[48px] items-center justify-center rounded-[13px] px-4 text-[15px] font-black leading-tight transition-colors sm:px-6 sm:text-[16px] ${
+      on ? 'bg-white text-[#1C1917] shadow-[0_6px_14px_-6px_rgba(0,0,0,0.5)]' : 'text-white hover:bg-[#5F2594]'
+    }`;
+  const chip = (on: boolean) =>
+    `min-h-[44px] rounded-full border-2 border-b-4 px-4 text-[14.5px] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 ${
+      on ? 'border-[#8A48C7] bg-[#A560E8] font-black text-white' : 'border-[#E4D4F8] bg-[#F7F1FF] font-extrabold text-[#1C1917] hover:border-[#C9A0F0]'
+    }`;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div role="tablist" aria-label="Where you are with your essay" className="grid grid-cols-2 gap-1.5 self-start rounded-[18px] bg-[#4A1778] p-1.5">
+        <button type="button" role="tab" aria-selected={tab === 'start'} onClick={() => setTab('start')} className={tabClass(tab === 'start')}>I have not started</button>
+        <button type="button" role="tab" aria-selected={tab === 'draft'} onClick={() => setTab('draft')} className={tabClass(tab === 'draft')}>I have a draft</button>
+      </div>
+
+      {tab === 'draft' ? (
+        <div className="flex flex-col gap-2">
+          <HeroEssayGrader onSubmit={(text) => { clearLandingEssay(); onGradeEssay(text); }} initialText={landingEssay} instant />
+          <CostLine kind="analysis" source="home_grader" className="px-1 text-center text-white/90" />
+        </div>
+      ) : (
+        <div className="w-full rounded-[28px] border-b-[6px] border-[#D9C2F2] bg-white p-3.5 text-left text-[#1C1917] shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)] sm:p-5">
+          <label htmlFor="home-essay-question" className="block px-1 text-[17px] font-black sm:text-[18px]">What is the essay question?</label>
+          <textarea
+            id="home-essay-question"
+            value={question}
+            onChange={(e) => { setQuestion(e.target.value); if (hint) setHint(''); }}
+            onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit(); }}
+            placeholder="Paste the question exactly as it was set"
+            rows={3}
+            maxLength={2000}
+            className="mt-2.5 block w-full resize-y rounded-[18px] border-2 border-[#DCC3F6] bg-[#FBF8FF] px-4 py-3.5 text-[17px] font-extrabold leading-snug text-[#1C1917] placeholder:font-bold placeholder:text-[#8A8580] focus:border-[#A560E8] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#A560E8]/25 sm:px-5 sm:text-[18px]"
+          />
+          {hint && (
+            <p role="alert" className="mt-3 rounded-2xl border border-[#F3D9A8] bg-[#FFF4E5] px-3.5 py-2.5 text-[13.5px] font-extrabold leading-snug text-[#9A3412]">{hint}</p>
+          )}
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+            <button type="button" onClick={submit} className={`min-h-[60px] px-7 text-[18px] ${BTN_GREEN}`}>
+              Start my essay
+              <Arrow />
+            </button>
+            <span className="text-[14px] font-extrabold text-[#57534E]">Four quick questions, then three theses to choose from and an outline.</span>
+          </div>
         </div>
       )}
     </div>
@@ -676,7 +1018,7 @@ function StartBanner({ title, body, mascot, children }: { title: ReactNode; body
   );
 }
 
-function PlanCard({ n, title, note, active, done, onOpen, cta, tone, children }: { n: number; title: string; note: string; active: boolean; done: boolean; onOpen: () => void; cta: string; tone?: 'game'; children: ReactNode }) {
+function PlanCard({ n, icon, title, note, active, done, onOpen, cta, tone, children }: { n: number; icon: string; title: string; note: string; active: boolean; done: boolean; onOpen: () => void; cta: string; tone?: 'game'; children: ReactNode }) {
   return (
     <article className={`relative flex flex-col gap-3 p-[18px] ${CARD} ${active ? '!border-2 !border-[#A560E8] shadow-[0_20px_40px_-24px_rgba(90,45,140,0.75)]' : ''} dark:border-stone-700 dark:bg-stone-900`}>
       {(done || active) && (
@@ -694,6 +1036,7 @@ function PlanCard({ n, title, note, active, done, onOpen, cta, tone, children }:
           <h3 className="m-0 text-[18.5px] font-black leading-tight text-[#1C1917] dark:text-stone-50">{title}</h3>
           <p className="m-0 mt-0.5 text-[13.5px] font-bold text-[#57534E] dark:text-stone-400">{note}</p>
         </div>
+        <img src={`/icons/${icon}.webp`} alt="" width={46} height={46} loading="lazy" className="h-[46px] w-[46px] shrink-0 object-contain" />
       </div>
       <div className={`mt-auto h-[168px] rounded-[18px] ${tone === 'game' ? 'bg-[#FFF3CF]' : 'bg-[#F7F1FF] dark:bg-stone-800'}`}>{children}</div>
       <button type="button" onClick={onOpen} className={`min-h-[50px] w-full text-[16px] ${active ? BTN_GREEN : BTN_WHITE}`}>

@@ -1,4 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
+import Icon3D from '../common/Icon3D';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import LessonViewer from '../common/LessonViewer';
 import QuizViewer from '../common/QuizViewer';
@@ -23,14 +24,14 @@ const WordTowerPage = lazy(() => import('./tools/WordTowerPage'));
 const WordBlitzPage = lazy(() => import('../games/word-blitz/WordBlitzPage'));
 
 const TABS = [
-  { key: 'notes', label: 'Original Notes', icon: '📄', proOnly: false },
-  { key: 'lesson', label: 'Lesson', icon: '📖', proOnly: false },
-  { key: 'flashcards', label: 'Flashcards', icon: '🃏', proOnly: false },
-  { key: 'quiz', label: 'Quiz', icon: '📝', proOnly: false },
-  { key: 'crossword', label: 'Crossword', icon: '🧩', proOnly: true },
-  { key: 'craterBlast', label: 'Crater Blast', icon: '💥', proOnly: true },
-  { key: 'wordTower', label: 'Word Tower', icon: '🗼', proOnly: true },
-  { key: 'wordBlitz', label: 'Word Blitz', icon: '⚡', proOnly: true },
+  { key: 'notes', label: 'Original Notes', icon: 'notes', proOnly: false },
+  { key: 'lesson', label: 'Lesson', icon: 'lesson', proOnly: false },
+  { key: 'flashcards', label: 'Flashcards', icon: 'flashcards', proOnly: false },
+  { key: 'quiz', label: 'Quiz', icon: 'quiz', proOnly: false },
+  { key: 'crossword', label: 'Crossword', icon: 'crossword', proOnly: true },
+  { key: 'craterBlast', label: 'Crater Blast', icon: 'crater-blast', proOnly: true },
+  { key: 'wordTower', label: 'Word Tower', icon: 'word-tower', proOnly: true },
+  { key: 'wordBlitz', label: 'Word Blitz', icon: 'word-blitz', proOnly: true },
 ] as const;
 
 type TabKey = typeof TABS[number]['key'];
@@ -545,7 +546,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
                 : 'text-stone-400 dark:text-stone-600 cursor-not-allowed'
           }`}
         >
-          <span className="text-lg">{tab.icon}</span>
+          <Icon3D name={tab.icon} size={26} />
           <span className="truncate flex-1">{tab.label}</span>
           {locked && has && <span className="text-[9px] px-1.5 py-0.5 rounded-lg bg-[#FF9600] text-white font-extrabold uppercase border-b border-[#D97F00]">Pro</span>}
         </button>
@@ -565,7 +566,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
               : 'bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-stone-400 cursor-not-allowed'
         }`}
       >
-        <span>{tab.icon}</span>
+        <Icon3D name={tab.icon} size={24} />
         <span>{tab.label}</span>
         {locked && has && <span className="text-[9px] px-1.5 py-0.5 rounded-lg bg-[#FF9600] text-white font-extrabold uppercase border-b border-[#D97F00]">Pro</span>}
       </button>
@@ -669,7 +670,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
         <div className="p-6 flex flex-col items-center justify-center min-h-[400px]">
           <div className="w-full max-w-sm text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]">
-              <span className="text-4xl">💥</span>
+              <Icon3D name="crater-blast" size={56} />
             </div>
             <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mb-2">Crater Blast</h2>
             <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 font-medium">{(Array.isArray(pack.data.craterBlast?.questions) ? pack.data.craterBlast.questions : pack.data.craterBlast?.questions?.questions ?? []).length} questions ready</p>
@@ -677,7 +678,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
               onClick={() => handleOpenFull('craterBlast')}
               className="inline-flex items-center gap-2 px-12 py-3.5 rounded-xl text-white font-bold text-base uppercase tracking-wide bg-[#A560E8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all mb-6"
             >
-              💥 Start Game
+              <Icon3D name="crater-blast" size={26} /> Start Game
             </button>
             <button
               onClick={() => setAtHome(true)}
@@ -692,7 +693,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
         <div className="p-6 flex flex-col items-center justify-center min-h-[400px]">
           <div className="w-full max-w-sm text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 bg-[#58CC02] border-2 border-b-4 border-[#46A302]">
-              <span className="text-4xl">🗼</span>
+              <Icon3D name="word-tower" size={56} />
             </div>
             <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mb-2">Word Tower</h2>
             <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 font-medium">{(Array.isArray(pack.data.wordTower?.questions) ? pack.data.wordTower.questions : pack.data.wordTower?.questions?.questions ?? []).length} questions ready</p>
@@ -700,7 +701,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
               onClick={() => handleOpenFull('wordTower')}
               className="inline-flex items-center gap-2 px-12 py-3.5 rounded-xl text-white font-bold text-base uppercase tracking-wide bg-[#58CC02] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all mb-6"
             >
-              🗼 Start Game
+              <Icon3D name="word-tower" size={26} /> Start Game
             </button>
             <button
               onClick={() => setAtHome(true)}
@@ -715,7 +716,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
         <div className="p-6 flex flex-col items-center justify-center min-h-[400px]">
           <div className="w-full max-w-sm text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 bg-[#FF9600] border-2 border-b-4 border-[#D97F00]">
-              <span className="text-4xl">⚡</span>
+              <Icon3D name="word-blitz" size={56} />
             </div>
             <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mb-2">Word Blitz</h2>
             <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 font-medium">{(Array.isArray(pack.data.wordBlitz?.questions) ? pack.data.wordBlitz.questions : pack.data.wordBlitz?.questions?.questions ?? []).length} questions ready · 60-second clock</p>
@@ -723,7 +724,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
               onClick={() => handleOpenFull('wordBlitz')}
               className="inline-flex items-center gap-2 px-12 py-3.5 rounded-xl text-white font-bold text-base uppercase tracking-wide bg-[#FF9600] border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all mb-6"
             >
-              ⚡ Start Game
+              <Icon3D name="word-blitz" size={26} /> Start Game
             </button>
             <button
               onClick={() => setAtHome(true)}
@@ -746,7 +747,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
           {isLocked(activeTab) ? (
             <>
               <div className="w-16 h-16 rounded-2xl bg-[#FF9600] border-2 border-b-4 border-[#D97F00] flex items-center justify-center text-4xl mb-4">
-                {TABS.find(t => t.key === activeTab)?.icon}
+                <Icon3D name={TABS.find(t => t.key === activeTab)?.icon ?? 'study-pack'} size={46} />
               </div>
               <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-2">{TABS.find(t => t.key === activeTab)?.label} is a Pro feature</h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 font-medium">
@@ -806,7 +807,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData, onAuth }
           ) : hasData(activeTab) ? (
             <>
               <div className="w-16 h-16 rounded-2xl bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6] flex items-center justify-center text-4xl mb-4">
-                {TABS.find(t => t.key === activeTab)?.icon}
+                <Icon3D name={TABS.find(t => t.key === activeTab)?.icon ?? 'study-pack'} size={46} />
               </div>
               <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-2">Open {TABS.find(t => t.key === activeTab)?.label}</h3>
               <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 font-medium">

@@ -1,3 +1,4 @@
+import Icon3D, { isIconName } from './Icon3D';
 /* ═══════════════════════════════════════════════════════════════
    FeatureHub — Duolingo-style hub for tool features.
 
@@ -17,7 +18,7 @@ export interface HubItem {
   title: string;
   /** Smaller subline — e.g. "2 days ago · 12 cards". */
   meta?: string;
-  /** Emoji or short label rendered in the card's icon tile. */
+  /** An icon name from public/icons ("study-pack"), or an emoji or short label. */
   icon?: string;
   /** Open this item — usually navigates to the viewer. */
   onOpen: () => void;
@@ -166,7 +167,7 @@ const FeatureHub = ({
                     style={{ borderColor: themeColor, backgroundColor: `${themeColor}15`, color: themeColor }}
                     aria-hidden
                   >
-                    {item.icon || '•'}
+                    {isIconName(item.icon) ? <Icon3D name={item.icon} size={30} /> : item.icon || '•'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight line-clamp-2">

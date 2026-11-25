@@ -71,10 +71,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
   { text: 'A rewrite for every comment on this essay, applied to your draft in one click', icon: '✍️', color: '#A560E8' },
-  { text: 'Check the essay against your professor’s rubric and export it as Word or PDF', icon: '🔓', color: '#A560E8' },
+  { text: 'Check the essay against your professor’s rubric', icon: '🔓', color: '#A560E8' },
   { text: 'Walk into exams ready with full flashcards, quizzes, and study games', icon: '🎯', color: '#FF9600' },
   { text: 'Get through any reading in minutes, not evenings', icon: '📚', color: '#58CC02' },
-  { text: 'References done right, exported to Word & PDF', icon: '📄', color: '#FF4B4B' },
+  { text: '100 essay outlines and 500 writing helps a month', icon: '📄', color: '#FF4B4B' },
   { text: '99 credits a month for essays, study packs & citations, and unused credits roll over', icon: '⚡', color: '#FF9600' },
 ];
 

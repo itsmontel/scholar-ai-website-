@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import { lazyWithRetry } from '../../utils/lazyWithRetry';
 import { applyPageSeoTags, injectJsonLd, removeJsonLd, absoluteCanonicalUrl } from '../../utils/seo';
 import { hrefForPage } from '../../utils/pageHref';
+import { FREE_CREDITS } from '../../config/pricing';
 
 const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../landing/InteractiveDocumentAnalysis'));
 
@@ -1092,7 +1093,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
                   {config.type === 'subject'
                     ? 'Pro is $19.99/mo. See the gaps before the exam does. Cancel anytime.'
-                    : 'Three study packs or essay grades a month are free, no card. Used by 50,000+ college students.'}
+                    : `${FREE_CREDITS} free credits a month, no card. Used by 50,000+ college students.`}
                 </p>
               </div>
               <a
@@ -1210,8 +1211,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               {config.type === 'subject'
                 ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Your first grade each month is free.'
                 : config.type === 'landing'
-                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Your first grade each month is free, no card; Pro is $19.99/mo for the rewrites. Cancel anytime.'
-                  : 'Three study packs or essay grades a month are free; Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
+                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Your first report is free and complete, no card; Pro is $19.99/mo for the rewrites. Cancel anytime.'
+                  : `${FREE_CREDITS} free credits a month, and a study pack costs 1 credit; Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.`}
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

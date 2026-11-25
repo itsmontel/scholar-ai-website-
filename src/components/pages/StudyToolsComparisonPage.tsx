@@ -34,7 +34,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
     { feature: 'Import Quizlet Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Community/Shared Study Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Spaced Repetition', ws: false, quizlet: true, knowt: true },
-    { feature: 'Free Tier', ws: '3 free study packs or essay grades a month', quizlet: 'Limited, ads', knowt: 'Unlimited notes' },
+    { feature: 'Free Tier', ws: '4 free credits a month: 2 essay grades or 4 study packs', quizlet: 'Limited, ads', knowt: 'Unlimited notes' },
     { feature: 'Starting Price', ws: 'Free, then $19.99/mo ($9.99 first month)', quizlet: '$7.99/mo', knowt: 'Free / $4.99/mo' },
   ];
 

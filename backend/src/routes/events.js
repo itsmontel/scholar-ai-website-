@@ -53,12 +53,24 @@ const ALLOWED_EVENTS = new Set([
   'pack_started',
   'pack_completed',
   'tool_next_step',
+  // First real use of each study tool, and the essay writer's limits.
+  'first_quiz',
+  'first_flashcards',
+  'first_game',
+  'blank_draft_started',
+  'outline_limit_hit',
+  'door_flow_closed',
+  'door_flow_done',
 ]);
 
 const ALLOWED_PROP_KEYS = new Set([
   'method', 'plan', 'source', 'trigger', 'words', 'grade', 'score', 'purpose', 'due',
   'code', 'reason', 'page', 'variant', 'feature', 'cycle', 'referrer',
   'door', 'kind', 'question', 'answer', 'utm_source', 'utm_medium', 'utm_campaign',
+  // Which tool or step, where it came from, which game, and the hero box's mode.
+  'tool', 'from', 'ask', 'typed', 'game', 'where', 'paid', 'left',
+  // The landing pop-up: which step it was closed on, and how the account was made.
+  'step', 'how',
 ]);
 
 let tableMissing = false;

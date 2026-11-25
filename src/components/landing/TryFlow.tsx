@@ -378,7 +378,7 @@ export default function TryFlow({ request, user, onClose, onNavigate, onAuth, on
           loginCta: 'Log in and show my report',
         } : {
           title: 'Make a free account to build this pack',
-          body: 'You get 3 free study packs or essay grades a month. No card.',
+          body: 'You get 4 free credits a month (2 essay grades or 4 study packs). No card.',
           cta: 'Build my study pack',
           loginTitle: 'Welcome back. Log in to build this pack.',
           loginCta: 'Log in and build my pack',

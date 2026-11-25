@@ -101,7 +101,7 @@ const CitationsHubPage: React.FC<CitationsHubPageProps> = ({ onNavigate, user, o
       id: s.id,
       title: s.research_topic || 'Untitled search',
       meta: `${timeAgo(s.created_at)} · ${s.citation_style || 'APA'} · ${count} ${count === 1 ? 'source' : 'sources'}`,
-      icon: '📖',
+      icon: 'citations',
       onOpen: () => handleOpen(s),
     };
   });

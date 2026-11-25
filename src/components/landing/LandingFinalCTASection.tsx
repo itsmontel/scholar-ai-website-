@@ -75,7 +75,7 @@ export default function LandingFinalCTASection({ onNavigate }: LandingFinalCTASe
           </div>
 
           <p className="mt-5 text-center sm:text-left text-xs text-stone-500 dark:text-stone-500">
-            No payment today · Cancel anytime · Secure checkout via Stripe
+            Free to start · No card needed
           </p>
         </LandingScrollReveal>
       </div>

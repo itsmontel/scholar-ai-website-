@@ -2,30 +2,30 @@ import { useState, useEffect } from 'react';
 
 const FEATURES = [
   {
-    emoji: '📝',
+    icon: '/icons/grade-essay.webp',
     title: 'AI Essay Feedback',
     desc: 'Instant analysis, suggestions & grading',
     color: '#A560E8',
     tint: '#F3EAFF',
   },
   {
-    emoji: '📖',
+    icon: '/icons/notes.webp',
     title: 'Smart Summaries',
     desc: 'Condense any text or paper in seconds',
     color: '#8A48C7',
     tint: '#F3EAFF',
   },
   {
-    emoji: '🎮',
+    icon: '/icons/games.webp',
     title: 'Arcade mode',
     desc: 'Crater Blast, Word Tower & more',
     color: '#A560E8',
     tint: '#F3EAFF',
   },
   {
-    emoji: '📚',
+    icon: '/icons/study-pack.webp',
     title: 'Citations & Study Packs',
-    desc: 'Auto-generate APA, MLA, flashcards & quizzes',
+    desc: 'APA, MLA & more, plus flashcards & quizzes',
     color: '#8A48C7',
     tint: '#F3EAFF',
   },
@@ -105,7 +105,7 @@ export const AuthMarketingSide: React.FC = () => {
       </div>
 
       <div className="relative z-10 max-w-md w-full px-6 xl:px-8 py-8">
-        {/* Mascot with sparkle + star badges */}
+        {/* Mascot */}
         <div className="flex justify-center mb-5">
           <div className="relative">
             <div className="absolute inset-0 -m-2 rounded-2xl bg-white/40 blur-xl" />
@@ -118,12 +118,6 @@ export const AuthMarketingSide: React.FC = () => {
                 decoding="async"
                 className="w-[96px] h-[96px] object-contain"
               />
-            </div>
-            <div className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-lg bg-[#A560E8] border-2 border-b-[3px] border-[#8A48C7] flex items-center justify-center text-sm shadow-lg shadow-[#A560E8]/30">
-              ✨
-            </div>
-            <div className="absolute -bottom-1 -left-1.5 w-7 h-7 rounded-lg bg-[#8A48C7] border-2 border-b-[3px] border-[#7733B5] flex items-center justify-center text-xs shadow-lg shadow-[#8A48C7]/30">
-              ⭐
             </div>
           </div>
         </div>
@@ -162,16 +156,17 @@ export const AuthMarketingSide: React.FC = () => {
                 }}
                 onMouseEnter={() => setActiveFeature(i)}
               >
-                <div
-                  className="w-10 h-10 rounded-lg border-2 border-b-[3px] flex items-center justify-center text-lg shrink-0 transition-transform duration-500"
-                  style={{
-                    backgroundColor: isActive ? `${f.color}20` : f.tint,
-                    borderColor: `${f.color}50`,
-                    transform: isActive ? 'rotate(-6deg) scale(1.1)' : 'rotate(0deg) scale(1)',
-                  }}
-                >
-                  {f.emoji}
-                </div>
+                <img
+                  src={f.icon}
+                  alt=""
+                  aria-hidden
+                  width={44}
+                  height={44}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-11 w-11 shrink-0 object-contain transition-transform duration-500"
+                  style={{ transform: isActive ? 'rotate(-6deg) scale(1.1)' : 'rotate(0deg) scale(1)' }}
+                />
                 <div className="min-w-0 flex-1">
                   <p className="font-extrabold text-[13px] text-stone-800 leading-tight">
                     {f.title}

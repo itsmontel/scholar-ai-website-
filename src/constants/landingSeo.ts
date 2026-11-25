@@ -17,7 +17,7 @@
  * risk reversal ("Free to start, no card.").
  */
 export const LANDING_PAGE_TITLE =
-  "Free AI Study Packs and Essay Grader | WriteScholar";
+  "Free AI Study Packs, Essay Writer and Grader | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Type an exam topic for free flashcards, a practice quiz and study games in minutes, or paste an essay for a professor-style grade. Free to start, no card.";
+  "Turn an exam topic into flashcards, a quiz and study games. Plan and write an essay from its question, then get it graded. Free to start, no card needed.";

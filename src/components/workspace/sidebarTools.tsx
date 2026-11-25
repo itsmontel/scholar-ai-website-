@@ -16,6 +16,7 @@ export const sidebarIcons = {
      Drawn at 24px on a 1.9 stroke so they read as calm outlines
      rather than the heavier chunky icons used inside the tools. */
   Wand: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M17.5 2.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8zM5.5 3l.5 1.3L7.3 5l-1.3.5L5.5 7 5 5.5 3.7 5 5 4.3 5.5 3z" /></svg>),
+  Write: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6.5h12M4 11.5h8M4 16.5h5M14.2 18.6l.5-2.7 4.9-4.9a1.5 1.5 0 012.1 2.1l-4.9 4.9-2.6.6z" /></svg>),
   Review: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path strokeLinecap="round" d="M8 3v4M16 3v4M3.5 10h17" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.2 14.8l2 2 3.6-3.8" /></svg>),
   Pack: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3.2l8.5 4.3-8.5 4.3-8.5-4.3L12 3.2z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.5 12l8.5 4.3 8.5-4.3M3.5 16.4l8.5 4.4 8.5-4.4" /></svg>),
   Cite: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="4" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.6 15.2c-1.5 0-2.4-1-2.4-2.4 0-1.9 1.3-3.4 3.1-4.1M16 15.2c-1.5 0-2.4-1-2.4-2.4 0-1.9 1.3-3.4 3.1-4.1" /></svg>),
@@ -31,6 +32,11 @@ export const sidebarIcons = {
 /* Each tool shares the WriteScholar purple palette so the workspace
  * feels like one product. Panel headers and mobile drawer read from
  * these tint fields. */
+/** The tools use the site's own 3D icons; Dashboard, My Documents and Blog keep the line icons above. */
+const toolIcon = (name: string) => (
+  <img src={`/icons/${name}.webp`} alt="" width={28} height={28} className="h-7 w-7 shrink-0 object-contain" />
+);
+
 export const SIDEBAR_TOOLS: {
   view: WorkspaceView;
   label: string;
@@ -42,9 +48,10 @@ export const SIDEBAR_TOOLS: {
   tintFg: string;
   tintFgDark: string;
 }[] = [
-  { view: 'analyze',      label: 'Analyze',      icon: <sidebarIcons.Wand />,   hint: 'Professor-style feedback',  tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
-  { view: 'study-packs',  label: 'Study Packs',  icon: <sidebarIcons.Pack />,   hint: 'Notes → lessons & quizzes', tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
-  { view: 'citations',    label: 'Citations',    icon: <sidebarIcons.Cite />,   hint: 'Find & format sources',     tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
-  { view: 'daily-review', label: 'Daily Review', icon: <sidebarIcons.Review />, hint: 'Quick recall session',      tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
-  { view: 'games',        label: 'Arcade Mode',  icon: <sidebarIcons.Game />,   hint: 'Learn by playing',          tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'write',        label: 'Write',        icon: toolIcon('write'),    hint: 'Start an essay',            tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'analyze',      label: 'Grade',        icon: toolIcon('grade-essay'),   hint: 'A grade and what to fix',    tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'study-packs',  label: 'Study Packs',  icon: toolIcon('study-pack'),   hint: 'Notes → lessons & quizzes', tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'citations',    label: 'Citations',    icon: toolIcon('citations'),   hint: 'Find & format sources',     tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'daily-review', label: 'Daily Review', icon: toolIcon('daily-review'), hint: 'Quick recall session',      tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'games',        label: 'Arcade Mode',  icon: toolIcon('games'),   hint: 'Learn by playing',          tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
 ];

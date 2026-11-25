@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 /**
  * Credit balance as returned by GET /subscriptions/usage (`credits`).
  * See backend/src/services/creditService.js.
@@ -33,6 +34,14 @@ export interface CreditState {
   freeExpiresAt: string | null;
   freeDaysLeft: number | null;
   freeExpired: boolean;
+  /** Bought top-up credits still available (already included in `remaining`). */
+  topUp: number;
+  /** When the soonest top-up credits expire. */
+  topUpExpiresAt: string | null;
+  /** Months in the last two with a top-up bought. */
+  topUpMonths: number;
+  /** What grading an essay costs right now. */
+  analysisCost: number;
 }
 
 /** Fired after anything that spends a credit, so counters refresh. */
@@ -73,6 +82,10 @@ export function parseCreditState(raw: unknown): CreditState | null {
     freeExpiresAt: typeof c.freeExpiresAt === 'string' ? c.freeExpiresAt : null,
     freeDaysLeft: typeof c.freeDaysLeft === 'number' ? c.freeDaysLeft : null,
     freeExpired: c.freeExpired === true,
+    topUp: num(c.topUp),
+    topUpExpiresAt: typeof c.topUpExpiresAt === 'string' ? c.topUpExpiresAt : null,
+    topUpMonths: num(c.topUpMonths),
+    analysisCost: num(c.analysisCost, 2),
   };
 }
 
@@ -122,4 +135,118 @@ export function installCreditSpendObserver() {
     }
     return response;
   };
+}
+
+const TOPUP_API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const topUpHeaders = (): HeadersInit => {
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+};
+
+/** Start Stripe Checkout for a credit top-up and send the browser there. Throws with a message to show. */
+export async function buyTopUp(pack: string): Promise<void> {
+  const origin = window.location.origin;
+  let json: { success?: boolean; message?: string; data?: { url?: string } } | null = null;
+  try {
+    const res = await fetch(`${TOPUP_API}/subscriptions/topup-checkout`, {
+      method: 'POST',
+      headers: topUpHeaders(),
+      body: JSON.stringify({
+        pack,
+        successUrl: `${origin}/dashboard?topup=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${origin}${window.location.pathname}`,
+      }),
+    });
+    json = await res.json().catch(() => null);
+  } catch {
+    throw new Error('Could not reach WriteScholar. Check your connection and try again.');
+  }
+  if (!json?.success || !json.data?.url) throw new Error(json?.message || 'We could not start checkout. Please try again in a moment.');
+  window.location.assign(json.data.url);
+}
+
+/**
+ * Back from Stripe after buying a top-up (?topup=success&session_id=…):
+ * add the credits and clean the address bar. Resolves with the credits
+ * added, or null when there is nothing to confirm.
+ */
+export async function confirmTopUpFromUrl(): Promise<number | null> {
+  let params: URLSearchParams;
+  try { params = new URLSearchParams(window.location.search); } catch { return null; }
+  if (params.get('topup') !== 'success') return null;
+  const sessionId = params.get('session_id') || '';
+  params.delete('topup');
+  params.delete('session_id');
+  try {
+    const rest = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
+  } catch { /* ignore */ }
+  if (!sessionId) return null;
+  try {
+    const res = await fetch(`${TOPUP_API}/subscriptions/topup-confirm`, { method: 'POST', headers: topUpHeaders(), body: JSON.stringify({ sessionId }) });
+    const json = await res.json().catch(() => null);
+    notifyCreditsChanged();
+    return json?.success && json.data?.paid ? Number(json.data.credits) || 0 : null;
+  } catch {
+    return null;
+  }
+}
+
+/* ─── Shared credit state and the "get more" choice ─────────────── */
+
+
+/** The signed-in account's credit state, refreshed after anything that spends a credit. */
+export function useCreditState(): CreditState | null {
+  const [state, setState] = useState<CreditState | null>(null);
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const bump = () => setVersion((v) => v + 1);
+    window.addEventListener(CREDITS_CHANGED_EVENT, bump);
+    return () => window.removeEventListener(CREDITS_CHANGED_EVENT, bump);
+  }, []);
+  useEffect(() => {
+    let alive = true;
+    const token = (() => { try { return localStorage.getItem('authToken') || localStorage.getItem('token'); } catch { return null; } })();
+    if (!token) return;
+    fetch(`${TOPUP_API}/subscriptions/usage`, { headers: topUpHeaders() })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (alive && d) setState(parseCreditState(d.credits)); })
+      .catch(() => { /* the nudges just stay hidden */ });
+    return () => { alive = false; };
+  }, [version]);
+  return state;
+}
+
+export const CREDIT_CHOICE_EVENT = 'writescholar-open-credit-choice';
+/** Open the "top up or choose a plan" pop-up from anywhere. `need` is what the action costs. */
+export function openCreditChoice(detail: { need?: number; source: string; heading?: string } = { source: 'unknown' }) {
+  window.dispatchEvent(new CustomEvent(CREDIT_CHOICE_EVENT, { detail }));
+}
+
+/** Start Stripe Checkout for a plan (free accounts) or open the billing portal (paid accounts changing plan). */
+export async function startPlanCheckout(planType: 'pro' | 'premium', newCustomer: boolean): Promise<void> {
+  const origin = window.location.origin;
+  const paid = (() => { try { const u = JSON.parse(localStorage.getItem('user') || '{}'); return isPaidCreditPlan(String(u.subscriptionPlan || u.subscription_plan || u.plan || 'free')); } catch { return false; } })();
+  if (paid) {
+    const res = await fetch(`${TOPUP_API}/subscriptions/billing-portal`, { method: 'POST', headers: topUpHeaders(), body: JSON.stringify({ returnUrl: `${origin}/billing` }) });
+    const j = await res.json().catch(() => null);
+    if (!j?.success || !j.url) throw new Error(j?.message || 'We could not open billing. Please try again.');
+    window.location.assign(j.url);
+    return;
+  }
+  const res = await fetch(`${TOPUP_API}/subscriptions/create-checkout-session`, {
+    method: 'POST',
+    headers: topUpHeaders(),
+    body: JSON.stringify({
+      planType,
+      billingCycle: 'monthly',
+      successUrl: `${origin}/dashboard?payment=success`,
+      cancelUrl: `${origin}${window.location.pathname}`,
+      ...(newCustomer ? { promoCode: 'NEWCUSTOMER' } : {}),
+    }),
+  });
+  const j = await res.json().catch(() => null);
+  if (!j?.success || !j.data?.checkoutUrl) throw new Error(j?.message || 'We could not start checkout. Please try again.');
+  try { sessionStorage.setItem('ws_checkout_offer', JSON.stringify({ kind: 'paid', plan: planType })); } catch { /* ignore */ }
+  window.location.assign(j.data.checkoutUrl);
 }

@@ -29,6 +29,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-write-effectively',
+    title: 'How to Write Effectively: 12 Habits That Make Any Essay Clearer',
+    description:
+      'How to write effectively for essays and assignments: decide your point, plan, one idea per sentence, strong topic sentences, cutting filler and revising in passes, with weak vs strong examples.',
+    date: '2026-11-25',
+    author: 'WriteScholar Team',
+    readTime: '10 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Decide your point in one sentence before you write, and plan what each paragraph will prove: most unclear writing comes from unclear thinking.',
+      'Keep one idea per sentence, open every paragraph with its point, and follow every piece of evidence with what it shows.',
+      'Revise in passes, argument first and sentences last, and cut every word that adds no meaning so the rest can carry the marks.',
+    ],
+  },
+  {
     slug: 'how-to-memorize-things-fast',
     title: 'How to Memorize Things Fast: 9 Techniques That Actually Work',
     description:

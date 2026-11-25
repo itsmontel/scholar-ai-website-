@@ -179,7 +179,7 @@ const FAQS = [
   },
   {
     q: 'How much does the essay grader cost?',
-    a: 'Your first essay report is free and complete, with no card. After that you get 3 free credits a month, and a free grade shows the score, every rubric score and full feedback on the first quarter of the essay. Pro is $19.99/mo ($9.99 for your first month) for 99 credits, feedback on every essay in full, the rewrite behind every comment and one-click fixes, and unused credits roll over. Cancel anytime.',
+    a: 'Your first essay report is free and complete, with no card. After that you get 4 free credits a month, and a free grade shows the score, every rubric score and full feedback on the first quarter of the essay. Pro is $19.99/mo ($9.99 for your first month) for 99 credits, feedback on every essay in full, the rewrite behind every comment and one-click fixes, and unused credits roll over. Cancel anytime.',
   },
   {
     q: 'What kinds of essays can it grade?',

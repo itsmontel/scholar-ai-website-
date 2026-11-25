@@ -1,3 +1,4 @@
+import { ResultUpsell } from '../common/CreditNudges';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import DOMPurify from 'dompurify';
 import type { AnalyzerResult } from './AnalyzerPanel';
@@ -944,6 +945,7 @@ export default function AnalysisReportView({
           </div>
         </div>
       )}
+      <div className="mt-8"><ResultUpsell source="report" /></div>
     </div>
   );
 }

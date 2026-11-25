@@ -7,7 +7,17 @@ import { SIDEBAR_TOOLS, sidebarIcons as I } from './sidebarTools';
  * Daily Review is no longer a tool of its own in the rail: it is step 1 of
  * today's plan on the dashboard home (TodayHome), which opens the same session.
  */
-const RAIL_TOOLS = SIDEBAR_TOOLS.filter((t) => t.view !== 'daily-review');
+/**
+ * Citations (the AI source finder) is out of the rail while it is under
+ * review; the page itself still opens. References in an essay are added
+ * with the editor's Cite button, from sources the student has read.
+ */
+const RAIL_TOOLS = SIDEBAR_TOOLS.filter((t) => t.view !== 'daily-review' && t.view !== 'citations');
+
+/** The site's own 3D icons, the same size as the tool icons in the rail. */
+const navIcon = (name: string) => (
+  <img src={`/icons/${name}.webp`} alt="" width={28} height={28} className="h-7 w-7 shrink-0 object-contain" />
+);
 
 /** Best-effort display name from the loosely-typed user record. */
 function displayNameOf(user: Record<string, unknown> | null | undefined): string {
@@ -202,7 +212,7 @@ export function WorkspaceSidebar({
 
       {/* Dashboard — the home base, always first and on its own. */}
       <div className="mt-2 w-full">
-        <Item active={activeView === 'hub'} icon={<I.Home />} label="Dashboard" onClick={() => onSelect('hub')} />
+        <Item active={activeView === 'hub'} icon={navIcon('dashboard')} label="Dashboard" onClick={() => onSelect('hub')} />
       </div>
 
       <SectionLabel>Study tools</SectionLabel>
@@ -221,9 +231,9 @@ export function WorkspaceSidebar({
 
       <SectionLabel>Library</SectionLabel>
       <div className="w-full">
-        <Item active={docsActive} icon={<I.Doc />} label="My Documents" onClick={() => onSelect('docs')} />
+        <Item active={docsActive} icon={navIcon('documents')} label="My Documents" onClick={() => onSelect('docs')} />
         {onNavigateBlog && (
-          <Item active={false} icon={<I.Blog />} label="Blog" onClick={onNavigateBlog} />
+          <Item active={false} icon={navIcon('blog')} label="Blog" onClick={onNavigateBlog} />
         )}
       </div>
 
@@ -292,9 +302,7 @@ export function WorkspaceSidebar({
               aria-label="Upgrade to Pro"
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#A560E8] text-white hover:bg-[#9450D8] transition-colors"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                <path d="M12 2l1.6 4.9L18 9l-4.4 2.1L12 16l-1.6-4.9L6 9l4.4-2.1z" />
-              </svg>
+              <img src="/icons/pro.webp" alt="" width={26} height={26} className="h-[26px] w-[26px] object-contain" />
             </button>
           ) : (
             <button
@@ -303,6 +311,7 @@ export function WorkspaceSidebar({
               className="w-full text-left rounded-xl bg-[#A560E8] hover:bg-[#9450D8] text-white px-3 py-2.5 transition-colors"
             >
               <div className="flex items-center gap-2.5">
+                <img src="/icons/pro.webp" alt="" width={30} height={30} className="h-[30px] w-[30px] shrink-0 object-contain" />
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13px] font-extrabold leading-tight">Upgrade to Pro</span>
                   <span className="block text-[11px] font-bold text-white/85 leading-tight mt-0.5">
@@ -453,7 +462,7 @@ export function WorkspaceMobileNav({
               </button>
             </div>
 
-            <Row active={activeView === 'hub'} icon={<I.Home />} label="Dashboard" onClick={() => pick('hub')} />
+            <Row active={activeView === 'hub'} icon={navIcon('dashboard')} label="Dashboard" onClick={() => pick('hub')} />
 
             <p className="px-3 pt-5 pb-2 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-stone-400">Study tools</p>
             <div className="flex flex-col gap-0.5">
@@ -463,9 +472,9 @@ export function WorkspaceMobileNav({
             </div>
 
             <p className="px-3 pt-5 pb-2 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-stone-400">Library</p>
-            <Row active={docsActive} icon={<I.Doc />} label="My Documents" onClick={() => pick('docs')} />
+            <Row active={docsActive} icon={navIcon('documents')} label="My Documents" onClick={() => pick('docs')} />
             {onNavigateBlog && (
-              <Row active={false} icon={<I.Blog />} label="Blog" onClick={() => { setOpen(false); onNavigateBlog(); }} />
+              <Row active={false} icon={navIcon('blog')} label="Blog" onClick={() => { setOpen(false); onNavigateBlog(); }} />
             )}
 
             <button

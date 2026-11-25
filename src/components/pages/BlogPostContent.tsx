@@ -1,5 +1,6 @@
 import React from 'react';
 import BlogFaqAccordion from '../blog/BlogFaqAccordion';
+import BlogEssayQuestionBox from '../blog/BlogEssayQuestionBox';
 import {
   ExpandedAiStudyTools,
   ExpandedAiWritingAssistant,
@@ -73,6 +74,198 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-write-effectively':
+      return (
+        <>
+          <p className={p}>
+            You know what you want to say. Then you start typing, and the sentences come out long, vague and somehow weaker than the idea in your head. You reread a paragraph three times and still cannot tell whether it works. The deadline does not move.
+          </p>
+          <p className={p}>
+            Effective writing is not a gift some people are born with. It is a small set of habits, most of them about deciding things before you write and cutting things after. This guide covers the habits that make the biggest difference to essays and assignments, with a weak and a strong version of each so you can see the change.
+          </p>
+
+          <h2 className={h2}>How to write effectively: the short version</h2>
+          <p className={p}>
+            <strong>Know your point before you start, write for one reader, put one idea in each sentence, make every paragraph prove one thing, and cut every word that does not add meaning.</strong> Then revise in separate passes: argument first, paragraphs second, sentences last. Everything below is a way of doing one of those six things.
+          </p>
+
+          <h2 className={h2}>Before you write</h2>
+          <h3 className={h3}>1. Decide your point in one sentence</h3>
+          <p className={p}>
+            Most unclear writing comes from unclear thinking. If you cannot say what your essay argues in one sentence, no amount of polishing will fix the paragraphs. Write that sentence first, before the introduction, and keep it where you can see it. It becomes your thesis, and every paragraph should help prove it.
+          </p>
+          <p className={p}>
+            <strong>Weak:</strong> &quot;This essay will look at social media and its effects on teenagers.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong:</strong> &quot;Social media harms teenagers less through screen time than through constant comparison with others.&quot;
+          </p>
+          <p className={p}>
+            The first is a topic. The second is a claim someone could disagree with, which is what gives an essay somewhere to go. Our guide to <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>writing a thesis statement</a> goes deeper on this step.
+          </p>
+
+          <h3 className={h3}>2. Write for one reader</h3>
+          <p className={p}>
+            Picture a specific person: a smart classmate who has not read your sources. They will not guess what you mean, so you have to say it. They do not need everything explained, so you can skip the obvious. Writing for this reader stops you from both padding and skipping steps, the two most common problems in student essays.
+          </p>
+
+          <h3 className={h3}>3. Plan before you draft</h3>
+          <p className={p}>
+            A plan does not need to be long. A list of paragraph points, each one sentence, in the order that builds your argument, is enough. When you know what each paragraph is for, you write it faster and it stays on topic. If you are not sure how many paragraphs you need, divide your word count: a 1,500-word essay is roughly an introduction, three or four body paragraphs of 300 to 400 words, and a conclusion.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>While you write</h2>
+          <h3 className={h3}>4. Put one idea in each sentence</h3>
+          <p className={p}>
+            Long sentences are not a sign of good writing. A sentence that tries to hold three ideas makes the reader do the sorting. Split it, and each idea gets the weight it deserves.
+          </p>
+          <p className={p}>
+            <strong>Weak:</strong> &quot;The novel, which was written after the war and is set in a small town where many families had lost sons, explores grief, but it also shows how the town tries to move on, which is shown through the characters of the mother and the teacher.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong:</strong> &quot;Written after the war, the novel is set in a town where many families lost sons. It explores grief, but also how a community moves on. The mother and the teacher show these two responses.&quot;
+          </p>
+
+          <h3 className={h3}>5. Start every paragraph with its point</h3>
+          <p className={p}>
+            The first sentence of a body paragraph should tell the reader what the paragraph proves. This is the topic sentence. A reader skimming only your first sentences should be able to follow your whole argument. If they cannot, your paragraphs are hiding their points.
+          </p>
+          <p className={p}>
+            <strong>Weak opening:</strong> &quot;In Act 2, Macbeth has a conversation with his wife.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong opening:</strong> &quot;In Act 2, Lady Macbeth&apos;s taunts show that ambition in the play is something characters push onto each other, not only something they feel.&quot;
+          </p>
+
+          <h3 className={h3}>6. Follow every piece of evidence with what it shows</h3>
+          <p className={p}>
+            A quotation or statistic does not make your point for you. After every piece of evidence, write at least one sentence explaining what it shows and how it supports your thesis. A useful pattern is point, evidence, explanation, link: say the point, give the evidence, explain it, and connect it back to the argument. Paragraphs that stop at the evidence are the most common reason essays get comments like &quot;more analysis needed&quot;.
+          </p>
+
+          <h3 className={h3}>7. Use specific words</h3>
+          <p className={p}>
+            Vague words make a reader work harder and believe you less. Replace &quot;things&quot;, &quot;aspects&quot;, &quot;a lot&quot; and &quot;very important&quot; with the actual thing you mean.
+          </p>
+          <p className={p}>
+            <strong>Weak:</strong> &quot;The policy had a lot of effects on many aspects of the economy.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong:</strong> &quot;The policy raised import prices and cut factory jobs in the north.&quot;
+          </p>
+
+          <h3 className={h3}>8. Prefer active sentences and strong verbs</h3>
+          <p className={p}>
+            In an active sentence, the subject does the action: &quot;The study found…&quot; rather than &quot;It was found by the study that…&quot;. Active sentences are shorter and make it clear who did what. Watch for verbs hidden inside nouns, too: &quot;make a decision&quot; is &quot;decide&quot;, &quot;carry out an analysis of&quot; is &quot;analyse&quot;. The passive voice is not wrong, and science writing uses it often, but it should be a choice rather than a habit.
+          </p>
+
+          <h3 className={h3}>9. Link your ideas so the reader never has to guess</h3>
+          <p className={p}>
+            Every new sentence and paragraph should connect to the one before it. Transition words show how: &quot;however&quot; for a contrast, &quot;therefore&quot; for a result, &quot;for example&quot; for evidence, &quot;this suggests&quot; for interpretation. Use them for real relationships, not as decoration at the start of every sentence. If you cannot choose a transition between two paragraphs, they may be in the wrong order.
+          </p>
+
+          <h2 className={h2}>After you write</h2>
+          <h3 className={h3}>10. Cut every word that does not add meaning</h3>
+          <p className={p}>
+            First drafts are full of words that sound like writing but say nothing. Cutting them makes every remaining word stronger. Common ones to delete or shorten:
+          </p>
+          <p className={p}>
+            &quot;In today&apos;s society&quot;, &quot;it is important to note that&quot;, &quot;due to the fact that&quot; (because), &quot;in order to&quot; (to), &quot;at this point in time&quot; (now), &quot;the fact that&quot;, &quot;very&quot;, &quot;really&quot;, &quot;basically&quot; and &quot;I think&quot; at the start of a claim.
+          </p>
+          <p className={p}>
+            <strong>Weak:</strong> &quot;It is important to note that, due to the fact that sleep is very important, students should in order to perform well get enough of it.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong:</strong> &quot;Students who sleep enough perform better.&quot;
+          </p>
+          <p className={p}>
+            Cutting is not about reaching a lower word count. It frees words for evidence and analysis, which is where marks come from.
+          </p>
+
+          <h3 className={h3}>11. Revise in passes, not all at once</h3>
+          <p className={p}>
+            Trying to fix everything in one read means you mostly fix commas. Revise in three passes, from big to small:
+          </p>
+          <p className={p}>
+            <strong>Pass 1, the argument.</strong> Does the essay answer the question? Does every paragraph support the thesis? Is anything missing or in the wrong order? Fix these first, because they can make sentence-level edits pointless.
+          </p>
+          <p className={p}>
+            <strong>Pass 2, the paragraphs.</strong> Does each one open with its point, give evidence and explain it? Read only the first sentences in order and check the argument still flows.
+          </p>
+          <p className={p}>
+            <strong>Pass 3, the sentences.</strong> Now cut filler, split long sentences, swap vague words for specific ones, and fix grammar and spelling.
+          </p>
+          <p className={p}>
+            A trick that helps with pass 1 is a reverse outline: after drafting, write one line summarising each paragraph. If you cannot sum up a paragraph in a line, it is doing too many things. If two lines say the same thing, merge the paragraphs.
+          </p>
+
+          <h3 className={h3}>12. Read it aloud, then take a break</h3>
+          <p className={p}>
+            Reading aloud is the fastest way to find clumsy sentences. If you run out of breath, the sentence is too long. If you stumble, the reader will too. Then put the essay away, even for an hour. Coming back with fresh eyes, you will see gaps and repetitions you could not see while writing.
+          </p>
+
+          <h2 className={h2}>Mistakes that make writing less effective</h2>
+          <p className={p}>
+            <strong>Writing to sound clever.</strong> Long words and complex sentences do not earn marks on their own. Clear writing about a strong idea beats impressive writing about a vague one.
+          </p>
+          <p className={p}>
+            <strong>Summarising instead of arguing.</strong> Retelling a plot or listing what sources say is description. Effective essays use description only as evidence for a claim.
+          </p>
+          <p className={p}>
+            <strong>Burying the point.</strong> If your main idea arrives in the last sentence of a paragraph, move it to the first.
+          </p>
+          <p className={p}>
+            <strong>Editing while drafting.</strong> Stopping to perfect every sentence breaks your flow. Get the draft down, then revise in passes.
+          </p>
+          <p className={p}>
+            <strong>Skipping the question.</strong> A brilliant essay that answers a slightly different question will lose marks. Reread the question before you plan and again before you submit. If it says &quot;critically evaluate&quot;, our guide to <a href="/blog/what-does-critically-evaluate-mean" className={internalLink}>what critically evaluate means</a> explains what the marker expects.
+          </p>
+
+          <h2 className={h2}>Put it into practice</h2>
+          <p className={p}>
+            You do not need to use all twelve habits at once. Pick the two that would help your current essay most, usually a one-sentence point before you start and a cutting pass at the end, and add more as they become automatic. For the parts of an essay where students most often get stuck, see our guides to <a href="/blog/how-to-start-an-essay" className={internalLink}>starting an essay</a>, <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>writing a good introduction</a> and <a href="/blog/how-to-write-a-conclusion" className={internalLink}>writing a conclusion</a>. If you already have a draft, <a href="/blog/how-to-turn-a-b-essay-into-an-a" className={internalLink}>how to turn a B essay into an A</a> shows what to fix first.
+          </p>
+
+          <BlogEssayQuestionBox onNavigate={onNavigate} source="how-to-write-effectively" />
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How can I write more effectively?',
+                answer:
+                  'Decide your main point in one sentence before you start, plan what each paragraph will prove, keep one idea per sentence, start each paragraph with its point, explain every piece of evidence, and cut words that add no meaning. Then revise in passes: argument first, paragraphs second, sentences last.',
+              },
+              {
+                question: 'What are the qualities of effective writing?',
+                answer:
+                  'Effective writing is clear, concise, specific and organised. The reader always knows what the main point is, why each paragraph is there, and how each idea connects to the next. It uses plain, precise words rather than vague or inflated ones.',
+              },
+              {
+                question: 'How do I make my writing more concise?',
+                answer:
+                  'Cut filler phrases such as "it is important to note that" and "due to the fact that", replace weak verb-and-noun pairs with one strong verb ("decide" instead of "make a decision"), split long sentences, and delete anything that repeats a point you have already made.',
+              },
+              {
+                question: 'Is it bad to use the passive voice in essays?',
+                answer:
+                  'No, but it should be a choice. Active sentences are usually shorter and clearer about who did what. The passive voice is useful when the action matters more than who did it, and it is common in scientific writing.',
+              },
+              {
+                question: 'How long should I spend revising an essay?',
+                answer:
+                  'Plan for revision to take about a third of your total time. Leave a gap between drafting and revising if you can, even an hour, and revise in separate passes rather than trying to fix everything in one read.',
+              },
+              {
+                question: 'How do I write effectively when I am short on time?',
+                answer:
+                  'Spend the first ten minutes on a one-sentence thesis and a list of paragraph points, then draft without stopping to edit. Save the last fifteen minutes for one pass that checks each paragraph opens with its point and one pass that cuts filler.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-memorize-things-fast':
       return (
         <>
@@ -3371,13 +3564,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             The tools we cover below work directly in your browser. There&apos;s nothing to download, no accounts required for basic features, and no hidden costs. Bookmark them, use them whenever you need them, and watch your writing improve.
           </p>
-          <p className={p}>
-            <strong>Resumes:</strong> These picks are for coursework. When you&apos;re polishing a resume for internships or jobs,{' '}
-            <a href="https://vivoresume.com" target="_blank" rel="noopener noreferrer" className={internalLink}>
-              VivoResume
-            </a>{' '}
-            offers AI feedback so you can see exactly what&apos;s holding it back.
-          </p>
 
           <h2 className={h2}>1. Word Counter: Know exactly where you stand</h2>
           <p className={p}>
@@ -4302,13 +4488,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <p className={p}>
             For most students, an all-in-one platform makes sense. You can upload or paste your draft, get feedback on grammar and style, run a citation check, and see comments on organization and argument in one place. That reduces context-switching and helps you address issues in a logical order: structure first, then clarity, then citations and polish.
-          </p>
-          <p className={p}>
-            Coursework is only part of the picture. When you start applying for internships or your first job after graduation, your resume becomes just as important as any paper, and it follows different rules.{' '}
-            <a href="https://vivoresume.com" target="_blank" rel="noopener noreferrer" className={internalLink}>
-              VivoResume
-            </a>{' '}
-            is built for that: AI resume feedback so you can see exactly what&apos;s holding your resume back, in the same spirit as getting structured feedback on an essay.
           </p>
 
           <h2 className={h2}>How to evaluate a writing tool</h2>

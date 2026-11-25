@@ -74,7 +74,7 @@ const AnalyzeHubPage: React.FC<AnalyzeHubPageProps> = ({ onNavigate, user, onLog
     id: a.id,
     title: a.documents?.title || a.documents?.original_filename || 'Untitled paper',
     meta: `${timeAgo(a.created_at)}${a.analysis_type ? ' · ' + a.analysis_type.replace(/_/g, ' ') : ''}`,
-    icon: '📝',
+    icon: 'essay-report',
     onOpen: () => {
       if (typeof window !== 'undefined') {
         // Push the analysis ID into the URL so AnalysisPage can pick it up.

@@ -9,13 +9,14 @@ import {
   FREE_PLAN_FEATURE_BULLETS,
   FREE_PLAN_LANDING_CTA,
   FREE_PLAN_STUDY_PACK_LINE,
+  FREE_PLAN_SUMMARY_SHORT,
 } from '../../constants/freePlanCopy';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
 import HeroEssayGrader, { type EssayFacts } from '../landing/HeroEssayGrader';
 import FreeGradeGate, { clearPendingEssay, readPendingEssay, stashPendingEssay, type GateUser } from '../common/FreeGradeGate';
-import { FREE_GRADE_FLOW_KEY, FINALS_FREE_LABEL, finalsFreeActive, FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE, TRY_BEFORE_SIGNUP } from '../../config/pricing';
+import { FREE_CREDITS, FREE_GRADE_FLOW_KEY, FINALS_FREE_LABEL, finalsFreeActive, FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE, TRY_BEFORE_SIGNUP } from '../../config/pricing';
 import { visitSource, rememberDoor, type PackRequest } from '../../utils/tryFirst';
 import DoorsHero from '../landing/DoorsHero';
 import TryFlow, { type TryRequest } from '../landing/TryFlow';
@@ -33,9 +34,9 @@ const LandingInteractiveDemoSection = lazyWithRetry(() => import('../landing/Lan
 // LandingCitationsShowcase removed from landing (Nov 2026 — replaced
 // by the comprehensive-analysis arrow-callout block in the essay
 // section). Re-add the lazy import here if it's ever brought back.
-const LandingStudyToolsHero = lazyWithRetry(() => import('../landing/LandingStudyToolsHero'));
-const LandingHowItWorksSection = lazyWithRetry(() => import('../landing/LandingHowItWorksSection'));
-const LandingWritingWorkspaceSection = lazyWithRetry(() => import('../landing/LandingWritingWorkspaceSection'));
+const LandingEssayWriterSection = lazyWithRetry(() => import('../landing/LandingEssayWriterSection'));
+const LandingStudySection = lazyWithRetry(() => import('../landing/LandingStudySection'));
+const LandingEverythingSection = lazyWithRetry(() => import('../landing/LandingEverythingSection'));
 const LandingChatGPTComparisonSection = lazyWithRetry(() => import('../landing/LandingChatGPTComparisonSection'));
 // LandingMotivationSection ("Studying that actually sticks") is hidden; see the note where it rendered.
 const LandingTestimonialsSection = lazyWithRetry(() => import('../landing/LandingTestimonialsSection'));
@@ -1432,15 +1433,11 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
                     </Suspense> */}
 
               <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
-                <LandingWritingWorkspaceSection onNavigate={onNavigate} />
+                <LandingEssayWriterSection onNavigate={onNavigate} />
               </Suspense>
 
               <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
-                <LandingStudyToolsHero onNavigate={onNavigate} />
-              </Suspense>
-
-              <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
-                <LandingHowItWorksSection onNavigate={onNavigate} />
+                <LandingStudySection />
               </Suspense>
 
               {/* Analysis preview — "Upload your essay…" block.
@@ -1993,173 +1990,10 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
       </Suspense>
 
 
-      {/* ─── "Everything you need to ace school" — feature matrix that
-          implicitly compares WriteScholar to single-purpose tools (Quizlet
-          flashcards only, ChatGPT essay help only, etc.) by showing breadth.
-          Hidden on mobile (hidden md:block) because the same product breadth
-          is already conveyed by the study-tools showcase, the gamification
-          section, and the pricing teaser — on a phone the dense 3-column
-          comparison just adds scroll for low return. ─── */}
-      {true && (
-      <section className="relative hidden md:block py-16 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-[#FAF7FF] dark:bg-stone-950">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(165,96,232,0.12),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(165,96,232,0.16),transparent_55%)]" aria-hidden />
-
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <LandingScrollReveal>
-            <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
-              <span className="inline-flex items-center gap-2 mb-4 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#7733B5] dark:text-[#C9A0F0] shadow-sm">
-                <span aria-hidden>★</span>
-                Why students switch
-              </span>
-              <h2
-                className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 tracking-tight leading-[1.05]"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Everything you need to ace school —{' '}
-                <span className="text-[#A560E8]">
-                  in one app.
-                </span>
-              </h2>
-              <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400">
-                No more juggling Quizlet, ChatGPT, Grammarly, and three citation generators. WriteScholar covers all of it.
-              </p>
-            </div>
-
-            {/* Feature matrix */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-              {/* Writing pillar */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#A560E8] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(165,96,232,0.30)]">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="inline-flex items-center gap-2 mb-3 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider">
-                    <span aria-hidden>📝</span> Writing
-                  </div>
-                  <h3
-                    className="text-xl font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-3"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    Hand in stronger essays
-                  </h3>
-                  <ul className="space-y-2">
-                    {[
-                      'Professor-style essay feedback',
-                      'Structure & argument scoring',
-                      'Citation finder (APA, MLA, Chicago)',
-                      'Paper summarizer for long readings',
-                      'Grammar & academic tone check',
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[14px] text-stone-700 dark:text-stone-300">
-                        <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Studying pillar — featured/highlighted */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-[#F3EAFF]/70 dark:bg-[#A560E8]/10 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden md:scale-[1.02] shadow-[0_8px_28px_-10px_rgba(138,72,199,0.35)]">
-                <span className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#A560E8] text-white text-[9px] font-extrabold uppercase tracking-wider border-2 border-[#7733B5]">
-                  <span aria-hidden>★</span> Most loved
-                </span>
-                <div className="pointer-events-none absolute -top-16 -left-12 w-52 h-52 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="inline-flex items-center gap-2 mb-3 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#8A48C7] dark:text-[#C9A0F0] text-[10px] font-extrabold uppercase tracking-wider">
-                    <span aria-hidden>📦</span> Studying
-                  </div>
-                  <h3
-                    className="text-xl font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-3"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    Walk into exams ready
-                  </h3>
-                  <ul className="space-y-2">
-                    {[
-                      'AI flashcards from your notes',
-                      'Auto-graded quizzes (MCQ, T/F, fill-in)',
-                      'Vocabulary crosswords',
-                      'Crater Blast — boss-battle quiz arcade',
-                      'Word Tower — daily vocab game',
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[14px] text-stone-700 dark:text-stone-300">
-                        <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Motivation pillar */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(119,51,181,0.30)]">
-                <div className="pointer-events-none absolute -bottom-12 -right-12 w-44 h-44 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="inline-flex items-center gap-2 mb-3 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#7733B5] dark:text-[#C9A0F0] text-[10px] font-extrabold uppercase tracking-wider">
-                    <span aria-hidden>🔥</span> Motivation
-                  </div>
-                  <h3
-                    className="text-xl font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-3"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    Study daily. Level up.
-                  </h3>
-                  <ul className="space-y-2">
-                    {[
-                      'Daily Review — personalised practice every day',
-                      'XP & 100 levels — from Seedling to Grandmaster',
-                      'Streaks — track your daily consistency',
-                      '80+ badges — unlock achievements as you learn',
-                      'Crater Blast & Word Tower — arcade mode classics',
-                    ].map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[14px] text-stone-700 dark:text-stone-300">
-                        <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* "vs alternatives" footer strip */}
-            <div className="mt-10 sm:mt-12 rounded-2xl border-2 border-b-4 border-[#D8B4FE] dark:border-[#5A1B8E]/60 bg-white dark:bg-stone-900 p-5 sm:p-6 max-w-4xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-1.5">
-                    The math
-                  </p>
-                  <p className="text-[15px] sm:text-base text-stone-800 dark:text-stone-100 leading-snug">
-                    <span className="font-semibold">Quizlet + ChatGPT + Grammarly + a citation generator</span>{' '}
-                    <span className="text-stone-500 dark:text-stone-400">≈ $40–60/mo combined.</span>
-                  </p>
-                  <p className="mt-1 text-[15px] sm:text-base text-stone-800 dark:text-stone-100 leading-snug">
-                    <span className="font-extrabold text-[#A560E8]">WriteScholar Pro</span>{' '}
-                    <span className="text-stone-500 dark:text-stone-400">covers all of that — </span>
-                    <span className="font-semibold">$19.99/mo.</span>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#A560E8] text-white font-extrabold text-sm border-2 border-b-4 border-[#7733B5] hover:bg-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
-                >
-                  Get started free
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </LandingScrollReveal>
-        </div>
-      </section>
-      )}
+      {/* One account for the essay and the exam: Write, Grade, Study. */}
+      <Suspense fallback={<div className="min-h-[560px] w-full" aria-hidden />}>
+        <LandingEverythingSection />
+      </Suspense>
 
       {/* Pricing — above FAQ, aligned with Pricing page.
           TEMPORARILY HIDDEN — remove `hidden` from className to re-enable. */}
@@ -2181,7 +2015,7 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
               Stop losing marks you could have kept
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Three study packs or essay grades a month are free, and your first essay report is complete. Pro opens every essay in full, the rewrites and one-click fixes: $9.99 for your first month, then $19.99 a month.
+              {FREE_PLAN_SUMMARY_SHORT}, and your first essay report is complete. Pro opens every essay in full, the rewrites and one-click fixes: $9.99 for your first month, then $19.99 a month.
             </p>
           </div>
 
@@ -2264,7 +2098,7 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>99 credits a month for essay checks, study packs &amp; citations. Unused credits roll over</span>
+                  <span>99 credits a month: an essay check costs 2, a study pack or citation search 1. Unused credits roll over</span>
                 </li>
               </ul>
               <button
@@ -2315,6 +2149,12 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
                   <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
+                  <span>Essay writer: 250 outlines and 1,000 writing helps a month</span>
+                </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                   <span>Summarise your whole reading list, no cap, with 1GB of storage</span>
                 </li>
               </ul>
@@ -2329,7 +2169,7 @@ const LandingPage = ({ onNavigate: navigateRaw, user, onAuth }: LandingPageProps
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            Three study packs or essay grades a month are free, no card. Pro is $9.99 for your first month, then $19.99, with monthly or yearly billing.{' '}
+            {FREE_CREDITS} free credits a month, no card. Pro is $9.99 for your first month, then $19.99, with monthly or yearly billing.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}

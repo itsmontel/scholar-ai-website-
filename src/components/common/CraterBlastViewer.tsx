@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { trackFirst } from '../../utils/analytics';
 
 interface CraterBlastQuestion {
   id?: string;
@@ -23,7 +24,8 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 const CraterBlastViewer = ({ questions, onEnlarge }: CraterBlastViewerProps) => {
-  const [displayedQuestions, setDisplayedQuestions] = useState(() => shuffle(questions).slice(0, Math.min(15, questions.length)));
+  useEffect(() => { trackFirst('first_game', { game: 'crater_blast' }); }, []);
+  const [displayedQuestions, setDisplayedQuestions] = useState(() => shuffle(questions));
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -58,7 +60,7 @@ const CraterBlastViewer = ({ questions, onEnlarge }: CraterBlastViewerProps) => 
   };
 
   const resetQuiz = () => {
-    setDisplayedQuestions(shuffle(questions).slice(0, Math.min(15, questions.length)));
+    setDisplayedQuestions(shuffle(questions));
     setCurrentQuestion(0);
     setSelectedAnswer(null);
     setShowResult(false);

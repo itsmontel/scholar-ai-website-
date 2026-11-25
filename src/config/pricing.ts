@@ -3,8 +3,8 @@
  * sells and where any discount is allowed to appear.
  *
  * Current model (2026-11-18):
- *   Free      3 credits a month, no card. A credit is one essay grade
- *             (200 to 10,000 words) or one study pack. The first essay
+ *   Free      4 credits a month, no card. An essay grade (200 to 10,000 words)
+ *             costs 2 credits and a study pack costs 1. The first essay
  *             an account grades comes back whole. Later free grades show
  *             the grade, score and every rubric score, with full feedback
  *             on the first quarter of the essay (cut on the server in
@@ -96,7 +96,7 @@ export const TRIAL_PRICE = 1;
  */
 export const TRIAL_CREDITS = 5;
 /** Free accounts: credits per calendar month (grades or study packs), resetting on the 1st. */
-export const FREE_CREDITS = 3;
+export const FREE_CREDITS = 4;
 /** Legacy: the free tier no longer expires after a week. */
 export const FREE_CREDIT_DAYS = 0;
 /** Free grades take essays in this range; Pro goes to 15,000 words. */
@@ -134,6 +134,19 @@ export function finalsFreeActive(now: number = Date.now()): boolean {
 }
 export const MONTHLY_CREDITS: Record<string, number> = { pro: 99, premium: 199 };
 export const CREDIT_CAP = 499;
+/** What each action costs. Mirrors CREDIT_COSTS in backend/src/services/creditService.js. */
+export const CREDIT_COSTS = { analysis: 2, studyPack: 1, citation: 1 } as const;
+/**
+ * Credit top-ups: a one-off purchase for any account. They last
+ * TOPUP_MONTHS months, sit outside the rollover cap and are used after
+ * the plan's own credits. Priced above the plans per credit on purpose.
+ * Mirrors TOPUP_PACKS in backend/src/services/creditService.js.
+ */
+export const TOPUP_PACKS = [
+  { id: 'small', credits: 25, price: 7.99 },
+  { id: 'large', credits: 60, price: 14.99 },
+] as const;
+export const TOPUP_MONTHS = 12;
 
 /**
  * sessionStorage key set right before redirecting to Stripe, so the

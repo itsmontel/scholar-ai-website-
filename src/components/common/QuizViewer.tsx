@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { trackFirst } from '../../utils/analytics';
 import QuizMascotReaction from './QuizMascotReaction';
 
 interface QuizQuestion {
@@ -80,6 +81,7 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
 
   const handleSubmit = () => {
     if (!selectedAnswer || !question) return;
+    trackFirst('first_quiz');
     const correctAns = question.correctAnswer;
     const options = question.options || [];
     let isCorrect = false;

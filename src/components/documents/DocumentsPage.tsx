@@ -10,6 +10,10 @@ import type { Editor } from '@tiptap/react';
 import DailyReviewTab from '../pages/DailyReviewTab';
 import CitationsPanel from './panels/CitationsPanel';
 import StudyPacksPanel from './panels/StudyPacksPanel';
+import EssayStartPanel from './panels/EssayStartPanel';
+import { SelectionHelp, WritingHelpRail } from './WritingHelp';
+import { CHECK_MIN_WORDS, GRADE_READY_SHARE, blankDraftTitle, clearEssayPlan, countWords, parsePlan, planToHtml, readEssayPlan, saveEssayPlan, type EssayPlan } from '../../utils/essayPlan';
+import { readPlanData, syncPlanData } from '../write/editorExtras';
 import GamesPanel from './panels/GamesPanel';
 import SoftPaywall from '../common/SoftPaywall';
 import { FREE_EDITOR_WORD_LIMIT } from '../../config/featureFlags';
@@ -702,7 +706,7 @@ function AnalyzePanel({
           <section aria-label="Grade a new essay" className="flex flex-col gap-3 rounded-[26px] border border-[#E4D4F8] bg-white p-5 shadow-[0_16px_34px_-26px_rgba(90,45,140,0.55)]">
             <h2 className="m-0 text-[22px] font-black tracking-[-0.01em] text-stone-900">Grade a new essay</h2>
             {pasteBox}
-            <p className="m-0 text-[13.5px] font-bold text-stone-500">Each grade uses 1 credit. Your essay is never used to train AI.</p>
+            <p className="m-0 text-[13.5px] font-bold text-stone-500">Each grade uses 2 credits. Your essay is never used to train AI.</p>
           </section>
         </>
       ) : (
@@ -722,7 +726,7 @@ function AnalyzePanel({
             <div className="rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-4 text-stone-900 shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)]">
               {pasteBox}
             </div>
-            <p className="m-0 text-[13.5px] font-bold text-[#F3EAFF]">Each grade uses 1 credit. Your essay is never used to train AI.</p>
+            <p className="m-0 text-[13.5px] font-bold text-[#F3EAFF]">Each grade uses 2 credits. Your essay is never used to train AI.</p>
           </div>
         </section>
       )}
@@ -991,17 +995,10 @@ function DocumentRow({
       : doc.wordCount
         ? `${doc.wordCount.toLocaleString()} words`
         : 'Empty';
+  // One lilac holder for every kind: the picture inside says what it is.
   const iconWrap = elevated
-    ? isPack
-      ? 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFF4E0] to-[#FFE4B8] text-[#D97F00] dark:from-[#FF9600]/25 dark:to-[#FF9600]/10 dark:text-[#FFB84D] ring-1 ring-[#FF9600]/35 dark:ring-[#FF9600]/25 transition-transform duration-200 group-hover:scale-105'
-      : isCite
-        ? 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#DDF4FF] to-[#C5ECFF] text-[#1899D6] dark:from-[#1CB0F6]/25 dark:to-[#1CB0F6]/10 dark:text-[#7DD3FC] ring-1 ring-[#1CB0F6]/35 dark:ring-[#1CB0F6]/25 transition-transform duration-200 group-hover:scale-105'
-        : 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] text-[#8A48C7] dark:from-[#A560E8]/25 dark:to-[#A560E8]/10 dark:text-[#C9A0F0] ring-1 ring-[#C9A0F0]/35 dark:ring-[#A560E8]/25 transition-transform duration-200 group-hover:scale-105'
-    : isPack
-      ? 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFF4E0] text-[#FF9600] dark:bg-[#FF9600]/15 dark:text-[#FFB84D] transition-colors group-hover:bg-[#FFE8C0] dark:group-hover:bg-[#FF9600]/25'
-      : isCite
-        ? 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDF4FF] text-[#1CB0F6] dark:bg-[#1CB0F6]/15 dark:text-[#7DD3FC] transition-colors group-hover:bg-[#C5ECFF] dark:group-hover:bg-[#1CB0F6]/25'
-        : 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3EAFF] text-[#A560E8] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0] transition-colors group-hover:bg-[#EADCFB] dark:group-hover:bg-[#A560E8]/25';
+    ? 'shrink-0 flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15'
+    : 'shrink-0 flex h-11 w-11 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15';
   const showMenu = Boolean(onDownload || onDelete);
 
   return (
@@ -1035,19 +1032,14 @@ function DocumentRow({
       )}
 
       <span className={iconWrap} aria-hidden>
-        {isPack ? (
-          <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" />
-          </svg>
-        ) : isCite ? (
-          <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z" />
-          </svg>
-        ) : (
-          <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" />
-          </svg>
-        )}
+        <img
+          src={`/icons/${isPack ? 'study-pack' : isCite ? 'citations' : graded ? 'essay-report' : readEssayPlan(doc.id) ? 'write' : 'new-essay'}.webp`}
+          alt=""
+          width={40}
+          height={40}
+          loading="lazy"
+          className={`${elevated ? 'h-10 w-10' : 'h-8 w-8'} object-contain transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none`}
+        />
       </span>
 
       <div className="min-w-0 flex-1">
@@ -2622,6 +2614,53 @@ function DocumentEditorView({
   const noAnalysesLeft = typeof analysesLeft === 'number' && analysesLeft === 0;
   const [editorMode, setEditorMode] = useState<'draft' | 'report'>('draft');
   const wasAnalyzingRef = useRef(false);
+  // Writing help: the editor instance, and the outline this draft was started from (if any).
+  const [helpEditor, setHelpEditor] = useState<Editor | null>(null);
+  const [essayPlan, setEssayPlan] = useState<EssayPlan | null>(() => readEssayPlan(docId));
+  useEffect(() => { setEssayPlan(readEssayPlan(docId)); setHelpEditor(null); }, [docId]);
+  // The outline also lives in the draft itself, so it follows the account to
+  // another device: read it from there when this browser has none, and keep
+  // the draft's copy in step with what is shown.
+  const planRemovedRef = useRef(false);
+  useEffect(() => { planRemovedRef.current = false; }, [docId]);
+  useEffect(() => {
+    if (!helpEditor) return;
+    const sync = () => {
+      if (helpEditor.isDestroyed) return;
+      if (essayPlan) { syncPlanData(helpEditor, JSON.stringify(essayPlan)); return; }
+      if (planRemovedRef.current) { syncPlanData(helpEditor, null); return; }
+      const stored = parsePlan(readPlanData(helpEditor));
+      if (stored) { saveEssayPlan(docId, stored); setEssayPlan(stored); }
+    };
+    sync();
+    helpEditor.on('update', sync);
+    return () => { helpEditor.off('update', sync); };
+  }, [helpEditor, essayPlan, docId]);
+  // A draft still being written from an outline is not ready for the full
+  // grade, which marks it as a finished essay. Offer the paragraph check first.
+  const [gradeGuard, setGradeGuard] = useState<{ words: number; target: number } | null>(null);
+  const [checkSignal, setCheckSignal] = useState<{ n: number; large: boolean }>({ n: 0, large: true });
+  const outlineDetailsRef = useRef<HTMLDetailsElement | null>(null);
+  const requestGrade = useCallback(() => {
+    if (essayPlan && helpEditor && !analyzerResult) {
+      // What the student has written: the outline's own headings do not count.
+      let words = 0;
+      helpEditor.state.doc.forEach((node) => { if (node.type.name !== 'heading') words += countWords(node.textContent); });
+      if (words < essayPlan.wordTarget * GRADE_READY_SHARE) {
+        setGradeGuard({ words, target: essayPlan.wordTarget });
+        return;
+      }
+    }
+    openAnalyzeConfirm();
+  }, [essayPlan, helpEditor, analyzerResult, openAnalyzeConfirm]);
+  const checkParagraphInstead = () => {
+    const enough = (gradeGuard?.words ?? 0) >= CHECK_MIN_WORDS;
+    setGradeGuard(null);
+    if (!enough) return;
+    const large = typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches;
+    if (!large && outlineDetailsRef.current) outlineDetailsRef.current.open = true;
+    setCheckSignal((c) => ({ n: c.n + 1, large }));
+  };
 
   useEffect(() => {
     setEditorMode('draft');
@@ -2722,8 +2761,11 @@ function DocumentEditorView({
   // free users see the upgrade path) before they've ever run it.
   // Mutually exclusive with showSplit (which needs a result/loading/
   // error — all negated here).
-  const showAnalyzePromo = !analyzerResult && !analyzerLoading && !analyzerError;
-  const splitLayout = showSplit || showAnalyzePromo;
+  // A draft started from an outline shows the outline (with writing help)
+  // in that slot until it is graded, and again whenever the feedback is closed.
+  const showWritingRail = !!essayPlan && !showSplit;
+  const showAnalyzePromo = !essayPlan && !analyzerResult && !analyzerLoading && !analyzerError;
+  const splitLayout = showSplit || showAnalyzePromo || showWritingRail;
 
   return (
     <div className={`mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 transition-[max-width] duration-200 ${splitLayout ? 'max-w-[1600px]' : 'max-w-6xl'}`}>
@@ -2794,6 +2836,50 @@ function DocumentEditorView({
           onOpenClassicReport={onOpenClassicReport}
         />
       )}
+      {!(editorMode === 'report' && analyzerResult) && (
+        <SelectionHelp editor={helpEditor} plan={essayPlan} onUpgrade={onUpgrade} />
+      )}
+      {gradeGuard && (
+        <div className="fixed inset-0 z-[230] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="grade-guard-title" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+          <div className="ws-fade absolute inset-0 bg-[#2A1540]/70" onClick={() => setGradeGuard(null)} aria-hidden />
+          <div className="ws-pop relative w-full max-w-[480px] rounded-[28px] border-b-[6px] border-[#D9C2F2] bg-white p-6 shadow-[0_30px_60px_-20px_rgba(42,21,64,0.6)] dark:border-stone-700 dark:bg-stone-900">
+            <div className="flex items-start gap-3.5">
+              <img src="/mascot-thinking-still.webp" alt="" width={76} height={76} className="h-[76px] w-[76px] shrink-0 object-contain" />
+              <div className="min-w-0">
+                <h2 id="grade-guard-title" className="m-0 text-[23px] font-black leading-tight text-stone-900 dark:text-stone-50">This draft is not finished yet</h2>
+                <p className="m-0 mt-1 text-[15px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">{gradeGuard.words.toLocaleString('en-US')} of about {gradeGuard.target.toLocaleString('en-US')} words</p>
+              </div>
+            </div>
+            <p className="m-0 mt-4 text-[15.5px] font-bold leading-[1.5] text-stone-700 dark:text-stone-200">
+              The full grade marks your essay as if it were finished, so an unfinished draft scores low and still uses 2 credits. Checking one paragraph tells you what to fix in it and uses no credits.
+            </p>
+            <div className="mt-5 flex flex-col gap-2.5">
+              <button type="button" autoFocus onClick={checkParagraphInstead} className="inline-flex min-h-[56px] items-center justify-center rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#58CC02] px-5 text-[17px] font-black text-white transition-all hover:bg-[#61E002] active:translate-y-0.5 active:border-b-2">
+                {gradeGuard.words >= CHECK_MIN_WORDS ? 'Check a paragraph instead' : 'Keep writing'}
+              </button>
+              <button type="button" onClick={() => { setGradeGuard(null); openAnalyzeConfirm(); }} className="inline-flex min-h-[50px] items-center justify-center rounded-2xl border-2 border-b-4 border-[#E4D4F8] bg-white px-5 text-[15.5px] font-black text-[#7733B5] transition-all hover:bg-[#FBF8FF] active:translate-y-0.5 active:border-b-2 dark:border-stone-700 dark:bg-stone-900 dark:text-[#C9A0F0]">
+                Grade the whole draft anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Small screens have no side rail, so the outline opens above the draft instead. */}
+      {showWritingRail && essayPlan && !(editorMode === 'report' && analyzerResult) && (
+        <details ref={outlineDetailsRef} className="lg:hidden mb-3 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden">
+          <summary className="flex min-h-[52px] cursor-pointer items-center px-4 text-[15px] font-black text-[#7733B5] dark:text-[#C9A0F0]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Your outline and writing help</summary>
+          <div className="flex max-h-[70vh] flex-col border-t border-stone-200 dark:border-stone-700">
+            <WritingHelpRail
+              editor={helpEditor}
+              plan={essayPlan}
+              onGrade={requestGrade}
+              checkSignal={checkSignal.large ? 0 : checkSignal.n}
+              onUpgrade={onUpgrade}
+              onRemovePlan={() => { planRemovedRef.current = true; clearEssayPlan(docId); setEssayPlan(null); }}
+            />
+          </div>
+        </details>
+      )}
       <div className={`${editorMode === 'report' && analyzerResult ? 'hidden' : ''} grid gap-4 lg:gap-6 ${splitLayout ? 'lg:grid-cols-[minmax(0,1fr)_min(360px,31%)]' : 'grid-cols-1'}`}>
         {/* overflow-clip (not -hidden): clips the rounded corners the
             same way visually, but unlike -hidden it does NOT create a
@@ -2802,19 +2888,19 @@ function DocumentEditorView({
             while you scroll a long draft. Same trick the app root
             uses. */}
         <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-clip min-w-0">
-        <div className="px-6 sm:px-10 lg:px-16 pt-8 pb-2">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Untitled"
-            aria-label="Document title"
-            className="w-full bg-transparent border-0 outline-none focus:outline-none text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-stone-50 placeholder:text-stone-300 dark:placeholder:text-stone-700"
-          />
-        </div>
-
         <WriteEditor
           key={docId}
+          skipHeadingWords={!!essayPlan}
+          titleSlot={
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Untitled"
+              aria-label="Document title"
+              className="w-full truncate rounded-lg border-0 bg-transparent px-1 text-[22px] font-black tracking-[-0.01em] text-stone-900 outline-none placeholder:text-stone-400 focus:bg-[#FBF8FF] focus:outline-none sm:text-[26px] dark:text-stone-50 dark:placeholder:text-stone-600 dark:focus:bg-stone-800"
+            />
+          }
           initialHtml={initialHtml}
           onSave={handleContentSave}
           annotations={editorAnnotations}
@@ -2822,7 +2908,7 @@ function DocumentEditorView({
           selectedAnnotationId={selectedAnnotationId}
           onAnnotationClick={(id) => onSelectAnnotation(id)}
           onAnnotationHover={onAnnotationHover}
-          onEditorReady={onEditorReady}
+          onEditorReady={(ed) => { setHelpEditor(ed); onEditorReady(ed); }}
           wordLimit={wordLimit}
           onUpgrade={onUpgrade}
           exportFileName={title || 'document'}
@@ -2913,9 +2999,9 @@ function DocumentEditorView({
             )}
             <button
               type="button"
-              onClick={openAnalyzeConfirm}
+              onClick={requestGrade}
               disabled={analyzerLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[11px] sm:text-xs font-extrabold uppercase tracking-wider border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="inline-flex h-11 items-center gap-2 whitespace-nowrap rounded-[14px] border-2 border-b-4 border-[#8A48C7] bg-[#A560E8] px-4 text-[15px] font-black text-white transition-all hover:bg-[#B070EE] active:translate-y-0.5 active:border-b-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {analyzerLoading ? (
                 <>
@@ -2923,13 +3009,10 @@ function DocumentEditorView({
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
                     <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
                   </svg>
-                  Analyzing…
+                  Grading…
                 </>
               ) : (
-                <>
-                  <I.Sparkle />
-                  {analyzerResult ? 'Re-analyze' : 'Analyze'}
-                </>
+                <>{analyzerResult ? 'Grade again' : 'Grade this draft'}</>
               )}
             </button>
             </div>
@@ -2961,6 +3044,19 @@ function DocumentEditorView({
               applyingAnnotationId={applyingAnnotationId}
               revisionsLocked={revisionsLocked}
               onUpgrade={onUpgrade}
+            />
+          </aside>
+        )}
+
+        {showWritingRail && essayPlan && (
+          <aside aria-label="Your outline" className="hidden lg:flex flex-col rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden self-start sticky top-4 h-[calc(100dvh-2rem)]">
+            <WritingHelpRail
+              editor={helpEditor}
+              plan={essayPlan}
+              onGrade={requestGrade}
+              checkSignal={checkSignal.large ? checkSignal.n : 0}
+              onUpgrade={onUpgrade}
+              onRemovePlan={() => { planRemovedRef.current = true; clearEssayPlan(docId); setEssayPlan(null); }}
             />
           </aside>
         )}
@@ -3154,7 +3250,7 @@ function DocumentEditorView({
                     <li className="flex gap-2"><span className="text-[#FF4B4B] font-extrabold">•</span><span><strong>Replaces</strong> your current feedback and clears any revisions you've already applied.</span></li>
                   )}
                   <li className="flex gap-2"><span className="text-[#A560E8] font-extrabold">•</span><span>
-                    Uses <strong>1 credit</strong>
+                    Uses <strong>2 credits</strong>
                     {typeof analysesLeft === 'number' && analysesLeft >= 0
                       ? revisionsLocked
                         ? ` — you have ${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'} left.`
@@ -3504,7 +3600,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   useEffect(() => {
     const handler = (e: Event) => {
       const view = (e as CustomEvent<string>).detail;
-      const allowed: WorkspaceView[] = ['hub', 'docs', 'editor', 'analyze', 'daily-review', 'study-packs', 'citations', 'games'];
+      const allowed: WorkspaceView[] = ['hub', 'docs', 'editor', 'write', 'analyze', 'daily-review', 'study-packs', 'citations', 'games'];
       if (allowed.includes(view as WorkspaceView)) {
         setView(view as WorkspaceView);
       }
@@ -3933,6 +4029,49 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       });
       setView('editor');
     }
+  }, [createNewDoc]);
+
+  /** "Write an essay" without an outline: a blank draft titled from the question. Free for everyone. */
+  const handleBlankEssay = useCallback(async (question: string): Promise<boolean> => {
+    analyzeOnOpenRef.current = false;
+    setShowAnalyzeNudge(false);
+    const title = blankDraftTitle(question);
+    const id = await createNewDoc({ title, html: '', text: '' });
+    if (!id) return false;
+    setOpenDocId(id);
+    setOpenDoc({
+      id, title, originalFilename: '', fileType: '', fileSize: 0,
+      wordCount: 0, pageCount: 0, uploadStatus: 'completed',
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      lastEditedAt: null, isDraft: false, isUpload: false,
+      contentPreview: '', contentHtml: '', contentText: '',
+    });
+    setView('editor');
+    try { window.history.pushState({}, '', `/documents/${id}`); } catch { /* ignore */ }
+    return true;
+  }, [createNewDoc]);
+
+  /** "Write an essay": open a new draft that already holds the outline's headings. */
+  const handleStartEssay = useCallback(async (plan: EssayPlan & { title: string }): Promise<boolean> => {
+    analyzeOnOpenRef.current = false;
+    setShowAnalyzeNudge(false);
+    const stored: EssayPlan = { question: plan.question, thesis: plan.thesis, sections: plan.sections, wordTarget: plan.wordTarget };
+    const html = planToHtml(plan.sections, stored);
+    const text = plan.sections.map((s) => s.heading).join('\n');
+    const id = await createNewDoc({ title: plan.title, html, text });
+    if (!id) return false;
+    saveEssayPlan(id, stored);
+    setOpenDocId(id);
+    setOpenDoc({
+      id, title: plan.title, originalFilename: '', fileType: '', fileSize: 0,
+      wordCount: 0, pageCount: 0, uploadStatus: 'completed',
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      lastEditedAt: null, isDraft: false, isUpload: false,
+      contentHtml: html, contentText: text,
+    });
+    setView('editor');
+    try { window.history.pushState({}, '', `/documents/${id}`); } catch { /* ignore */ }
+    return true;
   }, [createNewDoc]);
 
   /**
@@ -5034,7 +5173,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           <WelcomeQuestions
             userId={welcomeUserId}
             firstName={firstNameOf(user)}
-            onClose={() => { setWelcomeOpen(false); setWelcomeRev((n) => n + 1); }}
+            onClose={(next) => {
+              setWelcomeOpen(false);
+              setWelcomeRev((n) => n + 1);
+              // An essay that has not been started opens on the Start an essay screen.
+              if (next === 'write') handleRailSelect('write');
+            }}
           />
         )}
         {view === 'hub' && (
@@ -5049,6 +5193,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             onOpenPack={openHubStudyPack}
             onOpenDoc={handleOpenDoc}
             onGradeEssay={startFirstGrade}
+            onWriteEssay={() => handleRailSelect('write')}
+            onOpenGrader={() => handleRailSelect('analyze')}
+            onGradeDoc={(id) => handleOpenDoc(id, true)}
             onMakePack={(req) => { if (trialGated) { onTrialGate?.(); return; } setPackRequest({ kind: 'pack', req }); }}
             onStartReview={() => handleRailSelect('daily-review')}
             userId={typeof user?.id === 'string' ? user.id : undefined}
@@ -5123,6 +5270,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
               onSwitchTool={(t: string) => setView(t === 'study_pack' ? 'study-packs' : 'hub')}
             />
           </>
+        )}
+        {view === 'write' && (
+          <EssayStartPanel
+            onStart={handleStartEssay}
+            onBlankDraft={handleBlankEssay}
+            onGradeInstead={() => setView('analyze')}
+            onUpgrade={() => onNavigate('pricing')}
+          />
         )}
         {view === 'study-packs' && (
           <>

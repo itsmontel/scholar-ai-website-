@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { trackFirst } from '../../../utils/analytics';
 import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
@@ -125,6 +126,7 @@ function glowColor(mistakes: number): string {
 /* ────────────────────── Component ────────────────────── */
 
 const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
+  useEffect(() => { trackFirst('first_game', { game: 'word_tower' }); }, []);
   const userPlan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
   const canUseStudyTools = user && (userPlan === 'pro' || userPlan === 'premium');
   const maxWords = canUseStudyTools ? 10000 : 5000;

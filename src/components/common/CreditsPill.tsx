@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import CreditCoin from './CreditCoin';
 import { trackEvent } from '../../utils/analytics';
-import { isPaidCreditPlan, shortDate, type CreditState } from '../../utils/credits';
-import { MONTHLY_CREDITS, STANDARD_MONTHLY_PRICE, LIST_MONTHLY_PRICE, LAUNCH_OFFER_ENABLED, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
+import { buyTopUp, confirmTopUpFromUrl, isPaidCreditPlan, openCreditChoice, shortDate, type CreditState } from '../../utils/credits';
+import { TOPUP_MONTHS, TOPUP_PACKS, MONTHLY_CREDITS, STANDARD_MONTHLY_PRICE, LIST_MONTHLY_PRICE, LAUNCH_OFFER_ENABLED, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
 
 /**
- * Top-right credit counter + its dropdown. One credit = one essay
- * analysis, study pack or citation search. Shows the free plan's
+ * Top-right credit counter + its dropdown. An essay analysis costs 2
+ * credits, a study pack or citation search 1. Sells credit top-ups. Shows the free plan's
  * monthly grades (and when they reset), the trial's credits, the paid
  * balance (with rollover), a low/empty state, and the 499 cap.
  */
@@ -21,6 +21,32 @@ export default function CreditsPill({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
+  const [buying, setBuying] = useState<string | null>(null);
+  const [topUpNote, setTopUpNote] = useState<{ text: string; tone: 'info' | 'warn' } | null>(null);
+
+  // Back from Stripe after a top-up: add the credits and say so.
+  useEffect(() => {
+    let alive = true;
+    void confirmTopUpFromUrl().then((added) => {
+      if (!alive || added == null) return;
+      setTopUpNote({ text: `${added} credits added. They last ${TOPUP_MONTHS} months.`, tone: 'info' });
+      setOpen(true);
+    });
+    return () => { alive = false; };
+  }, []);
+
+  const buy = async (pack: string) => {
+    if (buying) return;
+    setBuying(pack);
+    setTopUpNote(null);
+    trackEvent('upgrade_clicked', { source: 'credit_topup', plan: pack });
+    try {
+      await buyTopUp(pack);
+    } catch (e) {
+      setTopUpNote({ text: e instanceof Error ? e.message : 'We could not start checkout. Please try again.', tone: 'warn' });
+      setBuying(null);
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +81,11 @@ export default function CreditsPill({
 
   const openPaywall = () => {
     setOpen(false);
-    window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true, trigger: 'credits_pill' } }));
+    if (credits?.isTrial) {
+      window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true, trigger: 'credits_pill' } }));
+    } else {
+      openCreditChoice({ source: 'credits_pill' });
+    }
   };
 
   const pillTone = !paid && !(freeLive && remaining > 0)
@@ -87,7 +117,7 @@ export default function CreditsPill({
         aria-label={`${remaining} credits${paid ? '' : ', get credits'}. Open credit details`}
         className={`inline-flex items-center gap-1.5 h-10 sm:h-11 pl-1.5 ${showGetMore ? 'pr-1' : 'pr-3.5'} rounded-full border-2 border-b-4 transition-transform duration-200 hover:scale-[1.03] active:border-b-2 ${pillTone}`}
       >
-        <CreditCoin size={26} />
+        <img src="/icons/credits.webp" alt="" width={28} height={28} className="h-7 w-7 shrink-0 object-contain" />
         <span className="text-[16px] font-black tabular-nums text-[#3C3C3C] dark:text-stone-50">{remaining}</span>
         {atCap ? (
           <span className="px-1.5 py-0.5 rounded-full bg-[#A560E8] text-white text-[10px] font-black">MAX</span>
@@ -182,9 +212,35 @@ export default function CreditsPill({
 
           <Note>
             {paid
-              ? `1 credit = 1 essay analysis, study pack or citation search. Unused credits roll over every month, up to ${credits?.cap ?? 499}.`
-              : 'Free plan: essay grades only. Study packs and citation searches are part of Pro.'}
+              ? `An essay analysis costs 2 credits; a study pack or citation search costs 1. Unused credits roll over every month, up to ${credits?.cap ?? 499}.`
+              : 'An essay grade costs 2 credits and a study pack costs 1. Citation searches are part of Pro.'}
           </Note>
+
+          {credits && credits.topUp > 0 && (
+            <Note>
+              Includes {credits.topUp} top-up credit{credits.topUp === 1 ? '' : 's'}{credits.topUpExpiresAt ? `, good until ${shortDate(credits.topUpExpiresAt) ?? 'next year'}` : ''}. They are used after your {paid ? "plan's" : 'free'} credits.
+            </Note>
+          )}
+          {topUpNote && <Note tone={topUpNote.tone}>{topUpNote.text}</Note>}
+
+          <div className="flex flex-col gap-2">
+            <p className="m-0 text-[12.5px] font-black uppercase tracking-[0.08em] text-stone-500 dark:text-stone-400">Need more now?</p>
+            <div className="grid grid-cols-2 gap-2">
+              {TOPUP_PACKS.map((pack) => (
+                <button
+                  key={pack.id}
+                  type="button"
+                  disabled={!!buying}
+                  onClick={() => void buy(pack.id)}
+                  className="flex min-h-[58px] flex-col items-center justify-center rounded-2xl border-2 border-b-4 border-[#F0C94A] bg-[#FFF8DD] px-2 py-1.5 text-[#3C3C3C] transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 disabled:opacity-60 dark:border-[#6B5A1C] dark:bg-[#2E2814] dark:text-stone-50"
+                >
+                  <span className="text-[14.5px] font-black">{buying === pack.id ? 'Opening…' : `${pack.credits} credits`}</span>
+                  <span className="text-[12.5px] font-extrabold text-stone-600 dark:text-stone-300">${pack.price}</span>
+                </button>
+              ))}
+            </div>
+            <p className="m-0 text-[12px] font-bold leading-snug text-stone-500 dark:text-stone-400">One-off purchase. Top-up credits last {TOPUP_MONTHS} months.</p>
+          </div>
 
           {!paid ? (
             <button type="button" onClick={openPaywall} className="h-12 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] border-2 border-b-4 border-[#7733B5] text-white text-[14px] font-extrabold uppercase tracking-wide active:border-b-2">

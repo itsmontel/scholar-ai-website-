@@ -6,16 +6,23 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
+import TextAlign from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
+import { TextStyle, Color } from '@tiptap/extension-text-style';
 // NOTE: @tiptap/extension-table exposes Table/TableRow/TableHeader/
 // TableCell as NAMED exports (no default). Importing the table as a
 // default gives `undefined` → Table.configure() throws and the whole
 // editor (and Documents page) fails to mount.
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table as DocxTable, TableRow as DocxTableRow, TableCell as DocxTableCell, ImageRun, WidthType, ExternalHyperlink } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table as DocxTable, TableRow as DocxTableRow, TableCell as DocxTableCell, ImageRun, WidthType, ExternalHyperlink, AlignmentType, ShadingType } from 'docx';
 import { saveAs } from 'file-saver';
 import { AnalyzerHighlights, setAnalyzerAnnotations, scrollToAnnotation } from '../documents/analyzerExtension';
 import type { AnnotatorAnnotation } from '../documents/analyzerExtension';
+import EditorToolbar, { EDITOR_SIZES, LINE_SPACINGS } from './EditorToolbar';
+import CiteSourceModal, { CITE_STYLE_KEY } from './CiteSourceModal';
+import { CiteMark, NumberedCitations, RefAttrs, printAsPdf } from './editorExtras';
+import { isCiteStyle } from '../../utils/citations';
 
 /* ═══════════════════════════════════════════════════════════════
    WriteEditor — Word-style rich-text surface for the in-app
@@ -64,6 +71,8 @@ interface WriteEditorProps {
   onAnnotationHover?: (annotationId: string | null, rect: DOMRect | null) => void;
   /** Fires once when the editor instance is ready. Lets the parent run imperative ops (apply-revision, scroll-to). */
   onEditorReady?: (editor: Editor) => void;
+  /** Leave headings out of the visible word count: in a draft started from an outline they are scaffolding, not writing. */
+  skipHeadingWords?: boolean;
   /** Free-tier writing cap. null/undefined = unlimited (paid). At
    *  or above this word count, content-adding input is blocked
    *  (trim/delete still works) and an upgrade banner shows. */
@@ -76,6 +85,8 @@ interface WriteEditorProps {
    *  sticky formatting toolbar pins to the viewport top (top-0)
    *  instead of below the header. Defaults to false (header present). */
   headerless?: boolean;
+  /** The document title field, shown at the start of the document row. */
+  titleSlot?: React.ReactNode;
 }
 
 /* Autosave debounce window. 1.2s was the original; bumped to 3s
@@ -147,170 +158,6 @@ function TBtn({
   );
 }
 
-function TDivider() {
-  return <span className="mx-1 h-5 w-px bg-stone-200 dark:bg-stone-700" aria-hidden />;
-}
-
-/* ─── Heading-level dropdown ────────────────────────────────── */
-function HeadingDropdown({ editor }: { editor: Editor }) {
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [open]);
-
-  const items: { label: string; preview: string; isActive: () => boolean; apply: () => void }[] = [
-    {
-      label: 'Text',
-      preview: 'text-base font-normal',
-      isActive: () => editor.isActive('paragraph') && !editor.isActive('heading'),
-      apply: () => editor.chain().focus().setParagraph().run(),
-    },
-    {
-      label: 'Heading 1',
-      preview: 'text-xl font-extrabold',
-      isActive: () => editor.isActive('heading', { level: 1 }),
-      apply: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
-    },
-    {
-      label: 'Heading 2',
-      preview: 'text-lg font-bold',
-      isActive: () => editor.isActive('heading', { level: 2 }),
-      apply: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-    },
-    {
-      label: 'Heading 3',
-      preview: 'text-base font-bold',
-      isActive: () => editor.isActive('heading', { level: 3 }),
-      apply: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-    },
-    {
-      label: 'Bullet list',
-      preview: 'text-base font-normal',
-      isActive: () => editor.isActive('bulletList'),
-      apply: () => editor.chain().focus().toggleBulletList().run(),
-    },
-    {
-      label: 'Numbered list',
-      preview: 'text-base font-normal',
-      isActive: () => editor.isActive('orderedList'),
-      apply: () => editor.chain().focus().toggleOrderedList().run(),
-    },
-    {
-      label: 'Quote',
-      preview: 'text-base italic',
-      isActive: () => editor.isActive('blockquote'),
-      apply: () => editor.chain().focus().toggleBlockquote().run(),
-    },
-  ];
-  const current = items.find((i) => i.isActive()) ?? items[0];
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-8 items-center gap-2 rounded-lg px-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-        aria-haspopup="menu"
-        aria-expanded={open}
-      >
-        <Icon.T />
-        <span className="text-[13px] font-medium">{current.label}</span>
-        {open ? <Icon.ChevUp /> : <Icon.ChevDown />}
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className="absolute left-0 top-full z-30 mt-1 min-w-[180px] rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.20)] py-1"
-        >
-          {items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              role="menuitemradio"
-              aria-checked={item.isActive()}
-              onClick={() => { item.apply(); setOpen(false); }}
-              className={`w-full text-left px-3 py-1.5 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 ${item.preview} ${item.isActive() ? 'bg-[#A560E8]/8 text-[#7733B5] dark:text-[#C390F2]' : ''}`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ─── Font picker ───────────────────────────────────────────── */
-const EDITOR_FONTS: { label: string; css: string }[] = [
-  { label: 'Sans (default)', css: '' },
-  { label: 'Serif', css: 'Georgia, "Times New Roman", serif' },
-  { label: 'Times New Roman', css: '"Times New Roman", Times, serif' },
-  { label: 'Arial', css: 'Arial, Helvetica, sans-serif' },
-  { label: 'Nunito', css: '"Nunito", system-ui, sans-serif' },
-  { label: 'Monospace', css: 'ui-monospace, SFMono-Regular, Menlo, monospace' },
-];
-
-function FontDropdown({ value, onChange }: { value: string; onChange: (css: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!open) return;
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, [open]);
-  const current = EDITOR_FONTS.find((f) => f.css === value) ?? EDITOR_FONTS[0];
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-8 items-center gap-2 rounded-lg px-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        title="Writing font"
-      >
-        <Icon.Font />
-        <span className="text-[13px] font-medium hidden sm:inline" style={{ fontFamily: current.css || undefined }}>{current.label}</span>
-        {open ? <Icon.ChevUp /> : <Icon.ChevDown />}
-      </button>
-      {open && (
-        <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-[190px] rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.20)] py-1">
-          {EDITOR_FONTS.map((f) => (
-            <button
-              key={f.label}
-              type="button"
-              role="menuitemradio"
-              aria-checked={f.css === value}
-              onClick={() => { onChange(f.css); setOpen(false); }}
-              style={{ fontFamily: f.css || undefined }}
-              className={`w-full text-left px-3 py-1.5 text-[14px] text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 ${f.css === value ? 'bg-[#A560E8]/10 text-[#7733B5] dark:text-[#C390F2]' : ''}`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ─── Font size picker ──────────────────────────────────────── */
-const EDITOR_FONT_SIZES: { key: string; label: string }[] = [
-  { key: 'xs', label: 'Extra small' },
-  { key: 'sm', label: 'Small' },
-  { key: 'base', label: 'Default' },
-  { key: 'lg', label: 'Large' },
-  { key: 'xl', label: 'Extra large' },
-];
-
 /* ─── Export font mapping ───────────────────────────────────────
    The editor's writing font lives only in CSS (a font-family
    *stack*), so the .docx exporter never saw it — Word then fell
@@ -324,16 +171,17 @@ function cssFontToDocx(css: string): string {
     case 'Arial, Helvetica, sans-serif': return 'Arial';
     case '"Nunito", system-ui, sans-serif': return 'Nunito';
     case 'ui-monospace, SFMono-Regular, Menlo, monospace': return 'Consolas';
-    // 'Sans (default)' / unknown → a clean, ubiquitous Word sans
+    // The editor's default (Nunito) is not on most computers, so Word
+    // files use a clean sans every copy of Word has.
     default: return 'Calibri';
   }
 }
 function sizeKeyToHalfPt(key: string): number {
   switch (key) {
-    case 'xs': return 18; // 9pt
-    case 'sm': return 20; // 10pt
-    case 'lg': return 26; // 13pt
-    case 'xl': return 30; // 15pt
+    case 'xs': return 20; // 10pt
+    case 'sm': return 22; // 11pt
+    case 'lg': return 28; // 14pt
+    case 'xl': return 32; // 16pt
     default: return 24;   // 12pt — standard academic essay size (MLA/APA/Chicago)
   }
 }
@@ -343,59 +191,31 @@ function sizeKeyToHalfPt(key: string): number {
 // <w:docDefaults>, so the document-default font alone isn't enough.
 let EXPORT_FONT = 'Calibri';
 let EXPORT_SIZE = 24;
+// Line spacing in Word's units (240 = single).
+let EXPORT_LINE = 384;
 
-function FontSizeDropdown({ value, onChange }: { value: string; onChange: (key: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!open) return;
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
-  }, [open]);
-  const current =
-    EDITOR_FONT_SIZES.find((s) => s.key === value) ??
-    EDITOR_FONT_SIZES.find((s) => s.key === 'base') ??
-    EDITOR_FONT_SIZES[0];
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        title="Text size"
-      >
-        <span className="text-[15px] font-extrabold leading-none">A</span>
-        <span className="text-[11px] font-extrabold leading-none">A</span>
-        {open ? <Icon.ChevUp /> : <Icon.ChevDown />}
-      </button>
-      {open && (
-        <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-[160px] rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.20)] py-1">
-          {EDITOR_FONT_SIZES.map((s) => (
-            <button
-              key={s.key}
-              type="button"
-              role="menuitemradio"
-              aria-checked={s.key === value}
-              onClick={() => { onChange(s.key); setOpen(false); }}
-              className={`w-full text-left px-3 py-1.5 text-[14px] text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 ${s.key === value ? 'bg-[#A560E8]/10 text-[#7733B5] dark:text-[#C390F2]' : ''}`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+/** "#abc", "#aabbcc" or "rgb(r, g, b)" to Word's "AABBCC"; anything else is ignored. */
+function cssColorToHex(v: string): string | undefined {
+  const c = v.trim().toLowerCase();
+  let m = /^#([0-9a-f]{3})$/.exec(c);
+  if (m) return m[1].split('').map((x) => x + x).join('').toUpperCase();
+  m = /^#([0-9a-f]{6})$/.exec(c);
+  if (m) return m[1].toUpperCase();
+  const r = /^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/.exec(c);
+  if (r) return [r[1], r[2], r[3]].map((n) => Math.min(255, parseInt(n, 10)).toString(16).padStart(2, '0')).join('').toUpperCase();
+  return undefined;
+}
+/** A block's text-align as Word's alignment. */
+function alignOf(el: HTMLElement) {
+  const a = /text-align\s*:\s*([a-z]+)/.exec((el.getAttribute('style') || '').toLowerCase())?.[1];
+  return a === 'center' ? AlignmentType.CENTER : a === 'right' ? AlignmentType.RIGHT : a === 'justify' ? AlignmentType.JUSTIFIED : undefined;
 }
 
 /* ─── Export (Word / plain text) ────────────────────────────── */
 
 // Inline (data:) image → docx ImageRun, scaled to a sane page width
 // keeping aspect ratio. Remote URLs are skipped in v1.
-async function imageRunFromSrc(src: string): Promise<ImageRun | null> {
+async function imageRunFromSrc(src: string, wanted?: string | null): Promise<ImageRun | null> {
   // Accept ANY base64 image data URI (mammoth/import can emit jpeg,
   // png, gif, etc.). Unknown subtypes still embed with a png type
   // hint so the bytes make it into the .docx.
@@ -420,7 +240,9 @@ async function imageRunFromSrc(src: string): Promise<ImageRun | null> {
     im.src = src;
   });
   const maxW = 480;
-  const scale = dims.w > maxW ? maxW / dims.w : 1;
+  // A picture the student resized keeps that width (up to the page width).
+  const target = Math.min(maxW, parseInt(wanted || '', 10) || dims.w);
+  const scale = target / dims.w;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new ImageRun({ data: bytes, type: type as any, transformation: { width: Math.round(dims.w * scale), height: Math.round(dims.h * scale) } });
 }
@@ -441,7 +263,7 @@ function buildDocxDocument(children: (Paragraph | DocxTable)[]) {
           // never inherit the lib's Strong/Heading defaults — body text
           // is hard-normal unless a run opts in.
           run: { font: EXPORT_FONT, size: B, bold: false, italics: false },
-          paragraph: { spacing: { line: 312, after: 160 } },
+          paragraph: { spacing: { line: EXPORT_LINE, after: 160 } },
         },
         heading1: { run: { font: EXPORT_FONT, size: Math.round(B * 1.9), bold: true, italics: false, color: '1A1A1A' }, paragraph: { spacing: { before: 240, after: 100 } } },
         heading2: { run: { font: EXPORT_FONT, size: Math.round(B * 1.5), bold: true, italics: false, color: '1A1A1A' }, paragraph: { spacing: { before: 220, after: 90 } } },
@@ -461,7 +283,7 @@ function buildDocxDocument(children: (Paragraph | DocxTable)[]) {
 // Word file WITHOUT mounting the editor. Reuses EXPORT_FONT/SIZE.
 function inlineRunsFromHtml(
   node: Node,
-  ctx: { bold?: boolean; italics?: boolean; underline?: boolean; sup?: boolean; sub?: boolean; href?: string },
+  ctx: { bold?: boolean; italics?: boolean; underline?: boolean; strike?: boolean; sup?: boolean; sub?: boolean; href?: string; color?: string; shade?: string },
 ): (TextRun | ExternalHyperlink)[] {
   const out: (TextRun | ExternalHyperlink)[] = [];
   node.childNodes.forEach((child) => {
@@ -475,9 +297,11 @@ function inlineRunsFromHtml(
         bold: !!ctx.bold,
         italics: !!ctx.italics,
         underline: ctx.underline || ctx.href ? {} : undefined,
+        strike: !!ctx.strike,
         superScript: !!ctx.sup,
         subScript: !!ctx.sub,
-        color: ctx.href ? '1155CC' : undefined,
+        color: ctx.href ? '1155CC' : ctx.color,
+        shading: ctx.shade ? { type: ShadingType.CLEAR, fill: ctx.shade, color: 'auto' } : undefined,
       });
       out.push(ctx.href ? new ExternalHyperlink({ link: ctx.href, children: [run] }) : run);
       return;
@@ -491,6 +315,7 @@ function inlineRunsFromHtml(
     if (tag === 'strong' || tag === 'b') next.bold = true;
     if (tag === 'em' || tag === 'i') next.italics = true;
     if (tag === 'u') next.underline = true;
+    if (tag === 's' || tag === 'del' || tag === 'strike') next.strike = true;
     if (tag === 'sup') next.sup = true;
     if (tag === 'sub') next.sub = true;
     if (tag === 'a') next.href = el.getAttribute('href') || ctx.href;
@@ -512,6 +337,13 @@ function inlineRunsFromHtml(
       else if (fsv === 'normal') next.italics = false;
     }
     if (/text-decoration[^;]*underline/.test(style)) next.underline = true;
+    // Text colour, and highlight (a <mark> with its colour).
+    const fg = /(?:^|;)\s*color\s*:\s*([^;]+)/.exec(style)?.[1];
+    if (fg) next.color = cssColorToHex(fg) ?? next.color;
+    if (tag === 'mark') {
+      const bg = el.getAttribute('data-color') || /background(?:-color)?\s*:\s*([^;]+)/.exec(style)?.[1] || '#FFF1B8';
+      next.shade = cssColorToHex(bg) ?? 'FFF1B8';
+    }
     out.push(...inlineRunsFromHtml(el, next));
   });
   return out.length ? out : [new TextRun({ text: '', font: EXPORT_FONT, size: EXPORT_SIZE })];
@@ -522,11 +354,17 @@ async function htmlToDocxChildren(html: string): Promise<(Paragraph | DocxTable)
   const docHtml = new DOMParser().parseFromString(html || '', 'text/html');
   const blocks = Array.from(docHtml.body.childNodes);
   const pushPara = (el: HTMLElement) =>
-    children.push(new Paragraph({ spacing: { after: 160, line: 312 }, children: inlineRunsFromHtml(el, {}) }));
+    children.push(new Paragraph({
+      spacing: { after: 160, line: EXPORT_LINE },
+      alignment: alignOf(el),
+      // Reference-list entries hang: first line flush, the rest indented.
+      indent: el.hasAttribute('data-ref') ? { left: 720, hanging: 720 } : undefined,
+      children: inlineRunsFromHtml(el, {}),
+    }));
   for (const raw of blocks) {
     if (raw.nodeType === 3) {
       const t = (raw.textContent || '').trim();
-      if (t) children.push(new Paragraph({ spacing: { after: 160, line: 312 }, children: [new TextRun({ text: t, font: EXPORT_FONT, size: EXPORT_SIZE })] }));
+      if (t) children.push(new Paragraph({ spacing: { after: 160, line: EXPORT_LINE }, children: [new TextRun({ text: t, font: EXPORT_FONT, size: EXPORT_SIZE })] }));
       continue;
     }
     if (raw.nodeType !== 1) continue;
@@ -536,6 +374,7 @@ async function htmlToDocxChildren(html: string): Promise<(Paragraph | DocxTable)
       children.push(new Paragraph({
         heading: tag === 'h1' ? HeadingLevel.HEADING_1 : tag === 'h2' ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
         spacing: { before: 240, after: 100 },
+        alignment: alignOf(el),
         children: inlineRunsFromHtml(el, {}),
       }));
     } else if (tag === 'ul' || tag === 'ol') {
@@ -563,12 +402,12 @@ async function htmlToDocxChildren(html: string): Promise<(Paragraph | DocxTable)
       });
       if (rows.length) children.push(new DocxTable({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
     } else if (tag === 'img') {
-      const ir = await imageRunFromSrc(el.getAttribute('src') || '');
+      const ir = await imageRunFromSrc(el.getAttribute('src') || '', el.getAttribute('width'));
       if (ir) children.push(new Paragraph({ spacing: { before: 120, after: 160 }, children: [ir] }));
     } else if (tag === 'p' || tag === 'div') {
       const img = el.querySelector(':scope > img');
       if (img && (el.textContent || '').trim() === '') {
-        const ir = await imageRunFromSrc(img.getAttribute('src') || '');
+        const ir = await imageRunFromSrc(img.getAttribute('src') || '', img.getAttribute('width'));
         if (ir) { children.push(new Paragraph({ spacing: { before: 120, after: 160 }, children: [ir] })); continue; }
       }
       pushPara(el);
@@ -580,9 +419,10 @@ async function htmlToDocxChildren(html: string): Promise<(Paragraph | DocxTable)
 }
 
 /** Build + download a faithful .docx from saved HTML (no live editor). */
-export async function exportHtmlAsDocx(html: string, fileBase: string, fontCss = '', sizeKey = 'base') {
+export async function exportHtmlAsDocx(html: string, fileBase: string, fontCss = '', sizeKey = 'base', lineHeight = 1.6) {
   EXPORT_FONT = cssFontToDocx(fontCss);
   EXPORT_SIZE = sizeKeyToHalfPt(sizeKey);
+  EXPORT_LINE = Math.round(240 * lineHeight);
   const children = await htmlToDocxChildren(html);
   const blob = await Packer.toBlob(buildDocxDocument(children));
   saveAs(blob, `${(fileBase || 'document').replace(/[^\w.-]+/g, '_')}.docx`);
@@ -595,8 +435,8 @@ export async function exportHtmlAsDocx(html: string, fileBase: string, fontCss =
 // reusing inlineRunsFromHtml() (bold only inside <strong>/<b>,
 // italic only inside <em>/<i>) fixes that and means there is ONE
 // export code path to reason about.
-async function exportDocx(editor: Editor, fileBase: string, fontCss = '', sizeKey = 'base') {
-  await exportHtmlAsDocx(editor.getHTML(), fileBase, fontCss, sizeKey);
+async function exportDocx(editor: Editor, fileBase: string, fontCss = '', sizeKey = 'base', lineHeight = 1.6) {
+  await exportHtmlAsDocx(editor.getHTML(), fileBase, fontCss, sizeKey, lineHeight);
 }
 
 function exportTxt(editor: Editor, fileBase: string) {
@@ -604,7 +444,7 @@ function exportTxt(editor: Editor, fileBase: string) {
   saveAs(blob, `${(fileBase || 'document').replace(/[^\w.-]+/g, '_')}.txt`);
 }
 
-function ExportMenu({ editor, fileBase, fontCss, sizeKey }: { editor: Editor; fileBase: string; fontCss: string; sizeKey: string }) {
+function ExportMenu({ editor, fileBase, fontCss, sizeKey, lineHeight }: { editor: Editor; fileBase: string; fontCss: string; sizeKey: string; lineHeight: number }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -620,24 +460,24 @@ function ExportMenu({ editor, fileBase, fontCss, sizeKey }: { editor: Editor; fi
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+        className="inline-flex h-11 items-center gap-2 rounded-[14px] border-2 border-b-4 border-[#E4D4F8] bg-white px-3.5 text-[15px] font-black text-[#7733B5] transition-all hover:bg-[#FBF8FF] active:translate-y-0.5 active:border-b-2 dark:border-stone-700 dark:bg-stone-900 dark:text-[#C9A0F0]"
         aria-haspopup="menu"
         aria-expanded={open}
         title="Export / download"
       >
         <Icon.Download />
-        <span className="text-[13px] font-medium hidden sm:inline">Export</span>
+        <span className="hidden sm:inline">Export</span>
         {open ? <Icon.ChevUp /> : <Icon.ChevDown />}
       </button>
       {open && (
-        <div role="menu" className="absolute left-0 top-full z-30 mt-1 min-w-[180px] rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.20)] py-1">
+        <div role="menu" className="absolute right-0 top-full z-40 mt-2 min-w-[250px] rounded-[16px] border border-[#E4D4F8] bg-white p-1.5 shadow-[0_24px_50px_-18px_rgba(42,21,64,0.5)] dark:border-stone-700 dark:bg-stone-900">
           <button
             type="button"
             disabled={busy}
             onClick={async () => {
               setBusy(true); setErr(null);
               try {
-                await exportDocx(editor, fileBase, fontCss, sizeKey);
+                await exportDocx(editor, fileBase, fontCss, sizeKey, lineHeight);
                 setOpen(false);
               } catch (e) {
                 console.error('[Export] docx failed', e);
@@ -645,14 +485,31 @@ function ExportMenu({ editor, fileBase, fontCss, sizeKey }: { editor: Editor; fi
               }
               setBusy(false);
             }}
-            className="w-full text-left px-3 py-1.5 text-[14px] text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 disabled:opacity-60"
+            role="menuitem"
+            className="flex min-h-[44px] w-full items-center rounded-[10px] px-3 text-left text-[15px] font-extrabold text-stone-800 hover:bg-stone-100 disabled:opacity-60 dark:text-stone-100 dark:hover:bg-stone-800"
           >
             {busy ? 'Preparing…' : 'Word (.docx)'}
           </button>
           <button
             type="button"
+            role="menuitem"
+            onClick={() => {
+              try {
+                const pt = EDITOR_SIZES.find((x) => x.key === sizeKey)?.pt ?? 12;
+                printAsPdf(editor.getHTML(), fileBase || 'document', fontCss, pt, lineHeight);
+                setOpen(false);
+              } catch (e) { console.error('[Export] pdf failed', e); setErr('Couldn’t open the print view for a PDF.'); }
+            }}
+            className="flex min-h-[44px] w-full flex-col justify-center rounded-[10px] px-3 py-1.5 text-left hover:bg-stone-100 dark:hover:bg-stone-800"
+          >
+            <span className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100">PDF</span>
+            <span className="text-[12.5px] font-bold text-stone-500 dark:text-stone-400">Opens Print. Choose “Save as PDF”.</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
             onClick={() => { try { exportTxt(editor, fileBase); setOpen(false); } catch (e) { console.error('[Export] txt failed', e); setErr('Couldn’t build the text file.'); } }}
-            className="w-full text-left px-3 py-1.5 text-[14px] text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800"
+            className="flex min-h-[44px] w-full items-center rounded-[10px] px-3 text-left text-[15px] font-extrabold text-stone-800 hover:bg-stone-100 dark:text-stone-100 dark:hover:bg-stone-800"
           >
             Plain text (.txt)
           </button>
@@ -695,12 +552,14 @@ function TableMenu({ editor }: { editor: Editor }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-2 transition-colors ${inTable ? 'bg-[#F3EAFF] text-[#8A48C7] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0]' : 'text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'}`}
+        onMouseDown={(e) => e.preventDefault()}
+        className={`inline-flex h-10 items-center gap-0.5 rounded-[10px] pl-1.5 pr-1 transition-colors ${inTable ? 'bg-[#A560E8] text-white' : 'text-stone-700 hover:bg-[#EADCFB] dark:text-stone-200 dark:hover:bg-stone-700'}`}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="Table"
         title="Table"
       >
-        <Icon.Table />
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="3.5" y="4.5" width="17" height="15" rx="3" /><path d="M3.5 10h17M3.5 15h17M10 4.5v15" /></svg>
         {open ? <Icon.ChevUp /> : <Icon.ChevDown />}
       </button>
       {open && (
@@ -765,98 +624,6 @@ function TableMenu({ editor }: { editor: Editor }) {
   );
 }
 
-/* ─── Citation insert ───────────────────────────────────────── */
-const CITE_STYLES = ['APA', 'MLA', 'Chicago', 'Harvard', 'IEEE'];
-type CiteResult = { citation: string; in_text_citation?: string; year?: string; type?: string };
-
-function CitationInsertModal({ editor, onClose }: { editor: Editor; onClose: () => void }) {
-  const [topic, setTopic] = useState('');
-  const [style, setStyle] = useState('APA');
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [results, setResults] = useState<CiteResult[] | null>(null);
-  const strip = (h: string) => (h || '').replace(/<[^>]+>/g, '').trim();
-
-  const search = async () => {
-    const t = topic.trim();
-    if (!t || loading) return;
-    setLoading(true); setErr(null);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/citation-search`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ researchTopic: t, citationStyle: style, numberOfCitations: 6 }),
-      });
-      const json = await res.json();
-      if (res.status === 429) { setErr(json?.message || "You've hit your citation search limit. Upgrade for more."); return; }
-      if (!res.ok || json?.success === false) throw new Error(json?.message || `Search failed (${res.status})`);
-      const data = json?.data ?? json;
-      setResults(Array.isArray(data?.citations) ? data.citations : []);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Could not run that search.');
-    } finally { setLoading(false); }
-  };
-
-  const insertRef = (c: CiteResult) => {
-    const ref = strip(c.citation);
-    if (ref) editor.chain().focus().insertContent(`<p>${ref.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>`).run();
-    onClose();
-  };
-  const insertInText = (c: CiteResult) => {
-    const t = (c.in_text_citation || '').trim();
-    if (t) editor.chain().focus().insertContent(` ${t}`).run();
-    onClose();
-  };
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 mb-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Insert a citation</h3>
-        <p className="text-[13px] text-stone-500 dark:text-stone-400 font-medium mb-4">Find a real source and drop the formatted reference straight into your draft.</p>
-        <textarea
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          rows={2}
-          autoFocus
-          placeholder="What are you citing? e.g. social media and adolescent sleep"
-          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 resize-none"
-        />
-        <div className="mt-3 flex items-center gap-2">
-          <select value={style} onChange={(e) => setStyle(e.target.value)} className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40">
-            {CITE_STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <button type="button" onClick={search} disabled={loading || !topic.trim()} className="ml-auto inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all">
-            {loading ? 'Searching…' : 'Find sources'}
-          </button>
-        </div>
-        {err && <p className="mt-3 text-[12px] font-bold text-[#D63A3A]">{err}</p>}
-        {loading && <div className="mt-4 space-y-2">{[0, 1, 2].map((i) => <div key={i} className="h-16 rounded-xl bg-stone-100 dark:bg-stone-800 animate-pulse" />)}</div>}
-        {!loading && results && (
-          results.length === 0 ? (
-            <p className="mt-4 text-sm text-stone-500 text-center py-6">No sources found — try a broader topic.</p>
-          ) : (
-            <div className="mt-4 space-y-2">
-              {results.map((c, i) => (
-                <div key={i} className="rounded-xl border-2 border-stone-200 dark:border-stone-700 p-3">
-                  <p className="text-[12.5px] leading-relaxed text-stone-800 dark:text-stone-100">{strip(c.citation)}</p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <button type="button" onClick={() => insertRef(c)} className="px-3 py-1 rounded-lg bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all">Insert reference</button>
-                    {c.in_text_citation && (
-                      <button type="button" onClick={() => insertInText(c)} className="px-3 py-1 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 transition-colors">Insert in-text {c.in_text_citation}</button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        )}
-        <button type="button" onClick={onClose} className="mt-5 w-full py-2 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all">Close</button>
-      </div>
-    </div>
-  );
-}
-
 /* ─── Main editor ───────────────────────────────────────────── */
 export default function WriteEditor({
   initialHtml,
@@ -870,10 +637,12 @@ export default function WriteEditor({
   onAnnotationClick,
   onAnnotationHover,
   onEditorReady,
+  skipHeadingWords = false,
   wordLimit = null,
   onUpgrade,
   exportFileName = 'document',
   headerless = false,
+  titleSlot,
 }: WriteEditorProps) {
   // Latest onSave kept in a ref so the debounce closure always
   // sees the freshest callback without re-creating the editor.
@@ -895,20 +664,6 @@ export default function WriteEditor({
     if (saveTimerRef.current) { clearTimeout(saveTimerRef.current); saveTimerRef.current = null; }
     dirtyRef.current = false;
     onSaveRef.current(lastPayloadRef.current);
-  }, []);
-
-  // Formatting toolbar can be collapsed for distraction-free
-  // writing. Preference is remembered across sessions. The Analyze
-  // button + save status stay visible either way.
-  const [toolbarOpen, setToolbarOpen] = useState<boolean>(() => {
-    try { return localStorage.getItem('writescholar_editor_toolbar') !== 'off'; } catch { return true; }
-  });
-  const toggleToolbar = useCallback(() => {
-    setToolbarOpen((v) => {
-      const next = !v;
-      try { localStorage.setItem('writescholar_editor_toolbar', next ? 'on' : 'off'); } catch { /* noop */ }
-      return next;
-    });
   }, []);
 
   // Feedback marks stay visible (you can always see *where* the
@@ -951,6 +706,15 @@ export default function WriteEditor({
   // Live word count, updated on every keystroke (independent of the
   // debounced autosave) so the footer always reflects what's typed.
   const [wordCount, setWordCount] = useState(0);
+  // The count shown beside the title. With skipHeadingWords it is the body only.
+  const skipHeadingWordsRef = useRef(skipHeadingWords);
+  skipHeadingWordsRef.current = skipHeadingWords;
+  const visibleWords = (ed: Editor): number => {
+    if (!skipHeadingWordsRef.current) return countWords(ed.getText());
+    let n = 0;
+    ed.state.doc.forEach((node) => { if (node.type.name !== 'heading') n += countWords(node.textContent); });
+    return n;
+  };
   // Writing font — applied to the whole editor surface and
   // remembered across sessions.
   const [editorFont, setEditorFont] = useState<string>(() => {
@@ -969,6 +733,15 @@ export default function WriteEditor({
     setEditorFontSize(key);
     try { localStorage.setItem('writescholar_editor_fontsize', key); } catch { /* noop */ }
   }, []);
+  // Line spacing — whole essay, remembered across sessions.
+  const [lineSpacing, setLineSpacing] = useState<string>(() => {
+    try { const v = localStorage.getItem('writescholar_editor_linespacing'); return LINE_SPACINGS.some((l) => l.key === v) ? (v as string) : '1.5'; } catch { return '1.5'; }
+  });
+  const changeLineSpacing = useCallback((key: string) => {
+    setLineSpacing(key);
+    try { localStorage.setItem('writescholar_editor_linespacing', key); } catch { /* noop */ }
+  }, []);
+  const lineHeight = LINE_SPACINGS.find((l) => l.key === lineSpacing)?.value ?? 1.6;
   // Refs so the editorProps input handlers (created once at editor
   // construction) always see the latest count + free-tier cap.
   const wordCountRef = useRef(0);
@@ -997,13 +770,21 @@ export default function WriteEditor({
       Underline,
       Subscript,
       Superscript,
+      TextStyle,
+      Color,
+      Highlight.configure({ multicolor: true }),
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      RefAttrs,
+      CiteMark,
+      NumberedCitations,
       Link.configure({
         openOnClick: false,
         autolink: true,
         HTMLAttributes: { rel: 'noopener noreferrer nofollow', class: 'text-[#A560E8] underline underline-offset-2' },
       }),
       Placeholder.configure({ placeholder, emptyEditorClass: 'is-editor-empty' }),
-      Image.configure({ inline: false, allowBase64: true, HTMLAttributes: { class: 'ws-img' } }),
+      // Drag a corner to resize; the picture keeps its proportions.
+      Image.configure({ inline: false, allowBase64: true, HTMLAttributes: { class: 'ws-img' }, resize: { enabled: true, directions: ['top-left', 'top-right', 'bottom-left', 'bottom-right'], minWidth: 60, minHeight: 40, alwaysPreserveAspectRatio: true } }),
       Table.configure({ resizable: true, HTMLAttributes: { class: 'ws-table' } }),
       TableRow,
       TableHeader,
@@ -1023,7 +804,7 @@ export default function WriteEditor({
       }),
     ],
     content: initialHtml || '',
-    onCreate: ({ editor: ed }) => setWords(countWords(ed.getText())),
+    onCreate: ({ editor: ed }) => setWords(visibleWords(ed)),
     editorProps: {
       attributes: {
         class:
@@ -1033,6 +814,19 @@ export default function WriteEditor({
           'prose prose-stone dark:prose-invert max-w-none focus:outline-none ' +
           'min-h-[60vh] sm:min-h-[70vh] px-6 sm:px-10 lg:px-16 py-8 sm:py-10 ' +
           'leading-relaxed [&>p]:my-3 [&>h1]:mt-6 [&>h2]:mt-5 [&>h3]:mt-4 ' +
+          // Headings need their own size and weight: there is no typography
+          // plugin, so without these they look like body text.
+          '[&>h1]:text-[1.75em] [&>h1]:font-extrabold [&>h1]:leading-tight [&>h1]:mb-2 ' +
+          '[&>h2]:text-[1.3em] [&>h2]:font-extrabold [&>h2]:leading-snug [&>h2]:mb-1 ' +
+          '[&>h3]:text-[1.1em] [&>h3]:font-bold [&>h3]:mb-1 ' +
+          '[&>h1]:text-stone-900 [&>h2]:text-stone-900 dark:[&>h1]:text-stone-50 dark:[&>h2]:text-stone-50 ' +
+          // Lists, quotes and inline code are reset to nothing by Tailwind's
+          // base styles, so a bullet list had no bullets and a quote looked
+          // like a normal paragraph.
+          '[&_ul]:list-disc [&_ul]:pl-7 [&_ol]:list-decimal [&_ol]:pl-7 [&_ul]:my-3 [&_ol]:my-3 [&_li]:my-1 [&_li>p]:my-0 ' +
+          '[&_ul_ul]:list-[circle] [&_ol_ol]:list-[lower-alpha] ' +
+          '[&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-[#C9A0F0] [&_blockquote]:pl-4 [&_blockquote]:text-stone-600 dark:[&_blockquote]:text-stone-300 ' +
+          '[&_code]:rounded-md [&_code]:bg-stone-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[0.9em] dark:[&_code]:bg-stone-800 ' +
           'text-[15px] sm:text-base text-stone-800 dark:text-stone-100',
       },
       // ── Free-tier writing cap ──────────────────────────────
@@ -1055,7 +849,7 @@ export default function WriteEditor({
     onUpdate: ({ editor: ed }) => {
       // Word count is live — update it every keystroke, even on the
       // skipped first update, so the footer is never stale.
-      setWords(countWords(ed.getText()));
+      setWords(visibleWords(ed));
       if (skipNextUpdateRef.current) {
         skipNextUpdateRef.current = false;
         return;
@@ -1143,19 +937,6 @@ export default function WriteEditor({
     return () => window.removeEventListener('keydown', onKey);
   }, [editor]);
 
-  // Link prompt — TipTap's setLink takes an href. Empty href clears.
-  const promptForLink = useCallback(() => {
-    if (!editor) return;
-    const previousUrl = editor.getAttributes('link').href as string | undefined;
-    const url = window.prompt('Link URL', previousUrl ?? 'https://');
-    if (url === null) return;
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }, [editor]);
-
   // Image insert — read the file inline as a data URL so it persists
   // in the saved HTML with no backend change. Capped so a huge photo
   // doesn't bloat every autosave.
@@ -1176,15 +957,19 @@ export default function WriteEditor({
   }, [editor]);
 
   const [citeOpen, setCiteOpen] = useState(false);
+  // The writing help rail asks for the Cite tool when it suggests backing a claim with a source.
+  useEffect(() => {
+    const open = () => setCiteOpen(true);
+    window.addEventListener('writescholar:openCite', open);
+    return () => window.removeEventListener('writescholar:openCite', open);
+  }, []);
 
   // Footnote v1 — a superscript marker at the cursor + an
   // auto-numbered "Footnotes" list appended at the end. Numbering
   // is derived from the existing footnote lines so it survives
   // reloads. (True page-bottom footnotes need a paginated view.)
-  const insertFootnote = useCallback(() => {
-    if (!editor) return;
-    const text = window.prompt('Footnote text');
-    if (!text || !text.trim()) return;
+  const insertFootnote = useCallback((text: string) => {
+    if (!editor || !text.trim()) return;
     const existing = (editor.getText().match(/^\[\d+\]/gm) || []).length;
     const n = existing + 1;
     editor.chain().focus().insertContent({ type: 'text', marks: [{ type: 'superscript' }], text: `[${n}]` }).run();
@@ -1197,106 +982,55 @@ export default function WriteEditor({
 
   return (
     <div className="flex flex-col">
-      {/* ─── Toolbar ─────────────────────────────────────────── */}
-      {/* Sticky formatting + Re-analyze / analyses-left / autosave bar.
-          Pins below the global header normally; when the host hides
-          the header (headerless editor view) it pins to the very top
-          so there's no dead band where the header used to be. */}
-      <div className={`sticky ${headerless ? 'top-0' : 'top-[3.5rem] sm:top-[4.25rem]'} z-20 flex flex-wrap items-center gap-1 px-3 sm:px-4 py-2 border-b border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur`}>
-        {/* Toggle — collapse the formatting toolbar for
-            distraction-free writing. Analyze + save stay visible. */}
-        <TBtn
-          title={toolbarOpen ? 'Hide formatting toolbar' : 'Show formatting toolbar'}
-          active={!toolbarOpen}
-          onClick={toggleToolbar}
-        >
-          <Icon.Sliders />
-        </TBtn>
-
-        {/* Feedback interaction toggle — only when there's analysis
-            on the page. Off = underlines stay but nothing pops up on
-            hover/click, so annotated text is just editable text. */}
-        {annotations && annotations.length > 0 && (
-          <TBtn
-            title={feedbackInteractive ? 'Feedback popups on — click to edit freely (hide hover/click)' : 'Feedback popups off — click to turn back on'}
-            active={!feedbackInteractive}
-            onClick={toggleFeedback}
-          >
-            {feedbackInteractive ? <Icon.Feedback /> : <Icon.FeedbackOff />}
-          </TBtn>
-        )}
-
-        {toolbarOpen && (
-          <>
-            <TDivider />
-
-            {/* Undo / redo */}
-            <TBtn title="Undo (⌘Z)" disabled={!editor.can().undo()} onClick={() => editor.chain().focus().undo().run()}><Icon.Undo /></TBtn>
-            <TBtn title="Redo (⌘⇧Z)" disabled={!editor.can().redo()} onClick={() => editor.chain().focus().redo().run()}><Icon.Redo /></TBtn>
-
-            <TDivider />
-
-            {/* Heading dropdown */}
-            <HeadingDropdown editor={editor} />
-
-            <TDivider />
-
-            {/* Writing font + size */}
-            <FontDropdown value={editorFont} onChange={changeFont} />
-            <FontSizeDropdown value={editorFontSize} onChange={changeFontSize} />
-
-            <TDivider />
-
-            {/* B I U S */}
-            <TBtn title="Bold (⌘B)" active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}><Icon.Bold /></TBtn>
-            <TBtn title="Italic (⌘I)" active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}><Icon.Italic /></TBtn>
-            <TBtn title="Underline (⌘U)" active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()}><Icon.Underline /></TBtn>
-            <TBtn title="Strikethrough" active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()}><Icon.Strike /></TBtn>
-            <TBtn title="Code" active={editor.isActive('code')} onClick={() => editor.chain().focus().toggleCode().run()}><Icon.Code /></TBtn>
-
-            {/* Sub / sup */}
-            <TBtn title="Superscript" active={editor.isActive('superscript')} onClick={() => editor.chain().focus().toggleSuperscript().run()}><Icon.Sup /></TBtn>
-            <TBtn title="Subscript" active={editor.isActive('subscript')} onClick={() => editor.chain().focus().toggleSubscript().run()}><Icon.Sub /></TBtn>
-
-            {/* Link */}
-            <TBtn title="Link" active={editor.isActive('link')} onClick={promptForLink}><Icon.Link /></TBtn>
-
-            <TDivider />
-
-            {/* Table + image */}
-            <TableMenu editor={editor} />
-            <TBtn title="Insert image" onClick={() => imageInputRef.current?.click()}><Icon.Image /></TBtn>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f); e.target.value = ''; }}
-            />
-
-            <TDivider />
-
-            {/* Citation + footnote */}
-            <TBtn title="Insert citation" onClick={() => setCiteOpen(true)}><Icon.Cite /></TBtn>
-            <TBtn title="Insert footnote" onClick={insertFootnote}><Icon.Footnote /></TBtn>
-
-            {/* Placeholder "comment" dot from the reference design.
-                Keeps the visual real estate; wired to a no-op for now
-                so a future "Add comment" extension can take this slot. */}
-            <TBtn title="Comments coming soon" disabled onClick={() => {}}><Icon.Comment /></TBtn>
-
-            <TDivider />
-
-            {/* Export / download */}
-            <ExportMenu editor={editor} fileBase={exportFileName} fontCss={editorFont} sizeKey={editorFontSize} />
-          </>
-        )}
-
-        {/* Right side — analyze button + save status pushed flush right */}
-        <div className="ml-auto flex items-center gap-2">
+      {/* ─── Document row + formatting bar ───────────────────────
+          Pinned while a long draft scrolls. The document row holds the
+          title, save state, export and the grade button; the bar under
+          it is formatting only. Pins below the global header normally,
+          and to the very top when the host hides that header. */}
+      <div className={`sticky ${headerless ? 'top-0' : 'top-[3.5rem] sm:top-[4.25rem]'} z-20 rounded-t-[22px] border-b border-stone-200 bg-white/95 backdrop-blur dark:border-stone-800 dark:bg-stone-900/95`}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 pb-2.5 pt-4 sm:px-5">
+          <div className="min-w-0 flex-[1_1_220px]">{titleSlot}</div>
+          {wordLimit == null && (
+            <span className="shrink-0 text-[13.5px] font-extrabold tabular-nums text-stone-600 dark:text-stone-300">
+              {wordCount.toLocaleString()} {wordCount === 1 ? 'word' : 'words'}
+            </span>
+          )}
           {saveStatus}
+          {/* Feedback interaction toggle — only when there's analysis
+              on the page. Off = underlines stay but nothing pops up on
+              hover/click, so annotated text is just editable text. */}
+          {annotations && annotations.length > 0 && (
+            <TBtn
+              title={feedbackInteractive ? 'Feedback popups on — click to edit freely (hide hover/click)' : 'Feedback popups off — click to turn back on'}
+              active={!feedbackInteractive}
+              onClick={toggleFeedback}
+            >
+              {feedbackInteractive ? <Icon.Feedback /> : <Icon.FeedbackOff />}
+            </TBtn>
+          )}
+          <ExportMenu editor={editor} fileBase={exportFileName} fontCss={editorFont} sizeKey={editorFontSize} lineHeight={lineHeight} />
           {toolbarRight}
         </div>
+        <EditorToolbar
+          editor={editor}
+          font={editorFont}
+          onFont={changeFont}
+          sizeKey={editorFontSize}
+          onSize={changeFontSize}
+          spacing={lineSpacing}
+          onSpacing={changeLineSpacing}
+          onPickImage={() => imageInputRef.current?.click()}
+          tableMenu={<TableMenu editor={editor} />}
+          onCite={() => setCiteOpen(true)}
+          onFootnote={insertFootnote}
+        />
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f); e.target.value = ''; }}
+        />
       </div>
 
       {/* ─── Free-tier writing cap banner ───────────────────────
@@ -1318,34 +1052,28 @@ export default function WriteEditor({
       )}
 
       {/* ─── Editor surface ──────────────────────────────────── */}
-      <div className="bg-white dark:bg-stone-900" data-fs={editorFontSize} style={editorFont ? { fontFamily: editorFont } : undefined}>
+      <div className="bg-white dark:bg-stone-900" data-fs={editorFontSize} style={{ ...(editorFont ? { fontFamily: editorFont } : {}), ['--ws-lh' as string]: String(lineHeight) }}>
         <EditorContent editor={editor} />
       </div>
 
-      {/* ─── Word count footer ───────────────────────────────────
-          Quiet bottom-right counter, like Docs/Word. Sticky so it
-          stays visible while scrolling a long draft. */}
-      <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 px-4 sm:px-6 py-1.5 border-t border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur">
-        {wordLimit != null ? (
-          <>
-            <span className={`text-[11px] font-extrabold tabular-nums ${limitReached ? 'text-[#8A48C7]' : wordCount >= wordLimit * 0.8 ? 'text-[#A560E8]' : 'text-stone-400 dark:text-stone-500'}`}>
-              {wordCount.toLocaleString()} / {wordLimit.toLocaleString()} words
-            </span>
-            <span className="text-[10px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-400">Free</span>
-            <button
-              type="button"
-              onClick={() => onUpgrade?.()}
-              className="text-[11px] font-extrabold text-[#A560E8] hover:text-[#8A48C7] hover:underline"
-            >
-              Upgrade
-            </button>
-          </>
-        ) : (
-          <span className="text-[11px] font-extrabold text-stone-400 dark:text-stone-500 tabular-nums">
-            {wordCount.toLocaleString()} {wordCount === 1 ? 'word' : 'words'}
+      {/* ─── Word count footer (free accounts) ───────────────────
+          Shows the count against the free writing allowance. Everyone
+          else sees the count in the document row. */}
+      {wordLimit != null && (
+        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-2 px-4 sm:px-6 py-1.5 border-t border-stone-200 dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur">
+          <span className={`text-[11px] font-extrabold tabular-nums ${limitReached ? 'text-[#8A48C7]' : wordCount >= wordLimit * 0.8 ? 'text-[#A560E8]' : 'text-stone-500 dark:text-stone-400'}`}>
+            {wordCount.toLocaleString()} / {wordLimit.toLocaleString()} words
           </span>
-        )}
-      </div>
+          <span className="text-[10px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500">Free</span>
+          <button
+            type="button"
+            onClick={() => onUpgrade?.()}
+            className="text-[11px] font-extrabold text-[#A560E8] hover:text-[#8A48C7] hover:underline"
+          >
+            Upgrade
+          </button>
+        </div>
+      )}
 
       {/* Tiny scoped placeholder styling — TipTap's Placeholder
           extension just adds an `is-editor-empty` class; we hook
@@ -1362,11 +1090,18 @@ export default function WriteEditor({
            wins over the editor root's text-[15px]/sm:text-base
            utilities (0,1,0). Headings are em-based so they scale
            proportionally. */
-        [data-fs="xs"]   .ProseMirror { font-size: 12px; }
-        [data-fs="sm"]   .ProseMirror { font-size: 14px; }
+        [data-fs="xs"]   .ProseMirror { font-size: 13.3px; }
+        [data-fs="sm"]   .ProseMirror { font-size: 14.7px; }
         [data-fs="base"] .ProseMirror { font-size: 16px; }
-        [data-fs="lg"]   .ProseMirror { font-size: 19px; }
-        [data-fs="xl"]   .ProseMirror { font-size: 22px; }
+        [data-fs="lg"]   .ProseMirror { font-size: 18.7px; }
+        [data-fs="xl"]   .ProseMirror { font-size: 21.3px; }
+
+        /* Line spacing for body text; headings keep their own tighter leading. */
+        .ProseMirror p, .ProseMirror li, .ProseMirror blockquote { line-height: var(--ws-lh, 1.6); }
+
+        /* Reference list: each entry hangs (first line flush, the rest indented). */
+        .ProseMirror p[data-ref] { padding-left: 2em; text-indent: -2em; }
+        .ProseMirror mark { border-radius: 3px; padding: 0.05em 0; color: inherit; }
 
         /* Tables */
         .ProseMirror table { border-collapse: collapse; width: 100%; margin: 1rem 0; overflow: hidden; table-layout: fixed; }
@@ -1381,9 +1116,28 @@ export default function WriteEditor({
         /* Images */
         .ProseMirror img.ws-img { max-width: 100%; height: auto; border-radius: 12px; margin: 0.75rem auto; display: block; }
         .ProseMirror img.ws-img.ProseMirror-selectednode { outline: 3px solid rgba(165,96,232,0.6); outline-offset: 2px; }
+
+        /* Resizable images: click a picture, then drag a corner dot. */
+        .ProseMirror [data-resize-container] { display: flex; justify-content: center; margin: 0.75rem 0; }
+        .ProseMirror [data-resize-wrapper] { position: relative; max-width: 100%; line-height: 0; }
+        .ProseMirror [data-resize-wrapper] img.ws-img { margin: 0; max-width: 100%; }
+        .ProseMirror [data-resize-container].ProseMirror-selectednode [data-resize-wrapper] { outline: 3px solid rgba(165,96,232,0.6); outline-offset: 2px; border-radius: 12px; }
+        .ProseMirror [data-resize-handle] { width: 16px; height: 16px; border-radius: 50%; background: #A560E8; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(42,21,64,0.45); opacity: 0; transition: opacity 0.12s; z-index: 2; touch-action: none; }
+        .ProseMirror [data-resize-container]:hover [data-resize-handle],
+        .ProseMirror [data-resize-container].ProseMirror-selectednode [data-resize-handle] { opacity: 1; }
+        .ProseMirror [data-resize-handle="top-left"] { transform: translate(-50%, -50%); cursor: nwse-resize; }
+        .ProseMirror [data-resize-handle="bottom-right"] { transform: translate(50%, 50%); cursor: nwse-resize; }
+        .ProseMirror [data-resize-handle="top-right"] { transform: translate(50%, -50%); cursor: nesw-resize; }
+        .ProseMirror [data-resize-handle="bottom-left"] { transform: translate(-50%, 50%); cursor: nesw-resize; }
       `}</style>
 
-      {citeOpen && <CitationInsertModal editor={editor} onClose={() => setCiteOpen(false)} />}
+      {citeOpen && (
+        <CiteSourceModal
+          editor={editor}
+          defaultStyle={(() => { try { const v = localStorage.getItem(CITE_STYLE_KEY); return isCiteStyle(v) ? v : 'APA'; } catch { return 'APA' as const; } })()}
+          onClose={() => setCiteOpen(false)}
+        />
+      )}
     </div>
   );
 }

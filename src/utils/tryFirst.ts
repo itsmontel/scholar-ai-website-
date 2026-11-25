@@ -249,6 +249,8 @@ export interface OnboardingAnswers {
   door?: Door;
   /** Exam date (exam door). */
   deadline?: 'week' | 'twoweeks' | 'month' | 'later' | 'none';
+  /** Where the essay is (essay side): decides between the Start an essay screen and the grader. */
+  stage?: 'start' | 'middle' | 'draft';
   /** Due date (essay door). */
   due?: 'today' | 'tomorrow' | 'week' | 'later' | 'none';
   level?: 'highschool' | 'underclass' | 'upperclass' | 'masters';
@@ -296,6 +298,7 @@ export async function flushAnswers(authToken: string): Promise<void> {
           ...(a.level ? { level: a.level } : {}),
           ...(a.deadline ? { deadline: a.deadline } : {}),
           ...(a.due ? { due: a.due } : {}),
+          ...(a.stage ? { stage: a.stage } : {}),
           ...(a.door ? { pressure: a.both ? 'both' : a.door === 'exam' ? 'exam' : 'essay' } : {}),
           ...(a.current ? { current: a.current } : {}),
           ...(a.struggles?.length ? { struggles: a.struggles } : {}),
@@ -306,4 +309,81 @@ export async function flushAnswers(authToken: string): Promise<void> {
       try { localStorage.setItem(sentKey, fingerprint); } catch { /* ignore */ }
     }
   } catch { /* try again on the next sign-in */ }
+}
+
+/* ─── What was typed in the landing box, kept through sign-up ───── */
+// localStorage, not sessionStorage: an email sign-up can finish in a new tab.
+const LANDING_TOPIC_KEY = 'ws_landing_topic';
+const LANDING_ESSAY_KEY = 'ws_landing_essay';
+const LANDING_TTL_MS = 6 * 60 * 60 * 1000;
+
+function stashLanding(key: string, text: string) {
+  try { localStorage.setItem(key, JSON.stringify({ text, at: Date.now() })); } catch { /* ignore */ }
+}
+/** Read without removing: the dashboard can draw more than once before the text is used. */
+function peekLanding(key: string): string {
+  try {
+    const raw = localStorage.getItem(key);
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || typeof v.text !== 'string' || Date.now() - Number(v.at || 0) > LANDING_TTL_MS) return '';
+    return v.text;
+  } catch {
+    return '';
+  }
+}
+function clearLanding(key: string) {
+  try { localStorage.removeItem(key); } catch { /* ignore */ }
+}
+
+/** An exam topic typed in the landing box, for the dashboard's study pack box. */
+export const stashLandingTopic = (text: string) => stashLanding(LANDING_TOPIC_KEY, text);
+export const peekLandingTopic = () => peekLanding(LANDING_TOPIC_KEY);
+/** Once the pack is made. */
+export const clearLandingTopic = () => clearLanding(LANDING_TOPIC_KEY);
+/** An essay pasted in the landing box, for the dashboard's grader. */
+export const stashLandingEssay = (text: string) => stashLanding(LANDING_ESSAY_KEY, text.slice(0, 120000));
+export const peekLandingEssay = () => peekLanding(LANDING_ESSAY_KEY);
+/** Once the essay is sent to be graded. */
+export const clearLandingEssay = () => clearLanding(LANDING_ESSAY_KEY);
+
+/* ─── Landing door flow → start the job straight after sign-up ───── */
+
+const AUTOSTART_KEY = 'ws_landing_autostart';
+const EXAM_DATE_PENDING_KEY = 'ws_landing_exam_date';
+const AUTOSTART_TTL_MS = 6 * 60 * 60 * 1000;
+export type AutoStart = 'pack' | 'grade';
+
+/** The landing pop-up finished: make the pack or grade the essay the first time the dashboard opens. */
+export function setAutoStart(kind: AutoStart) {
+  try { localStorage.setItem(AUTOSTART_KEY, JSON.stringify({ kind, at: Date.now() })); } catch { /* ignore */ }
+}
+/** Reads and clears it, so it runs once. */
+export function takeAutoStart(): AutoStart | null {
+  try {
+    const raw = localStorage.getItem(AUTOSTART_KEY);
+    localStorage.removeItem(AUTOSTART_KEY);
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || (v.kind !== 'pack' && v.kind !== 'grade') || Date.now() - Number(v.at || 0) > AUTOSTART_TTL_MS) return null;
+    return v.kind;
+  } catch {
+    return null;
+  }
+}
+
+/** The exam date picked in the landing pop-up, for the pack it makes: a yyyy-mm-dd date or 'none'. */
+export function stashPendingExamDate(value: string) {
+  try { localStorage.setItem(EXAM_DATE_PENDING_KEY, JSON.stringify({ value, at: Date.now() })); } catch { /* ignore */ }
+}
+export function peekPendingExamDate(): { value: string; at: number } | null {
+  try {
+    const raw = localStorage.getItem(EXAM_DATE_PENDING_KEY);
+    const v = raw ? JSON.parse(raw) : null;
+    if (!v || typeof v.value !== 'string' || Date.now() - Number(v.at || 0) > AUTOSTART_TTL_MS) return null;
+    return v;
+  } catch {
+    return null;
+  }
+}
+export function clearPendingExamDate() {
+  try { localStorage.removeItem(EXAM_DATE_PENDING_KEY); } catch { /* ignore */ }
 }

@@ -211,8 +211,8 @@ export const DEMO_ANNOTATIONS: DemoAnnotation[] = [
 export const DEMO_RUBRIC: DemoRubricCategory[] = [
   { name: 'Thesis And Argument', score: 15, maxScore: 20, feedback: 'The thesis is present but lacks clarity and depth in the argumentation.' },
   { name: 'Response To Question', score: 16, maxScore: 20, feedback: 'The essay addresses the question but could benefit from clearer connections between the arguments presented.' },
-  { name: 'Organization And Structure', score: 13, maxScore: 15, feedback: 'The essay has a basic structure but lacks clear transitions and logical flow between points.' },
-  { name: 'Writing Quality And Clarity', score: 8, maxScore: 10, feedback: 'There are several grammatical errors and awkward phrasings that detract from the overall clarity.' },
+  { name: 'Organization And Structure', score: 13, maxScore: 15, feedback: 'The structure is clear. A few transitions between points are abrupt.' },
+  { name: 'Writing Quality And Clarity', score: 8, maxScore: 10, feedback: 'Mostly clear and readable. A few awkward phrasings and grammar slips remain.' },
   { name: 'Analysis And Critical Thinking', score: 15, maxScore: 20, feedback: 'The analysis shows some critical thinking but lacks depth and could explore the implications of the arguments further.' },
   { name: 'Use Of Evidence And Textual Support', score: 11, maxScore: 15, feedback: 'The use of examples from The Dark Knight is relevant but could be more effectively integrated into the argument.' },
 ];
@@ -535,10 +535,10 @@ export const DEMO_B_ANNOTATIONS: DemoAnnotation[] = [
 export const DEMO_B_RUBRIC: DemoRubricCategory[] = [
   { name: 'Thesis And Argument', score: 15, maxScore: 20, feedback: 'The thesis presents a clear argument but lacks depth and specificity in some areas.' },
   { name: 'Response To Question', score: 17, maxScore: 20, feedback: 'The essay addresses the prompt effectively but could improve in clarity and focus.' },
-  { name: 'Organization And Structure', score: 13, maxScore: 15, feedback: 'The structure is somewhat disorganized, affecting the flow of arguments.' },
-  { name: 'Writing Quality And Clarity', score: 9, maxScore: 10, feedback: 'Numerous grammatical errors and awkward phrasing hinder clarity.' },
+  { name: 'Organization And Structure', score: 13, maxScore: 15, feedback: 'Well organized overall. One or two paragraphs could follow on more smoothly.' },
+  { name: 'Writing Quality And Clarity', score: 9, maxScore: 10, feedback: 'Clear and direct. Only the occasional awkward phrase.' },
   { name: 'Analysis And Critical Thinking', score: 15, maxScore: 20, feedback: 'The analysis is insightful but could benefit from deeper exploration of key concepts.' },
-  { name: 'Use Of Evidence And Textual Support', score: 13, maxScore: 15, feedback: 'Evidence is used but lacks consistency in citation format and depth of analysis.' },
+  { name: 'Use Of Evidence And Textual Support', score: 13, maxScore: 15, feedback: 'Evidence is relevant and well chosen. The citation format is not always consistent.' },
 ];
 
 export const DEMO_B_OVERALL_SCORE = 82;

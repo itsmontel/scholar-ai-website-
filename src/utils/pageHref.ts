@@ -40,6 +40,7 @@ const PAGE_HREF: Record<string, string> = {
   'readability-score': '/tools/readability-score',
   'thesis-generator': '/tools/thesis-generator',
   'essay-outline': '/tools/essay-outline',
+  'essay-writer': '/essay-writer',
   'text-case-converter': '/tools/text-case-converter',
   'paraphrasing-tips': '/tools/paraphrasing-tips',
   'gpa-calculator': '/tools/gpa-calculator',

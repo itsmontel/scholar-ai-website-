@@ -78,6 +78,11 @@ export const TOOL_SEO_META = {
     description:
       'Get Flesch-Kincaid, Gunning Fog, and grade-level scores so you can tune essays for college audiences. Free, no signup.',
   },
+  'essay-writer': {
+    title: 'Free Essay Writer: Thesis, Outline and Feedback | WriteScholar',
+    description:
+      'Paste your essay question for three thesis options and an editable outline. Get help opening each paragraph, checks as you write, and references in APA or MLA.',
+  },
   'thesis-generator': {
     title: 'Thesis Statement Generator for Essays | WriteScholar',
     description:

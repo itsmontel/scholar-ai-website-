@@ -4,12 +4,15 @@ import {
   FREE_PLAN_FEATURE_BULLETS,
   FREE_PLAN_LIMITATIONS,
   FREE_PLAN_FAQ_ANSWER,
+  FREE_PLAN_SUMMARY_SHORT,
 } from '../../constants/freePlanCopy';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, TRIAL_PRICE, TRIAL_CREDITS, CHECKOUT_OFFER_KEY, LAUNCH_OFFER_ENABLED, LAUNCH_OFFER_LABEL, LAUNCH_OFFER_FOOTNOTE, LIST_MONTHLY_PRICE, launchSaving } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
+import { CREDIT_COSTS, FREE_CREDITS, TOPUP_MONTHS, TOPUP_PACKS } from '../../config/pricing';
+import { buyTopUp } from '../../utils/credits';
 import { openVerifyEmailIfNeeded } from '../../utils/verifyEmail';
 
 interface PricingPageProps {
@@ -214,6 +217,21 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     }
   };
 
+  // Credit top-ups: signed-out visitors make an account first.
+  const [topUpBusy, setTopUpBusy] = useState<string | null>(null);
+  const [topUpError, setTopUpError] = useState('');
+  const handleTopUp = async (pack: string) => {
+    if (!user) { onNavigate('signup'); return; }
+    setTopUpBusy(pack);
+    setTopUpError('');
+    try {
+      await buyTopUp(pack);
+    } catch (e) {
+      setTopUpError(e instanceof Error ? e.message : 'We could not start checkout. Please try again.');
+      setTopUpBusy(null);
+    }
+  };
+
   const plans = [
     {
       id: 'free',
@@ -237,9 +255,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         'A rewrite for every comment, applied to your draft in one click',
         'Check any essay against your professor’s rubric',
         'Walk into exams ready with full flashcards, quizzes, crossword, and Crater Blast',
-        'References done right in every citation style, plus PDF/Word export',
         'Get through any reading in minutes with the Paper Summarizer',
-        '99 credits a month for essay checks, study packs & citations (100MB uploads)',
+        'Essay writer: 100 outlines and 500 writing helps a month',
+        '99 credits a month: an essay check costs 2, a study pack or citation search 1 (100MB uploads)',
         'Unused credits roll over every month, up to 499'
       ],
       limitations: [],
@@ -260,6 +278,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       features: [
         'Everything in Pro',
         '199 credits a month for finals, dissertations and heavy research terms',
+        'Essay writer: 250 outlines and 1,000 writing helps a month',
         'Hit the 499 rollover cap twice as fast',
         'Summarise every paper on your reading list, no cap',
         'Keep every draft and source in one place with 1GB of storage'
@@ -282,11 +301,19 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What does Pro include?",
-      answer: "Pro includes 99 credits per month (1 credit = 1 essay analysis, study pack or citation search), and unused credits roll over up to 499. It also includes 999,999 words for the Paper Summarizer, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
+      answer: "Pro includes 99 credits per month (an essay analysis costs 2 credits, a study pack or citation search costs 1), and unused credits roll over up to 499. It also includes 999,999 words for the Paper Summarizer, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
+    },
+    {
+      question: "How do credits work?",
+      answer: `An essay analysis costs ${CREDIT_COSTS.analysis} credits. A study pack costs ${CREDIT_COSTS.studyPack} and a citation search costs ${CREDIT_COSTS.citation}. Essay outlines, paragraph starters, paragraph checks and sentence rewrites do not use credits; they have their own monthly allowance (2 outlines and 10 writing helps on Free, 100 and 500 on Pro, 250 and 1,000 on Premium). Free accounts get 4 credits a month, Pro gets 99 and Premium gets 199.`
+    },
+    {
+      question: "Can I buy extra credits?",
+      answer: `Yes. Any account, free or paid, can buy a top-up: ${TOPUP_PACKS.map((p) => `${p.credits} credits for $${p.price}`).join(' or ')}. It is a one-off payment, not a subscription. Top-up credits last ${TOPUP_MONTHS} months, are used after your plan's own credits, and do not count toward the 499 rollover cap. A plan costs less per credit, so top-ups suit a busy week rather than regular use.`
     },
     {
       question: "What does Premium add?",
-      answer: "Premium includes everything in Pro with 199 credits per month (rolling over up to 499), unlimited research-paper summarisation, and 1GB total library storage for your document library."
+      answer: "Premium includes everything in Pro with 199 credits per month (rolling over up to 499), 250 essay outlines and 1,000 writing helps a month, unlimited research-paper summarisation, and 1GB total library storage for your document library."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -360,7 +387,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              Three study packs or essay grades a month are free, and your first essay report is complete. Pro opens every essay in full, the rewrites and one-click fixes: $9.99 for your first month, then $19.99 a month.
+              {FREE_PLAN_SUMMARY_SHORT}, and your first essay report is complete. Pro opens every essay in full, the rewrites and one-click fixes: $9.99 for your first month, then $19.99 a month.
             </p>
           </div>
 
@@ -634,6 +661,36 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         </div>
       </section>
 
+      {/* Credit top-ups: a one-off purchase for any account */}
+      <section className="relative px-4 pb-4 sm:px-6" aria-labelledby="pricing-topup-heading" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+        <div className="mx-auto flex w-full max-w-[1040px] flex-wrap items-center gap-6 rounded-[28px] border border-[#E4D4F8] bg-white p-6 shadow-[0_2px_4px_rgba(60,40,90,0.04),0_22px_50px_-34px_rgba(90,45,140,0.55)] dark:border-stone-700 dark:bg-stone-900 sm:p-8">
+          <div className="flex min-w-0 flex-[1_1_320px] items-center gap-4">
+            <img src="/icons/credits.webp" alt="" width={72} height={72} className="h-[72px] w-[72px] shrink-0 object-contain" />
+            <div className="min-w-0">
+              <h2 id="pricing-topup-heading" className="m-0 text-[24px] font-black leading-tight tracking-[-0.01em] text-stone-900 dark:text-stone-50">Need a few more credits?</h2>
+              <p className="m-0 mt-1.5 text-[15px] font-bold leading-snug text-stone-600 dark:text-stone-300">
+                Buy a top-up on any plan, including Free. One-off payment. Top-up credits last {TOPUP_MONTHS} months and are used after your plan&apos;s own.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-[1_1_300px] flex-wrap gap-3">
+            {TOPUP_PACKS.map((pack) => (
+              <button
+                key={pack.id}
+                type="button"
+                disabled={!!topUpBusy}
+                onClick={() => void handleTopUp(pack.id)}
+                className="flex min-h-[84px] flex-[1_1_130px] flex-col items-center justify-center rounded-2xl border-2 border-b-4 border-[#F0C94A] bg-[#FFF8DD] px-3 py-2 text-stone-900 transition-transform hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2 disabled:opacity-60 dark:border-[#6B5A1C] dark:bg-[#2E2814] dark:text-stone-50"
+              >
+                <span className="text-[19px] font-black">{topUpBusy === pack.id ? 'Opening…' : `${pack.credits} credits`}</span>
+                <span className="text-[15px] font-extrabold text-stone-600 dark:text-stone-300">${pack.price}</span>
+              </button>
+            ))}
+            {topUpError && <p role="alert" className="m-0 w-full text-[14px] font-extrabold text-[#9A3412]">{topUpError}</p>}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ — landing FAQ / editorial theme */}
       <section
         className="relative py-16 sm:py-24 overflow-hidden"
@@ -689,7 +746,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
-                : 'Three study packs or essay grades a month are free, no card. Pro is $9.99 for your first month, then $19.99. Cancel anytime.'}
+                : `${FREE_CREDITS} free credits a month, no card. Pro is $9.99 for your first month, then $19.99. Cancel anytime.`}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { trackFirst } from '../../utils/analytics';
 
 interface FlashCard {
   id: string;
@@ -101,6 +102,8 @@ const FlashcardViewer = ({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  // The first flip is the first real use of flashcards.
+  useEffect(() => { if (isFlipped) trackFirst('first_flashcards'); }, [isFlipped]);
   const [knownCards, setKnownCards] = useState<Set<number>>(new Set());
 
   const [theme, setTheme] = useState<ThemeId>('violet');

@@ -91,7 +91,7 @@ const StudyPackHubPage: React.FC<StudyPackHubPageProps> = ({ onNavigate, user, o
     id: pack.id,
     title: pack.title || 'Untitled study pack',
     meta: `${timeAgo(pack.created_at)} · ${pack.question_count || 0} ${pack.question_count === 1 ? 'card' : 'cards'}`,
-    icon: '📚',
+    icon: 'study-pack',
     onOpen: () => handleOpen(pack),
   }));
 

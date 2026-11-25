@@ -185,6 +185,19 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           { '@type': 'Question', name: "What if I have too much material and not enough time?", acceptedAnswer: { '@type': 'Answer', text: "Prioritize. Focus on the concepts that show up most often in past exams or that your professor emphasized. Use active recall on the high-yield material first. A quiz on the most important 20 percent of the content will help more than passive reading of everything. WriteScholar can generate quizzes and flashcards quickly so you can test yourself on the material that matters most." } },
         ],
       });
+    } else if (post.slug === 'how-to-write-effectively') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'How can I write more effectively?', acceptedAnswer: { '@type': 'Answer', text: 'Decide your main point in one sentence before you start, plan what each paragraph will prove, keep one idea per sentence, start each paragraph with its point, explain every piece of evidence, and cut words that add no meaning. Then revise in passes: argument first, paragraphs second, sentences last.' } },
+          { '@type': 'Question', name: 'What are the qualities of effective writing?', acceptedAnswer: { '@type': 'Answer', text: 'Effective writing is clear, concise, specific and organised. The reader always knows what the main point is, why each paragraph is there, and how each idea connects to the next. It uses plain, precise words rather than vague or inflated ones.' } },
+          { '@type': 'Question', name: 'How do I make my writing more concise?', acceptedAnswer: { '@type': 'Answer', text: 'Cut filler phrases such as "it is important to note that" and "due to the fact that", replace weak verb-and-noun pairs with one strong verb ("decide" instead of "make a decision"), split long sentences, and delete anything that repeats a point you have already made.' } },
+          { '@type': 'Question', name: 'Is it bad to use the passive voice in essays?', acceptedAnswer: { '@type': 'Answer', text: 'No, but it should be a choice. Active sentences are usually shorter and clearer about who did what. The passive voice is useful when the action matters more than who did it, and it is common in scientific writing.' } },
+          { '@type': 'Question', name: 'How long should I spend revising an essay?', acceptedAnswer: { '@type': 'Answer', text: 'Plan for revision to take about a third of your total time. Leave a gap between drafting and revising if you can, even an hour, and revise in separate passes rather than trying to fix everything in one read.' } },
+          { '@type': 'Question', name: 'How do I write effectively when I am short on time?', acceptedAnswer: { '@type': 'Answer', text: 'Spend the first ten minutes on a one-sentence thesis and a list of paragraph points, then draft without stopping to edit. Save the last fifteen minutes for one pass that checks each paragraph opens with its point and one pass that cuts filler.' } },
+        ],
+      });
     } else if (post.slug === 'how-to-memorize-things-fast') {
       injectJsonLd('blog-post-faq', {
         '@context': 'https://schema.org',

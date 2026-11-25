@@ -61,6 +61,7 @@ export function getPageFromPath(pathname: string): string {
   if (p === '/tools/thesis-generator' || p === '/thesis-generator') return 'thesis-generator';
   if (p === '/tools/grammar-checker' || p === '/grammar-checker') return 'grammar-checker';
   if (p === '/tools/humanizer' || p === '/humanizer') return 'dashboard';
+  if (p === '/essay-writer' || p === '/ai-essay-writer' || p === '/write-my-essay') return 'essay-writer';
   if (p === '/tools/summarizer' || p === '/summarizer') return 'summarizer';
   if (p === '/tools/quiz-generator' || p === '/quiz-generator') return 'quiz-generator';
   if (p === '/tools/flashcard-generator' || p === '/flashcard-generator') return 'create-flashcards';

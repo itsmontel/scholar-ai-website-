@@ -169,6 +169,8 @@ router.post('/onboarding-survey', authenticateToken, async (req, res) => {
       // The two questions asked while the first free grade runs.
       purpose: ['assignment', 'application', 'exam', 'curious'],
       due: ['today', 'tomorrow', 'week', 'later', 'none'],
+      // Where the essay is when they sign up: not started, part-way, or a finished draft.
+      stage: ['start', 'middle', 'draft'],
     };
     const ANSWER_MULTI = {
       struggles: ['marker', 'structure', 'start', 'refs', 'remember', 'time', 'understand', 'predict', 'focus', 'nerves'],

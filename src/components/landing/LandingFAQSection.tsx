@@ -10,39 +10,44 @@ import LandingSectionBackdrop from './LandingSectionBackdrop';
 
 const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
   {
-    question: 'Can I actually write my essay in WriteScholar?',
+    question: 'Can I write my whole essay in WriteScholar?',
     answer:
-      "Yes, that's the main thing it does. You write, paste, or import a Word doc into a real editor with headings, bold, italics, tables and images. As you write, professor-style feedback shows up next to your draft, and you can drop a suggested fix straight into the text with one click. It autosaves as you go, and you export a clean Word document when you're done.",
+      "Yes. The Essay Writer takes you from your question to a finished draft. It builds an outline with a word budget for every paragraph, gives you ways to start a paragraph when you are stuck, checks each paragraph as you finish it, and formats your citations. The editor saves as you type, imports a Word document, and exports to Word or PDF. Writing help uses no credits: free accounts get 2 outlines and 10 writing helps a month.",
   },
   {
-    question: 'What kind of feedback will I get on my essay?',
+    question: 'Will it write my essay for me?',
     answer:
-      'Line-by-line notes colour-coded green for strong, amber for needs work, and red for serious concerns, plus an estimated grade with a full rubric covering thesis, evidence, structure, clarity and academic style, and specific rewrite suggestions you can apply. It reads your draft the way a marker would.',
+      "No. You write the essay. Scholar suggests two ways to open a paragraph, asks questions to get you thinking, and can make a sentence you select clearer, shorter or more formal. The ideas, the argument and the words are yours.",
   },
   {
-    question: 'How does the analyzer work?',
+    question: 'How do I get feedback on a finished essay?',
     answer:
-      'Write in the editor, paste your essay, or upload a PDF, DOCX or TXT. The AI grades structure, argument, clarity, citations and academic tone the way a professor would and gives you an estimated grade out of 100 with a letter band and detailed notes, usually in under a minute.',
+      "Paste your essay or upload a PDF or Word file, choose US or UK marking and your citation style, and you get an estimated grade out of 100, a score for every rubric category, and green, amber and red highlights with comments on your draft. Pro adds rewrites and one-click fixes.",
   },
   {
     question: 'How accurate is the grade? Is it my real grade?',
     answer:
-      "It's an AI estimate, not your official grade. It uses the same rubric weights professors mark with and in practice lands within a few points of real scores. Use it to find and fix the weak spots before you hand in, not as a guarantee of what you'll get.",
+      "It is an AI estimate, not your official grade, and it can get things wrong. Use it to find the weak spots before you hand in, and check anything that looks off against your assignment brief and your marker's rubric.",
   },
   {
-    question: 'Can I import a Word or PDF, and export it back?',
+    question: 'How long does a grade take?',
     answer:
-      "Yes. Import a .docx and your bold, italics, headings and paragraphs carry over. PDF and TXT come in as clean text. When you're finished, export back to a properly formatted Word document with no reformatting on your end.",
+      FREE_PLAN_FAQ_ANALYSIS_TIMING,
+  },
+  {
+    question: 'Can I import a Word document, and export it back?',
+    answer:
+      "Yes. Import a Word (.docx) file and your bold, italics and headings carry over. You can also import a text file. When you are finished, export to Word (.docx), PDF or plain text.",
+  },
+  {
+    question: 'Which citation styles does it support?',
+    answer:
+      "APA 7, MLA 9, Chicago 18 (author-date), Harvard, IEEE and Vancouver. In the Essay Writer you type in a source you have read, and it formats the in-text citation and the reference list for you. It never suggests or makes up a source. IEEE and Vancouver number your sources in the order you cite them, and renumber when you add or move one. When you grade an essay, its citations are checked in the style you pick.",
   },
   {
     question: 'Is WriteScholar for college and university students?',
     answer:
-      "Yes, it's built for undergrad and postgrad coursework worldwide, UK or US. Set your education level so the feedback fits your course. We support the major citation styles (APA, MLA, Chicago, Harvard, IEEE, Vancouver), and there are high school options too.",
-  },
-  {
-    question: 'How long does an analysis take?',
-    answer:
-      FREE_PLAN_FAQ_ANALYSIS_TIMING,
+      "Yes. It is built for college and university coursework, and the grader marks the US way or the UK way, whichever your course uses.",
   },
   {
     question: 'Can I also turn my notes into study tools?',
@@ -50,14 +55,14 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
       FREE_PLAN_FAQ_STUDY_TOOLS,
   },
   {
-    question: 'What citation styles are supported?',
+    question: 'Do I need an account?',
     answer:
-      "APA 7th, MLA 9th, Chicago (notes-bibliography and author-date), Harvard, IEEE and Vancouver. There's also a citation finder that pulls relevant academic sources for your topic.",
+      'Yes. You make a free account first, with no card, and work from your dashboard.',
   },
   {
-    question: 'Is my content private and secure?',
+    question: 'Is my content private?',
     answer:
-      'Yes. Your work is encrypted, never sold or used to train AI models, and you can delete any document whenever you want.',
+      "We do not sell your personal data, and we do not use your work to train our own AI models. To give you feedback, your text is sent to OpenAI's API, so OpenAI's data policies apply to it. Your documents are stored in encrypted cloud storage, and you can delete any document whenever you want.",
   },
   {
     question: "What's the difference between Free, Pro and Premium?",
@@ -146,7 +151,7 @@ export default function LandingFAQSection() {
                 </span>
               </h2>
               <p className="text-sm sm:text-base text-[#777] dark:text-stone-300 leading-relaxed">
-                Essay feedback, citations, and study tools for college and university coursework.
+                Essay writing, feedback, citations, and study tools for college and university coursework.
               </p>
             </div>
 

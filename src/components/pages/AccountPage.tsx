@@ -569,6 +569,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     <>
                       <div>• Everything in Pro, 2× the credits</div>
                       <div>• 199 credits per month, rolling over up to 499</div>
+                      <div>• Essay writer: 250 outlines and 1,000 writing helps a month</div>
                       <div>• Summarise unlimited research papers</div>
                       <div>• 1GB total library storage</div>
                       <div>• Uploads up to 100MB per file</div>

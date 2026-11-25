@@ -1,13 +1,16 @@
 import { Suspense, useEffect, useState, type MouseEvent, type ReactNode } from 'react';
+import { ESSAY_MAX_WORDS, ESSAY_MIN_WORDS, ESSAY_QUESTION_DRAFT_KEY } from '../../../utils/essayPlan';
+import { stashWorkspaceView } from '../../workspace/workspaceNavigate';
 import Footer from '../../common/Footer';
 import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import { trackEvent } from '../../../utils/analytics';
-import { rememberDoor } from '../../../utils/tryFirst';
+import { rememberDoor, saveAnswer } from '../../../utils/tryFirst';
 import { hrefForPage } from '../../../utils/pageHref';
 import { applyPageSeoTags, injectJsonLd, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 import { FINALS_FREE_LABEL, FREE_CREDITS, FREE_GRADE_MAX_WORDS, FREE_GRADE_MIN_WORDS, finalsFreeActive } from '../../../config/pricing';
 import { BTN_GREEN, BTN_WHITE, CARD, EYEBROW, FONT } from '../../landing/webStyle';
+import { FlashcardDemo, QuizDemo } from '../../landing/StudyDemos';
 import { lazyWithRetry } from '../../../utils/lazyWithRetry';
 
 /** The sample essay report shown on the home page: a real report on a sample draft. */
@@ -24,7 +27,7 @@ const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../../landing/In
  * box. The essay page leads to the same sign-up through the essay door.
  * Nothing is generated on this page.
  */
-export type StudyToolVariant = 'study-pack' | 'quiz' | 'flashcards' | 'essay' | 'summarizer';
+export type StudyToolVariant = 'study-pack' | 'quiz' | 'flashcards' | 'essay' | 'essay-writer' | 'summarizer';
 type HeroKind = 'topic' | 'button' | 'text';
 
 type Navigate = (page: string, slug?: string, options?: unknown) => void;
@@ -41,7 +44,7 @@ const TOPIC_EXAMPLES = ["Aristotle's ethics", 'Statistics 101', 'Cell respiratio
 interface Faq { q: string; a: string }
 interface Part { title: string; body: string; mine?: boolean }
 interface Copy {
-  metaKey: 'study-pack' | 'quiz-generator' | 'create-flashcards' | 'analyze' | 'summarizer';
+  metaKey: 'study-pack' | 'quiz-generator' | 'create-flashcards' | 'analyze' | 'essay-writer' | 'summarizer';
   schemaName: string;
   hero: HeroKind;
   /** Line under the hero box for a signed-out visitor. */
@@ -63,29 +66,6 @@ interface Copy {
   tips: { title: string; body: string }[];
   faqs: Faq[];
 }
-
-/** Real cards and questions from a pack made for "Cell biology: mitosis and meiosis". */
-const DEMO_CARDS = [
-  { q: 'What is cell division, and why is it important?', a: 'Cell division is the process by which one cell produces new cells. It is essential for growth, development, tissue repair, replacement of damaged cells, and reproduction.' },
-  { q: 'What are the two major types of nuclear division in eukaryotic cells?', a: 'The two major types are mitosis and meiosis. Mitosis produces genetically identical cells, while meiosis produces genetically different haploid cells.' },
-  { q: 'What happens during interphase?', a: 'During interphase, the cell grows, carries out normal functions, copies its DNA, and prepares for nuclear division. Interphase includes the G1, S, and G2 phases.' },
-];
-const DEMO_QUESTIONS = [
-  {
-    kind: 'Fill in the blank',
-    q: 'In plant cells, cytokinesis occurs when a ___ forms between the two nuclei.',
-    options: ['Cleavage furrow', 'Centromere', 'Cell plate', 'Kinetochore'],
-    answer: 2,
-    why: 'Plant cells form a cell plate that develops into a new cell wall, whereas animal cells form a cleavage furrow.',
-  },
-  {
-    kind: 'Multiple choice',
-    q: 'A human cell has 46 chromosomes before meiosis begins. Assuming normal chromosome separation, how many chromosomes should each final meiotic cell contain?',
-    options: ['12', '23', '46', '92'],
-    answer: 1,
-    why: 'Meiosis reduces the diploid chromosome number by half, producing haploid human cells with 23 chromosomes.',
-  },
-];
 
 const FINALS = finalsFreeActive();
 
@@ -238,7 +218,7 @@ const COPY: Record<StudyToolVariant, Copy> = {
     ],
     free: [
       'A free account, with no card.',
-      `${FREE_CREDITS} credits a month. One essay report costs 1 credit.`,
+      `${FREE_CREDITS} credits a month. One essay report costs 2 credits.`,
       FINALS
         ? `Until ${FINALS_FREE_LABEL}: ${FINALS_FREE_CREDITS} credits a month, and every report is complete.`
         : 'Your first report is complete. After that, free reports show part of the feedback.',
@@ -253,9 +233,57 @@ const COPY: Record<StudyToolVariant, Copy> = {
       { title: 'Leave time for a second pass', body: 'Grade a draft a day or two before the deadline, so you can act on what it finds.' },
     ],
     faqs: [
-      { q: 'Is the essay checker free?', a: `Yes, with a free account and no card. A free account gets ${FREE_CREDITS} credits a month and one essay report costs 1 credit. ${FINALS ? `Until ${FINALS_FREE_LABEL} that is ${FINALS_FREE_CREDITS} credits a month and every report is complete.` : 'Your first report is complete; after that, free reports show part of the feedback and paid plans show all of it.'}` },
+      { q: 'Is the essay checker free?', a: `Yes, with a free account and no card. A free account gets ${FREE_CREDITS} credits a month and one essay report costs 2 credits. ${FINALS ? `Until ${FINALS_FREE_LABEL} that is ${FINALS_FREE_CREDITS} credits a month and every report is complete.` : 'Your first report is complete; after that, free reports show part of the feedback and paid plans show all of it.'}` },
       { q: 'Is the grade accurate?', a: 'It is an estimate, written by AI against a general academic rubric. Use it to find weak spots, not as your official mark.' },
       { q: 'What can I give it?', a: `Paste the text, or import a Word, PDF or plain text file. An essay needs at least ${FREE_GRADE_MIN_WORDS} words.` },
+      ACCOUNT_FAQ,
+      WRONG_FAQ,
+    ],
+  },
+  'essay-writer': {
+    metaKey: 'essay-writer',
+    schemaName: 'WriteScholar Essay Writer',
+    hero: 'text',
+    nextStep: 'Next step: a free account. No card needed. Your question is kept, ready for your outline.',
+    eyebrow: 'Essay writer',
+    title: <>From a blank page to a <span className="text-[#FFD84D]">finished essay</span>.</>,
+    sub: 'Paste your essay question. Pick a thesis, write into an outline with help on every paragraph, add your references, then grade it before you hand it in.',
+    cta: 'Start my essay',
+    demoTitle: 'See the editor',
+    demoSub: 'A sample question in the essay writer: the outline on the right, with two ways to open the first paragraph.',
+    partsEyebrow: 'What you get',
+    partsTitle: 'Help at every step, in your own words',
+    partsSub: 'It plans with you and checks what you write. It does not write the essay for you.',
+    parts: [
+      { title: 'Three theses to choose from', body: 'Three arguments you could make for your question, each with a reason. Pick one or write your own.', mine: true },
+      { title: 'An outline you can edit', body: 'A heading, a goal and a word count for each paragraph. Rename, reorder or remove any of them.' },
+      { title: 'Help with each paragraph', body: 'Two ways to open a paragraph and three questions to answer in it. A check tells you what works and what to fix next.' },
+      { title: 'References that build themselves', body: 'Type the details of a source you have read. The citation and the reference list are formatted in APA, MLA, Harvard or Chicago.' },
+    ],
+    steps: [
+      { t: 'Make a free account', b: 'No card. It is where your essays are kept.' },
+      { t: 'Paste the question and pick a thesis', b: `Choose a length from ${ESSAY_MIN_WORDS} to ${ESSAY_MAX_WORDS.toLocaleString('en-US')} words.` },
+      { t: 'Write, check, then grade', b: 'Check each paragraph as you go. Grade the whole draft when it is finished.' },
+    ],
+    free: [
+      'A free account, with no card.',
+      '2 outlines and 10 writing helps a month. They do not use credits.',
+      `${FREE_CREDITS} credits a month. Grading a finished essay costs 2 credits.`,
+      'Export to Word, PDF or plain text.',
+    ],
+    closingSub: 'Make a free account and start your essay. No card needed.',
+    tipsTitle: 'How to use it well',
+    tips: [
+      { title: 'Paste the question exactly as it was set', body: 'The thesis and outline are built from its wording, so a paraphrase gives a weaker plan.' },
+      { title: 'Change the outline to fit your course', body: 'It is a starting point. Add the reading your module covered and remove what it did not.' },
+      { title: 'Write the evidence yourself', body: 'It does not supply quotes, sources or statistics. Those come from your own reading.' },
+      { title: 'Check a paragraph before moving on', body: 'A paragraph check is quicker to act on than a full grade at the end.' },
+    ],
+    faqs: [
+      { q: 'Does it write my essay for me?', a: 'No. It suggests three theses, builds an outline, offers a sentence to open a paragraph and checks what you have written. The paragraphs are yours.' },
+      { q: 'Is the essay writer free?', a: `Yes, with a free account and no card. Free accounts get 2 outlines and 10 writing helps a month, and they do not use credits. Grading a finished essay costs 2 of your ${FREE_CREDITS} monthly credits.` },
+      { q: 'Does it find sources for me?', a: 'No. You type the details of a book, article or web page you have read, and it formats the in-text citation and the reference list in APA, MLA, Harvard or Chicago. Check the result against your course guide.' },
+      { q: 'How long can the essay be?', a: `You choose a target from ${ESSAY_MIN_WORDS} to ${ESSAY_MAX_WORDS.toLocaleString('en-US')} words, and the outline is sized to fit.` },
       ACCOUNT_FAQ,
       WRONG_FAQ,
     ],
@@ -264,7 +292,7 @@ const COPY: Record<StudyToolVariant, Copy> = {
     metaKey: 'summarizer',
     schemaName: 'WriteScholar AI Summarizer',
     hero: 'text',
-    nextStep: 'Next step: a free account. No card needed. Your text stays on this device, ready when you open the summarizer.',
+    nextStep: 'Next step: a free account. No card needed. Your text is kept and the summarizer opens with it afterwards.',
     eyebrow: 'AI summarizer',
     title: <>Long reading in. The <span className="text-[#FFD84D]">key points</span> out.</>,
     sub: 'Paste a paper, an article or a chapter and get a summary of the main points.',
@@ -315,102 +343,6 @@ const arrow = (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 );
 
-/* ── Flashcard demo ─────────────────────────────────────────────── */
-function FlashcardDemo() {
-  const [i, setI] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [known, setKnown] = useState(0);
-  const card = DEMO_CARDS[i];
-  const next = (knew: boolean) => {
-    if (knew) setKnown((k) => Math.min(DEMO_CARDS.length, k + 1));
-    setFlipped(false);
-    setI((n) => (n + 1) % DEMO_CARDS.length);
-  };
-  return (
-    <div className={`${CARD} flex flex-col gap-4 p-5 sm:p-6`}>
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="m-0 text-[19px] font-black text-stone-900">Card {i + 1} of {DEMO_CARDS.length}</h3>
-        <span className="inline-flex min-h-[32px] items-center rounded-full bg-[#E6F9D2] px-3 text-[13px] font-extrabold text-[#2F6B00]">{known} known</span>
-      </div>
-      <button
-        type="button"
-        onClick={() => setFlipped((f) => !f)}
-        aria-label={flipped ? 'Show the question' : 'Show the answer'}
-        className={`flex min-h-[230px] w-full flex-col items-center justify-center gap-3 rounded-[26px] border-2 border-b-[6px] px-5 py-6 text-center transition-colors ${flipped ? 'border-[#58CC02] bg-[#F4FCEB]' : 'border-[#D2B5F3] bg-white'}`}
-      >
-        <span className={`inline-flex min-h-[28px] items-center rounded-full px-3 text-[12px] font-black uppercase tracking-[0.14em] ${flipped ? 'bg-[#E6F9D2] text-[#2F6B00]' : 'bg-[#F3EAFF] text-[#7733B5]'}`}>{flipped ? 'Answer' : 'Question'}</span>
-        <span className={`font-black leading-[1.3] text-stone-900 ${flipped ? 'text-[17px]' : 'text-[21px]'}`}>{flipped ? card.a : card.q}</span>
-        <span className="text-[13.5px] font-extrabold text-[#7733B5]">{flipped ? 'Tap to see the question' : 'Tap the card to see the answer'}</span>
-      </button>
-      <div className="flex flex-wrap gap-3">
-        <button type="button" onClick={() => next(false)} className="inline-flex min-h-[54px] flex-[1_1_180px] items-center justify-center rounded-[18px] border-2 border-b-[5px] border-[#E0A800] bg-[#FFC800] px-4 text-[16px] font-black text-[#3A2A00] transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2">Show me again later</button>
-        <button type="button" onClick={() => next(true)} className={`${BTN_GREEN} min-h-[54px] flex-[1_1_180px] px-4 text-[16px]`}>{check} I knew it</button>
-      </div>
-    </div>
-  );
-}
-
-/* ── Quiz demo ──────────────────────────────────────────────────── */
-function QuizDemo() {
-  const [i, setI] = useState(0);
-  const [pick, setPick] = useState<number | null>(null);
-  const [checked, setChecked] = useState(false);
-  const q = DEMO_QUESTIONS[i];
-  const right = pick === q.answer;
-  const nextQ = () => { setI((n) => (n + 1) % DEMO_QUESTIONS.length); setPick(null); setChecked(false); };
-  return (
-    <div className={`${CARD} flex flex-col gap-4 p-5 sm:p-6`}>
-      <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex min-h-[28px] items-center rounded-full bg-[#DDF9E8] px-3 text-[12px] font-black uppercase tracking-[0.1em] text-[#0B7A43]">{q.kind}</span>
-        <span className="text-[14px] font-extrabold text-stone-500">{i + 1} / {DEMO_QUESTIONS.length}</span>
-      </div>
-      <h3 className="m-0 text-[18px] font-black leading-[1.35] text-stone-900">{q.q}</h3>
-      <div className="flex flex-col gap-2.5" role="radiogroup" aria-label="Answers">
-        {q.options.map((o, n) => {
-          const isPick = pick === n;
-          const state = !checked ? (isPick ? 'pick' : 'idle') : n === q.answer ? 'right' : isPick ? 'wrong' : 'idle';
-          const cls = state === 'right' ? 'border-[#16A34A] bg-[#22C55E] text-white'
-            : state === 'wrong' ? 'border-[#B91C1C] bg-[#EF4444] text-white'
-            : state === 'pick' ? 'border-[#0284C7] bg-[#38BDF8] text-white'
-            : 'border-stone-200 bg-white text-stone-900 hover:border-[#C9A0F0]';
-          return (
-            <button
-              key={o}
-              type="button"
-              role="radio"
-              aria-checked={isPick}
-              disabled={checked}
-              onClick={() => setPick(n)}
-              className={`flex min-h-[54px] w-full items-center gap-3 rounded-2xl border-2 border-b-4 px-3.5 text-left text-[15.5px] font-extrabold transition-colors disabled:cursor-default ${cls}`}
-            >
-              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[12.5px] font-black ${state === 'idle' ? 'bg-stone-100 text-stone-500' : 'bg-white/25 text-white'}`}>{String.fromCharCode(65 + n)}</span>
-              <span className="min-w-0 flex-1">{o}</span>
-              {state === 'right' && <span aria-hidden className="text-[18px]">✓</span>}
-              {state === 'wrong' && <span aria-hidden className="text-[18px]">✗</span>}
-            </button>
-          );
-        })}
-      </div>
-      {checked && (
-        <div aria-live="polite" className="flex flex-col gap-2.5">
-          <p className={`m-0 rounded-2xl border-2 px-4 py-3 text-[16px] font-black ${right ? 'border-[#58CC02] bg-[#D7FFB8] text-[#2F6B00]' : 'border-[#F87171] bg-[#FEE2E2] text-[#B91C1C]'}`}>
-            {right ? 'Nice work!' : `Not quite. Correct answer: ${q.options[q.answer]}`}
-          </p>
-          <div className="rounded-2xl border-2 border-[#DDD6FE] bg-[#F5F3FF] px-4 py-3">
-            <p className="m-0 text-[12px] font-black uppercase tracking-[0.1em] text-[#5B21B6]">Explanation</p>
-            <p className="m-0 mt-1 text-[15px] font-bold leading-[1.45] text-[#5B21B6]">{q.why}</p>
-          </div>
-        </div>
-      )}
-      <div className="flex justify-end">
-        {checked
-          ? <button type="button" onClick={nextQ} className="inline-flex min-h-[50px] items-center rounded-2xl border-2 border-b-4 border-[#0284C7] bg-[#0EA5E9] px-6 text-[15px] font-black uppercase tracking-wide text-white transition-all hover:-translate-y-0.5 active:translate-y-0.5 active:border-b-2">Next question</button>
-          : <button type="button" disabled={pick === null} onClick={() => setChecked(true)} className={`${BTN_GREEN} min-h-[50px] px-6 text-[15px] uppercase tracking-wide`}>Check</button>}
-      </div>
-    </div>
-  );
-}
-
 /* ── Page ───────────────────────────────────────────────────────── */
 export default function StudyToolLanding({ variant, onNavigate, user, onLogout }: { variant: StudyToolVariant; onNavigate: Navigate; user?: Record<string, unknown> | null; onLogout?: () => void }) {
   const copy = COPY[variant];
@@ -426,7 +358,8 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
   const countWords = (v: string) => (v.trim() ? v.trim().split(/\s+/).filter(Boolean).length : 0);
   const wordCount = countWords(notes);
   const textWords = countWords(text);
-  const ready = copy.hero === 'button' ? true : copy.hero === 'text' ? textWords >= 50 : mode === 'topic' ? topic.trim().length >= 2 : wordCount >= 50;
+  const isWriter = variant === 'essay-writer';
+  const ready = copy.hero === 'button' ? true : isWriter ? text.trim().length >= 12 : copy.hero === 'text' ? textWords >= 50 : mode === 'topic' ? topic.trim().length >= 2 : wordCount >= 50;
 
   useEffect(() => {
     const meta = TOOL_SEO_META[copy.metaKey];
@@ -443,17 +376,26 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
   /** Keep what was typed, then send the visitor on: sign-up first, or straight to the tool. */
   const start = (from: string) => {
     try {
-      if (variant === 'summarizer') {
-        if (text.trim()) localStorage.setItem(SUMMARIZER_DRAFT_KEY, JSON.stringify({ inputText: text }));
+      if (isWriter) {
+        // The question waits on the Start an essay screen, which opens first after sign-up.
+        if (text.trim()) sessionStorage.setItem(ESSAY_QUESTION_DRAFT_KEY, text.trim());
+        stashWorkspaceView('write');
+        saveAnswer({ stage: 'start' });
+      } else if (variant === 'summarizer') {
+        if (text.trim()) {
+          localStorage.setItem(SUMMARIZER_DRAFT_KEY, JSON.stringify({ inputText: text }));
+          // Come back to the summarizer, with the text in it, once the account exists.
+          if (!signedIn) sessionStorage.setItem('ws_after_signup_page', 'summarizer');
+        }
       } else if (isPack) {
         if (mode === 'notes' && notes.trim()) sessionStorage.setItem(NOTES_DRAFT_KEY, notes);
         else if (topic.trim()) { sessionStorage.removeItem(NOTES_DRAFT_KEY); sessionStorage.setItem(TOPIC_DRAFT_KEY, topic.trim()); }
       }
     } catch { /* storage off: they simply type it again */ }
     if (isPack) rememberDoor('exam');
-    if (variant === 'essay') rememberDoor('essay');
+    if (variant === 'essay' || isWriter) rememberDoor('essay');
     trackEvent('tool_next_step', { tool: copy.metaKey, from, signed_in: signedIn });
-    onNavigate(signedIn ? (isPack ? 'study-pack-hub' : variant === 'essay' ? 'analyze' : 'summarizer') : 'signup');
+    onNavigate(signedIn ? (isPack ? 'study-pack-hub' : variant === 'essay' ? 'analyze' : isWriter ? 'dashboard' : 'summarizer') : 'signup');
   };
 
   const link = (page: string) => ({
@@ -466,19 +408,21 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
     quiz: { page: 'quiz-generator', title: 'AI quiz generator', body: 'Practice questions with the reason for each answer.' },
     flashcards: { page: 'create-flashcards', title: 'AI flashcard maker', body: 'A deck made from your topic or notes.' },
     essay: { page: 'analyze', title: 'AI essay checker', body: 'A grade and feedback on your sentences.' },
+    'essay-writer': { page: 'essay-writer', title: 'Essay writer', body: 'A thesis, an outline and help with every paragraph.' },
     summarizer: { page: 'summarizer', title: 'AI summarizer', body: 'The key points of a long reading.' },
   } as const;
   const RELATED: Record<StudyToolVariant, (keyof typeof ALL)[]> = {
     'study-pack': ['quiz', 'flashcards', 'essay'],
     quiz: ['study-pack', 'flashcards', 'essay'],
     flashcards: ['study-pack', 'quiz', 'essay'],
-    essay: ['study-pack', 'quiz', 'summarizer'],
+    essay: ['essay-writer', 'study-pack', 'quiz'],
+    'essay-writer': ['essay', 'study-pack', 'summarizer'],
     summarizer: ['study-pack', 'essay', 'quiz'],
   };
   const others = RELATED[variant].map((k) => ALL[k]);
   const guides = isPack
     ? [{ href: '/blog/how-to-study-for-finals', label: 'how to study for finals' }, { href: '/blog/how-to-memorize-things-fast', label: 'how to memorize things fast' }]
-    : variant === 'essay'
+    : variant === 'essay' || isWriter
       ? [{ href: '/blog/grade-my-essay-before-submitting', label: 'grading your essay before you submit' }, { href: '/blog/how-to-write-a-thesis-statement', label: 'how to write a thesis statement' }]
       : [{ href: '/blog/turn-lecture-notes-into-study-guide', label: 'turning lecture notes into a study guide' }, { href: '/blog/how-to-study-effectively-complete-guide', label: 'how to study effectively' }];
 
@@ -493,7 +437,7 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
           <div className="absolute left-1/2 top-[400px] h-[760px] w-[760px] -translate-x-1/2 rounded-full bg-[#9652D3]" />
         </div>
         <div className="relative mx-auto flex w-full max-w-[1040px] flex-col items-center px-4 pb-14 pt-12 text-center sm:px-6 sm:pb-20 sm:pt-16">
-          {finals && variant !== 'summarizer' && (
+          {finals && variant !== 'summarizer' && !isWriter && (
             <p className="m-0 mb-5 inline-flex items-center gap-2 rounded-full border-2 border-b-[3px] border-[#E0A800] bg-[#FFC800] px-3.5 py-1 text-[13px] font-black text-[#3A2A00] sm:text-[14px]">
               {variant === 'essay' ? `Free for finals: whole essay reports until ${FINALS_FREE_LABEL}` : `Free for finals: ${FINALS_FREE_CREDITS} study packs a month until ${FINALS_FREE_LABEL}`}
             </p>
@@ -548,17 +492,17 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
           )}
           {copy.hero === 'text' && (
             <div className="mt-8 flex w-full max-w-[860px] flex-col gap-3 rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-4 text-left text-stone-900 shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)]">
-              <label htmlFor="tool-text" className="sr-only">Text to summarize</label>
+              <label htmlFor="tool-text" className="sr-only">{isWriter ? 'Your essay question' : 'Text to summarize'}</label>
               <textarea
                 id="tool-text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                rows={6}
-                placeholder="Paste your article, paper or chapter here."
+                rows={isWriter ? 3 : 6}
+                placeholder={isWriter ? 'Paste the essay question exactly as it was set.' : 'Paste your article, paper or chapter here.'}
                 className="w-full resize-y rounded-[18px] border-2 border-[#DCC3F6] bg-[#FBF8FF] px-[18px] py-3.5 text-[16px] font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#A560E8] focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20"
               />
               <div className="flex flex-wrap items-center gap-3">
-                <span className={`text-[14px] font-extrabold ${textWords >= 50 ? 'text-[#3F8F00]' : 'text-stone-500'}`}>{textWords === 0 ? 'At least 50 words' : textWords >= 50 ? `${textWords.toLocaleString('en-US')} words` : `${50 - textWords} more words needed`}</span>
+                <span className={`text-[14px] font-extrabold ${textWords >= 50 ? 'text-[#3F8F00]' : 'text-stone-500'}`}>{isWriter ? (ready ? 'You get three theses and an outline' : 'Paste the full question') : textWords === 0 ? 'At least 50 words' : textWords >= 50 ? `${textWords.toLocaleString('en-US')} words` : `${50 - textWords} more words needed`}</span>
                 <button type="button" disabled={!ready} onClick={() => start('hero')} className={`${BTN_GREEN} min-h-[56px] w-full whitespace-nowrap rounded-[18px] px-[24px] text-[17px] sm:ml-auto sm:w-auto`}>{copy.cta}{arrow}</button>
               </div>
             </div>
@@ -574,7 +518,7 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
             </div>
           )}
           <p className="m-0 mt-4 text-[14.5px] font-extrabold text-[#F3EAFF] sm:text-[15.5px]">
-            {signedIn ? (isPack ? 'Opens your study packs with this filled in. A pack costs 1 credit.' : 'Opens the tool in your account.') : copy.nextStep}
+            {signedIn ? (isPack ? 'Opens your study packs with this filled in. A pack costs 1 credit.' : isWriter ? 'Opens Start an essay with this filled in.' : 'Opens the tool in your account.') : copy.nextStep}
           </p>
         </div>
       </section>
@@ -596,6 +540,11 @@ export default function StudyToolLanding({ variant, onNavigate, user, onLogout }
               <Suspense fallback={<div className="min-h-[480px] w-full bg-white" aria-hidden />}>
                 <InteractiveDocumentAnalysis onNavigate={onNavigate as (page: string) => void} landingHeroEmbed />
               </Suspense>
+            </div>
+          )}
+          {isWriter && (
+            <div className={`${CARD} mx-auto mt-8 max-w-[1040px] overflow-hidden p-2 sm:p-3`}>
+              <img src="/essay-writer-demo.webp" alt="The essay writer: a draft with outline headings on the left, and on the right the outline with two suggested opening sentences for the introduction" width={1316} height={884} loading="lazy" className="block h-auto w-full rounded-[16px]" />
             </div>
           )}
           {variant === 'summarizer' && (

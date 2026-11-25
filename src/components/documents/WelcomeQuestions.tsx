@@ -6,9 +6,10 @@ import { flushAnswers, readAnswers, rememberDoor, saveAnswer, type Door, type On
  * The welcome flow: a full-screen "Welcome to WriteScholar", then a short
  * set of questions, the first time an account reaches the dashboard.
  *
- * The first answer sets up the dashboard (exams, essays or both). The rest
- * are research: who is signing up, where they came from and what they find
- * hard. There is no skip and no close; every question needs an answer.
+ * The first answer sets up the dashboard (exams, essays or both). On the
+ * essay side the second asks where the essay is, which decides whether they
+ * land on the Start an essay screen or the grader. The rest are research:
+ * who is signing up, where they came from and what they find hard. There is no skip and no close; every question needs an answer.
  * Anything already answered on the landing page is not asked again.
  *
  * Shown once per account on a device. Answers are saved to the account's
@@ -18,7 +19,7 @@ import { flushAnswers, readAnswers, rememberDoor, saveAnswer, type Door, type On
 const DONE_KEY = (userId: string) => `ws_welcome_done2_${userId}`;
 const MODE_KEY = 'ws_home_mode';
 
-type StepKey = 'goal' | 'deadline' | 'due' | 'level' | 'current' | 'struggles' | 'referralSource';
+type StepKey = 'goal' | 'stage' | 'deadline' | 'due' | 'level' | 'current' | 'struggles' | 'referralSource';
 interface Step {
   key: StepKey;
   ask: string;
@@ -36,8 +37,19 @@ const GOAL: Step = {
   reply: 'Got it.',
   options: [
     { value: 'exam', label: 'Studying for an exam', reply: 'Exams it is. I will turn any topic into flashcards, a quiz and games.' },
-    { value: 'essay', label: 'Writing an essay', reply: 'Essays it is. I will grade it and show you what to fix first.' },
+    { value: 'essay', label: 'Working on an essay', reply: 'Essays it is. I will help you plan it, write it and grade it.' },
     { value: 'both', label: 'Both', reply: 'Both, then. Your dashboard will show your packs and your essays.' },
+  ],
+};
+const STAGE: Step = {
+  key: 'stage',
+  ask: 'Where are you with your essay?',
+  hint: 'So I open the right thing for you.',
+  reply: 'Got it.',
+  options: [
+    { value: 'start', label: 'I have not started', reply: 'Then we start with the question. I will give you a thesis and an outline.' },
+    { value: 'middle', label: 'I am part of the way through', reply: 'Good. We will build the outline and you can paste in what you have.' },
+    { value: 'draft', label: 'I have a finished draft', reply: 'Then let us get it graded. You will see what to fix first.' },
   ],
 };
 const DEADLINE: Step = {
@@ -59,8 +71,8 @@ const DUE: Step = {
   hint: 'So I know how much time we have.',
   reply: 'Good to know.',
   options: [
-    { value: 'today', label: 'Today', reply: 'Then let us get it graded right after this.' },
-    { value: 'tomorrow', label: 'Tomorrow', reply: 'Enough time to fix the big things.' },
+    { value: 'today', label: 'Today', reply: 'Then let us get straight to it after this.' },
+    { value: 'tomorrow', label: 'Tomorrow', reply: 'Enough time if we start now.' },
     { value: 'week', label: 'This week' },
     { value: 'later', label: 'Later than that' },
     { value: 'none', label: 'Already handed in' },
@@ -140,6 +152,8 @@ const SOURCE: Step = {
 function missingSteps(a: OnboardingAnswers, door: Door | null, both = !!a.both): Step[] {
   const list: Step[] = [];
   if (!a.door) list.push(GOAL);
+  // Asked once they are known to be here for an essay (or for both).
+  if ((both || (door ?? a.door) === 'essay') && !a.stage) list.push(STAGE);
   const timing = (door ?? a.door ?? 'exam') === 'exam' ? DEADLINE : DUE;
   if (!a[timing.key as 'deadline' | 'due']) list.push(timing);
   if (!a.level) list.push(LEVEL);
@@ -161,7 +175,7 @@ const Arrow = () => (
 );
 const GREEN = 'inline-flex min-h-[62px] items-center justify-center gap-2.5 rounded-[20px] border-2 border-b-[6px] border-[#46A302] bg-[#58CC02] px-9 text-[19px] font-black text-white transition-all enabled:hover:-translate-y-0.5 enabled:active:translate-y-0.5 enabled:active:border-b-2 disabled:cursor-not-allowed disabled:border-[#D6D3D1] disabled:bg-[#E7E5E4] disabled:text-[#78716C]';
 
-export default function WelcomeQuestions({ userId, firstName, onClose }: { userId: string; firstName?: string; onClose: () => void }) {
+export default function WelcomeQuestions({ userId, firstName, onClose }: { userId: string; firstName?: string; onClose: (next?: 'write') => void }) {
   // Fixed for this visit: what the landing page already collected.
   const had = useMemo(() => readAnswers(), []);
   const [door, setDoor] = useState<Door | null>(had.door ?? null);
@@ -217,8 +231,13 @@ export default function WelcomeQuestions({ userId, firstName, onClose }: { userI
     let token = '';
     try { token = localStorage.getItem('authToken') || ''; } catch { /* noop */ }
     if (token) void flushAnswers(token);
-    onClose();
+    onClose(startsEssay ? 'write' : undefined);
   };
+
+  // Here only for an essay that is not finished: the next screen is Start an essay.
+  const stage = picked.stage?.[0] ?? had.stage;
+  const essayOnly = door === 'essay' && !both;
+  const startsEssay = essayOnly && (stage === 'start' || stage === 'middle');
 
   const reply = step && chosen.length > 0
     ? (!step.multi && step.options.find((o) => o.value === chosen[0])?.reply) || step.reply
@@ -272,7 +291,7 @@ export default function WelcomeQuestions({ userId, firstName, onClose }: { userI
               Welcome to <span className="text-[#7733B5]">WriteScholar</span>{firstName ? `, ${firstName}` : ''}
             </h1>
             <p className="m-0 max-w-[520px] text-[18px] font-bold leading-snug text-stone-600 sm:text-[20px]">
-              I am Scholar. {total === 1 ? 'One quick question' : `${total} quick questions`} and I will set everything up for you.
+              I am Scholar. {!had.door ? 'A few quick questions' : total === 1 ? 'One quick question' : `${total} quick questions`} and I will set everything up for you.
             </p>
             <button type="button" onClick={() => setIndex(0)} autoFocus className={`mt-2 w-full sm:w-auto ${GREEN}`}>
               Let&apos;s go
@@ -330,12 +349,14 @@ export default function WelcomeQuestions({ userId, firstName, onClose }: { userI
               You are all <span className="text-[#7733B5]">set</span>{firstName ? `, ${firstName}` : ''}
             </h1>
             <p className="m-0 max-w-[520px] text-[18px] font-bold leading-snug text-stone-600 sm:text-[20px]">
-              {door === 'essay' && !readAnswers().both
-                ? 'Your dashboard is ready. Paste an essay and I will grade it.'
-                : 'Your dashboard is ready. Type a topic and I will make your first study pack.'}
+              {startsEssay
+                ? 'Next, paste your essay question and I will build your outline.'
+                : essayOnly
+                  ? 'Your dashboard is ready. Paste your essay and I will grade it.'
+                  : 'Your dashboard is ready. Type a topic and I will make your first study pack.'}
             </p>
             <button type="button" onClick={finish} autoFocus className={`mt-2 w-full sm:w-auto ${GREEN}`}>
-              Go to my dashboard
+              {startsEssay ? 'Start my essay' : 'Go to my dashboard'}
               <Arrow />
             </button>
           </div>

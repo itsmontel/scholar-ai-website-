@@ -1,3 +1,4 @@
+import { PremiumSavingsCard } from '../common/CreditNudges';
 import React, { useState, useEffect } from 'react';
 import {
   FREE_PLAN_DESCRIPTION,
@@ -93,7 +94,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Most popular for students',
       icon: '🚀',
       features: [
-        '99 credits/mo for analyses, study packs & citations',
+        '99 credits/mo (an analysis costs 2, a pack or citation search 1)',
         'Unused credits roll over, up to 499',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
@@ -114,6 +115,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       features: [
         'Everything in Pro',
         '199 credits/mo, rolling over up to 499',
+        'Essay writer: 250 outlines and 1,000 writing helps a month',
         'Summarise unlimited research papers',
         '1GB total library storage',
         'Built for heavy essay and citation workloads'
@@ -327,6 +329,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </span>
           </div>
         </div>
+
+        <div className="mb-8 empty:hidden"><PremiumSavingsCard /></div>
 
         {/* Billing Management */}
         {currentPlan !== 'free' && (

@@ -1232,7 +1232,31 @@ html.dark .landing-hero-grid-animate {
 }
 .ws-shake { animation: ws-shake 0.45s ease-in-out; }
 
+/* Essay writing: results arrive instead of appearing.
+   `backwards` holds the start frame through a stagger delay and then hands
+   the element back to its own styles, so hover lifts still work. */
+@keyframes ws-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.ws-rise { animation: ws-rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+@keyframes ws-pop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+.ws-pop { animation: ws-pop 0.24s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+@keyframes ws-fade { from { opacity: 0; } to { opacity: 1; } }
+.ws-fade { animation: ws-fade 0.2s ease-out backwards; }
+/* A tick landing: a section finished, a thesis chosen. */
+@keyframes ws-tick { 0% { transform: scale(0.3); } 60% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.ws-tick { display: inline-flex; animation: ws-tick 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+/* Placeholder blocks while an outline is built. */
+@keyframes ws-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.ws-shimmer {
+  background-image: linear-gradient(90deg, #F3EAFF 0%, #FBF8FF 40%, #E4D4F8 50%, #FBF8FF 60%, #F3EAFF 100%);
+  background-size: 200% 100%;
+  animation: ws-shimmer 1.6s linear infinite;
+}
+.dark .ws-shimmer { background-image: linear-gradient(90deg, #292524 0%, #1c1917 40%, #44403c 50%, #1c1917 60%, #292524 100%); }
+@keyframes ws-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.ws-bob { animation: ws-bob 1.7s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .ws-box-glow, .ws-upload-glow, .ws-upload-glow::after, .ws-shake { animation: none; }
+  .ws-box-glow, .ws-upload-glow, .ws-upload-glow::after, .ws-shake,
+  .ws-rise, .ws-pop, .ws-fade, .ws-tick, .ws-shimmer, .ws-bob { animation: none; }
   .ws-box-glow::after { display: none; }
 }

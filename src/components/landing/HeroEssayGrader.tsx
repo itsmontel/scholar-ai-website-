@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { ESSAY_FILE_ACCEPT, EssayFileError, readEssayFile } from '../../utils/readEssayFile';
 import { FREE_GRADE_MAX_WORDS, FREE_GRADE_MIN_WORDS } from '../../config/pricing';
 import { trackEvent } from '../../utils/analytics';
 import { BTN_GREEN, BTN_WHITE } from './webStyle';
@@ -82,7 +83,7 @@ const READ_STEPS = [
  * The paste box on the landing hero. Holds the essay, counts words and
  * reads a few facts about it on the client. Nothing is graded until the
  * sign-in gate has an account, so this component never talks to the API.
- * Accepts paste or a dropped .docx / .txt (mammoth runs in the browser).
+ * Accepts paste or an uploaded or dropped PDF, Word or text file (utils/readEssayFile).
  *
  * On "Grade my essay" it runs a pre-read (about seven seconds of real,
  * local observations) before handing off. The visitor
@@ -137,37 +138,13 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
   const readFile = useCallback(async (file: File) => {
     setFileError('');
     const name = file.name || 'essay';
-    const lower = name.toLowerCase();
-    if (file.size > 8 * 1024 * 1024) {
-      setFileError('That file is over 8MB. Paste the text instead.');
-      return;
-    }
     setReading(true);
     try {
-      let content = '';
-      if (lower.endsWith('.docx')) {
-        const mammoth = (await import('mammoth')).default;
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        content = result.value || '';
-      } else if (lower.endsWith('.txt') || lower.endsWith('.md') || file.type.startsWith('text/')) {
-        content = await file.text();
-      } else if (lower.endsWith('.pdf')) {
-        setFileError('PDFs can be uploaded once you are signed in. For now, copy the text and paste it here.');
-        return;
-      } else {
-        setFileError('Drop a .docx or .txt file, or paste the text.');
-        return;
-      }
-      content = content.replace(/\r\n/g, '\n').trim();
-      if (!content) {
-        setFileError('That file looks empty. Paste the text instead.');
-        return;
-      }
+      const content = await readEssayFile(file);
       setText(content);
-      setFileName(name.replace(/\.(docx|txt|md)$/i, ''));
-    } catch {
-      setFileError('We could not read that file. Paste the text instead.');
+      setFileName(name.replace(/\.(docx|doc|pdf|txt|md)$/i, ''));
+    } catch (e) {
+      setFileError(e instanceof EssayFileError ? e.message : 'We could not read that file. Paste the text instead.');
     } finally {
       setReading(false);
     }
@@ -288,7 +265,7 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".docx,.txt,.md,text/plain"
+                accept={ESSAY_FILE_ACCEPT}
                 className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) void readFile(f); e.currentTarget.value = ''; }}
               />
@@ -307,7 +284,7 @@ export default function HeroEssayGrader({ onSubmit, initialText = '', resetSigna
                 <svg className="h-5 w-5 text-[#7733B5]" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
                 </svg>
-                {reading ? 'Reading…' : 'Upload .docx'}
+                {reading ? 'Reading…' : 'Upload PDF or Word'}
               </button>
 
               <button

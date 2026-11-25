@@ -227,6 +227,67 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 // @route   POST /api/subscriptions/sync-checkout-session
 // @desc    Confirm Embedded Checkout session and sync subscription to DB (webhook may lag)
 // @access  Private
+// Buy a credit top-up: starts a one-off Stripe Checkout and returns its URL.
+router.post('/topup-checkout', authenticateToken, async (req, res) => {
+  try {
+    const creditService = require('../services/creditService');
+    const { pack, successUrl, cancelUrl } = req.body || {};
+    if (!creditService.TOPUP_PACKS[pack]) {
+      return res.status(400).json({ success: false, message: 'Choose a credit pack first.' });
+    }
+    const user = req.user;
+    let customerId = user.stripe_customer_id;
+    if (!customerId) {
+      const customerResult = await subscriptionService.createStripeCustomer(user.email, user.name || user.email);
+      if (!customerResult.success) {
+        return res.status(500).json({ success: false, message: 'We could not start checkout. Please try again in a moment.' });
+      }
+      customerId = customerResult.customerId;
+      const { error: updateError } = await getSupabase().from('users').update({ stripe_customer_id: customerId }).eq('id', user.id);
+      if (updateError) console.error('topup-checkout: could not save Stripe customer id:', updateError);
+    }
+    // Only send the buyer back to this site: the configured front end, or the
+    // origin the request came from when that is one the API already allows.
+    const allowedOrigins = [process.env.FRONTEND_URL, 'https://writescholar.com', 'https://www.writescholar.com', 'http://localhost:5173']
+      .filter(Boolean)
+      .map((u) => { try { return new URL(u).origin; } catch { return null; } })
+      .filter(Boolean);
+    const ok = (u) => {
+      try { return typeof u === 'string' && allowedOrigins.includes(new URL(u.replace('{CHECKOUT_SESSION_ID}', 'x')).origin); } catch { return false; }
+    };
+    const result = await subscriptionService.createTopUpCheckoutSession(customerId, user.id, pack, ok(successUrl) ? successUrl : null, ok(cancelUrl) ? cancelUrl : null);
+    if (!result.success) {
+      return res.status(500).json({ success: false, message: 'We could not start checkout. Please try again in a moment.' });
+    }
+    res.json({ success: true, data: { url: result.url, sessionId: result.sessionId } });
+  } catch (error) {
+    console.error('topup-checkout error:', error);
+    res.status(500).json({ success: false, message: 'We could not start checkout. Please try again in a moment.' });
+  }
+});
+
+// Back from Stripe after a top-up: add the credits now rather than waiting for the webhook.
+router.post('/topup-confirm', authenticateToken, async (req, res) => {
+  try {
+    const creditService = require('../services/creditService');
+    const sessionId = typeof req.body?.sessionId === 'string' ? req.body.sessionId : '';
+    if (!sessionId) return res.status(400).json({ success: false, message: 'Missing session.' });
+    const found = await subscriptionService.retrieveCheckoutSession(sessionId);
+    const session = found.success ? found.session : null;
+    if (!session || session.metadata?.kind !== 'credit_topup' || session.metadata?.user_id !== String(req.user.id)) {
+      return res.status(404).json({ success: false, message: 'We could not find that purchase.' });
+    }
+    if (session.payment_status !== 'paid') {
+      return res.json({ success: true, data: { paid: false } });
+    }
+    const result = await creditService.grantTopUp(req.user.id, session.metadata.pack, session.id);
+    res.json({ success: true, data: { paid: true, credits: result.credits } });
+  } catch (error) {
+    console.error('topup-confirm error:', error);
+    res.status(500).json({ success: false, message: 'We could not confirm that purchase yet. Your credits will appear shortly.' });
+  }
+});
+
 router.post('/sync-checkout-session', authenticateToken, async (req, res) => {
   try {
     const sessionId = typeof req.body?.sessionId === 'string' ? req.body.sessionId.trim() : '';

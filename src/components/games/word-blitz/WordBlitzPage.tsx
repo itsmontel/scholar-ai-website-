@@ -22,6 +22,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { trackFirst } from '../../../utils/analytics';
 import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
@@ -143,6 +144,7 @@ function vibrate(pattern: number | number[]) {
 /* ────────────────────── Component ────────────────────── */
 
 const WordBlitzPage = ({ onNavigate, user, onLogout }: WordBlitzPageProps) => {
+  useEffect(() => { trackFirst('first_game', { game: 'word_blitz' }); }, []);
   const userPlan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
   const canUseStudyTools = !!user && (userPlan === 'pro' || userPlan === 'premium');
   const maxWords = canUseStudyTools ? 10000 : 5000;

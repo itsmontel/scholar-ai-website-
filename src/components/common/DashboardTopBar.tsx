@@ -349,14 +349,7 @@ export default function DashboardTopBar({
             onClick={() => onNavigate('quiz-history')}
             className="group inline-flex items-center gap-2 pl-1.5 pr-4 h-10 sm:h-11 rounded-full bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 text-[13px] sm:text-[14px] font-extrabold border border-[#E4D4F8] dark:border-stone-700 shadow-[0_1px_2px_rgba(60,40,90,0.05)] hover:border-[#C9A0F0] hover:text-[#7733B5] dark:hover:text-[#C9A0F0] hover:shadow-[0_10px_22px_-14px_rgba(122,52,182,0.65)] transition-all duration-200"
           >
-            <span
-              className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white shadow-[0_4px_10px_-5px_rgba(122,52,182,0.8)] transition-transform duration-200 group-hover:scale-105"
-              aria-hidden
-            >
-              <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-            </span>
+            <img src="/icons/saved.webp" alt="" width={32} height={32} className="h-7 w-7 shrink-0 object-contain transition-transform duration-200 group-hover:scale-110 sm:h-8 sm:w-8" />
             <span className="sm:hidden">Saved</span>
             <span className="hidden sm:inline">Saved Materials</span>
           </button>
@@ -657,11 +650,11 @@ export default function DashboardTopBar({
             {/* Account links — icon tiles + arrow that slides in on hover */}
             <div className="p-1.5">
               {([
-                { label: 'Account', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', page: 'account' },
-                { label: 'Billing', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', page: 'billing' },
-                { label: 'Achievements', icon: 'M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 5 5 .5-3.75 3.5L18 17l-5-3-5 3 1.25-5L5.5 8.5l5-.5z', page: 'badges' },
-                { label: 'Blog', icon: 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2M7 8h6v4H7V8zM7 16h6', page: 'blog' },
-                { label: 'Help & FAQ', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', page: 'help' },
+                { label: 'Account', icon: 'account', page: 'account' },
+                { label: 'Billing', icon: 'billing', page: 'billing' },
+                { label: 'Achievements', icon: 'trophy', page: 'badges' },
+                { label: 'Blog', icon: 'blog', page: 'blog' },
+                { label: 'Help & FAQ', icon: 'help', page: 'help' },
               ] as const).map((item) => (
                 <button
                   key={item.page}
@@ -669,13 +662,8 @@ export default function DashboardTopBar({
                   onClick={() => { setMenuOpen(false); onNavigate(item.page); }}
                   className="group/item w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-[13.5px] font-bold text-stone-700 dark:text-stone-200 hover:bg-[#F7F1FF] dark:hover:bg-[#A560E8]/12 hover:text-[#7733B5] dark:hover:text-[#C9A0F0] transition-colors"
                 >
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] transition-colors group-hover/item:bg-[#A560E8] group-hover/item:text-white"
-                    aria-hidden
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                    </svg>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#F3EAFF] dark:bg-[#A560E8]/15" aria-hidden>
+                    <img src={`/icons/${item.icon}.webp`} alt="" width={28} height={28} className="h-7 w-7 object-contain transition-transform duration-200 group-hover/item:scale-110" />
                   </span>
                   <span className="flex-1 text-left">{item.label}</span>
                   <svg
@@ -695,13 +683,8 @@ export default function DashboardTopBar({
                   onClick={() => { setMenuOpen(false); onLogout(); }}
                   className="group/out w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-[13.5px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/25 text-red-500 dark:text-red-400 transition-colors group-hover/out:bg-red-500 group-hover/out:text-white"
-                    aria-hidden
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/25" aria-hidden>
+                    <img src="/icons/sign-out.webp" alt="" width={28} height={28} className="h-7 w-7 object-contain transition-transform duration-200 group-hover/out:scale-110" />
                   </span>
                   Sign out
                 </button>

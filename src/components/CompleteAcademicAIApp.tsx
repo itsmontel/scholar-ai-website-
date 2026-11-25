@@ -111,6 +111,7 @@ import ErrorBoundary from './common/ErrorBoundary';
 import PageErrorBoundary from './common/PageErrorBoundary';
 import Header from './common/Header';
 import SoftPaywall from './common/SoftPaywall';
+import CreditChoice from './common/CreditChoice';
 import StripeCancelTrialChoiceModal from './common/StripeCancelTrialChoiceModal';
 import DashboardWelcomeToast from './common/DashboardWelcomeToast';
 import DailyReviewReadyModal, {
@@ -468,7 +469,7 @@ const AcademicAIApp = () => {
     'study-pack': TOOL_SEO_META['study-pack'],
     features: { title: 'Features — Essay Feedback & Study Tools | WriteScholar', description: 'Write in a real editor and get a professor-style grade with a full rubric and one-click line-by-line fixes. Plus citations, summarizer, and study tools in one workspace.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
-    pricing: { title: 'Pricing: 3 Free Study Packs or Essay Grades a Month | WriteScholar', description: 'Three study packs or essay grades a month are free, and your first essay report is complete. Pro is $9.99 for your first month, then $19.99/mo, for 99 credits, every rewrite and one-click fixes.' },
+    pricing: { title: 'Pricing: 4 Free Credits a Month, Pro from $9.99 | WriteScholar', description: 'Free: 4 credits a month, the essay writer and full study packs. Pro is $9.99 for your first month, then $19.99/mo for 99 credits. Credit top-ups from $7.99.' },
     about: { title: 'About WriteScholar | Study & Writing Help for Students', description: 'WriteScholar helps students improve drafts before deadlines: professor-style essay feedback, citations, quizzes, flashcards, and distraction blocking in one app.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot for College Writing | 2026', description: 'Honest comparison: essay feedback and rubrics vs grammar-only tools. See which fits research papers and coursework.' },
     'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt — College Study Tools | 2026', description: 'Why students add WriteScholar for essay feedback and rubrics, not just flashcards. Side-by-side features vs Quizlet and Knowt.' },
@@ -489,6 +490,7 @@ const AcademicAIApp = () => {
     'thesis-generator': TOOL_SEO_META['thesis-generator'],
     'grammar-checker': TOOL_SEO_META['grammar-checker'],
     'summarizer': TOOL_SEO_META.summarizer,
+    'essay-writer': TOOL_SEO_META['essay-writer'],
     'quiz-generator': TOOL_SEO_META['quiz-generator'],
     'create-flashcards': TOOL_SEO_META['create-flashcards'],
     'crossword-generator': { title: 'AI Crossword Generator — Study Tool | WriteScholar', description: 'Turn notes into crossword puzzles for memorization. Unique mode beyond basic flashcards. Pro feature.' },
@@ -1173,6 +1175,19 @@ const AcademicAIApp = () => {
     void trackSignupConversion(userData.email);
   };
 
+  // A tool page can ask to be reopened once the visitor has an account
+  // (the summarizer does, so pasted text is not left behind at sign-up).
+  useEffect(() => {
+    if (!isLoggedIn || currentPage !== 'dashboard') return;
+    let next = '';
+    try {
+      next = sessionStorage.getItem('ws_after_signup_page') || '';
+      if (next) sessionStorage.removeItem('ws_after_signup_page');
+    } catch { /* ignore */ }
+    if (next === 'summarizer') navigateTo('summarizer');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, currentPage]);
+
   const handleLogin = (userData: User) => {
     setIsLoggedIn(true);
     setUser(userData);
@@ -1853,6 +1868,8 @@ const AcademicAIApp = () => {
         return <ThesisGeneratorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'grammar-checker':
         return <GrammarCheckerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'essay-writer':
+        return <StudyToolLanding key="essay-writer" variant="essay-writer" onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'summarizer':
         if (!user) return <StudyToolLanding key="summarizer" variant="summarizer" onNavigate={navigateTo} />;
         return <SummarizerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
@@ -1976,6 +1993,7 @@ const AcademicAIApp = () => {
       )}
       {/* Global achievement popup */}
       {user && !HIDE_STREAK_AND_BADGES && <BadgeNotificationToast onNavigate={navigateTo} />}
+      {isLoggedIn && user && <CreditChoice />}
       {apiLimitPaywallOpen && isLoggedIn && user && (
         <SoftPaywall
           variant="postTutorial"

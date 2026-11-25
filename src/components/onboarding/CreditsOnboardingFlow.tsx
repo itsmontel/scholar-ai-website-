@@ -39,7 +39,7 @@ const PAID_TRIAL = FREE_CREDITS <= 0;
      12     (skipped) week comparison — didn't fit the flow
      13     How did you find us?
      14     Building your plan
-     15     Plan + 3 free credits → upload their essay or notes
+     15     Plan + 4 free credits → upload their essay or notes
 
    No paywall here: the plan screen sends them to grade their own essay
    (or build a pack from their notes) with a free credit. Answers live in
@@ -481,7 +481,7 @@ export default function CreditsOnboardingFlow({
               <div className="text-[14px] font-black">How credits work</div>
               <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
                 <CreditCoin size={16} className="mt-px" />
-                1 credit = 1 essay grade, study pack or citation search
+                An essay grade costs 2 credits; a study pack or citation search costs 1
               </div>
               <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
                 <svg className="w-4 h-4 mt-px shrink-0 text-[#7733B5] dark:text-[#C9A0F0]" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16" /><path d="M3 21v-5h5" /></svg>

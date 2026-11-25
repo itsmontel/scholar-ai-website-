@@ -107,6 +107,15 @@ async function syncCredits(userId, plan, subscription) {
 // Handle successful checkout session
 async function handleCheckoutSessionCompleted(session) {
   try {
+    // A credit top-up is a one-off payment with no subscription behind it.
+    if (session?.metadata?.kind === 'credit_topup') {
+      if (session.payment_status !== 'paid') return;
+      const creditService = require('../services/creditService');
+      const result = await creditService.grantTopUp(session.metadata.user_id, session.metadata.pack, session.id);
+      console.log(`Top-up ${session.id}: ${result.granted ? `granted ${result.credits} credits` : result.reason}`);
+      return;
+    }
+
     // Get customer ID from session
     const customerId = session.customer;
     

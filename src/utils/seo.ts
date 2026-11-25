@@ -35,6 +35,8 @@ const PATH_ALIASES: Record<string, string> = {
   '/thesis-generator': '/tools/thesis-generator',
   '/grammar-checker': '/tools/grammar-checker',
   '/summarizer': '/tools/summarizer',
+  '/ai-essay-writer': '/essay-writer',
+  '/write-my-essay': '/essay-writer',
   '/quiz-generator': '/tools/quiz-generator',
   '/flashcard-generator': '/tools/create-flashcards',
   '/create-flashcards': '/tools/create-flashcards',

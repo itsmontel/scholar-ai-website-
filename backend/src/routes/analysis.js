@@ -87,8 +87,12 @@ const getEffectivePlan = (req) => {
 // Copy for a failed credit check (checkCombinedActionsLimit result).
 const outOfCreditsMessage = (limitCheck) => {
   const c = limitCheck?.credits;
+  // Some credits left, but fewer than this action costs (an essay analysis is 2).
+  if (c && limitCheck?.cost > 1 && c.remaining > 0 && c.remaining < limitCheck.cost) {
+    return `An essay analysis costs ${limitCheck.cost} credits and you have ${c.remaining} left. ${c.plan !== 'free' ? 'Your credits top up when your plan renews, or you can add a top-up now.' : 'Your free credits reset on the 1st, or you can add a top-up or go Pro.'}`;
+  }
   if (c && c.plan !== 'free') {
-    return "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over.";
+    return "You're out of credits for now. Your credits top up when your plan renews, or you can add a top-up from the credits menu.";
   }
   if (c?.freeCredits) {
     const resets = c.freeResetsAt ? new Date(c.freeResetsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : 'the 1st';
@@ -1752,7 +1756,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
           setTimeout(() => reject(new Error('Analysis check timeout')), 3000);
         });
 
-        const analysisCheck = await Promise.race([subscriptionService.checkCombinedActionsLimit(userId), timeoutPromise]);
+        const analysisCheck = await Promise.race([subscriptionService.checkCombinedActionsLimit(userId, require('../services/creditService').CREDIT_COSTS.analysis), timeoutPromise]);
 
         if (!analysisCheck.allowed) {
           return res.status(403).json({

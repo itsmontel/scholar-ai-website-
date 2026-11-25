@@ -58,6 +58,21 @@ export type AnalyticsEvent =
   | 'first_citation'
   | 'first_humanize'
   | 'first_summary'
+  // — First real use of each study tool (once per person), and the essay writer's limits —
+  | 'first_quiz'
+  | 'first_flashcards'
+  | 'first_game'
+  | 'blank_draft_started'
+  | 'outline_limit_hit'
+  // — The landing pop-up that asks the free questions before sign-up —
+  | 'door_flow_step'
+  | 'door_flow_closed'
+  | 'door_flow_done'
+  // — Credit and upgrade nudges —
+  | 'credit_choice_view'
+  | 'credit_nudge_view'
+  | 'credit_nudge_click'
+  | 'credit_nudge_dismiss'
   | 'onboarding_complete'
   | 'first_action_prompt_view'
   | 'first_action_prompt_dismiss'
@@ -208,6 +223,13 @@ const SERVER_EVENTS = new Set<string>([
   'pack_started',
   'pack_completed',
   'tool_next_step',
+  'first_quiz',
+  'first_flashcards',
+  'first_game',
+  'blank_draft_started',
+  'outline_limit_hit',
+  'door_flow_closed',
+  'door_flow_done',
 ]);
 const ANON_ID_KEY = 'ws_anon_id';
 
@@ -274,6 +296,19 @@ export function trackEvent(event: AnalyticsEvent, properties?: Record<string, un
       sendToServer(event, properties);
     }
   } catch (_) {}
+}
+
+/**
+ * Track a first-use event once per person (per account, or per browser when
+ * signed out), so the funnel counts people rather than clicks.
+ */
+export function trackFirst(event: 'first_quiz' | 'first_flashcards' | 'first_game', properties?: Record<string, unknown>): void {
+  try {
+    const key = `ws_first_${event}_${getUserId() ?? getAnonId() ?? 'anon'}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+  } catch (_) { /* no storage: still count it */ }
+  trackEvent(event, properties);
 }
 
 /* ─── Funnel step de-duplication ─────────────────────────────────

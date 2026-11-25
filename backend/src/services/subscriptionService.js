@@ -383,15 +383,17 @@ const getRemainingUsage = async (userId, limitType) => {
   return result.remaining;
 };
 
-// The credit balance. Analyses, study packs and citations each cost 1
-// credit. limit = credits available this period (monthly credits +
-// rollover, 3 on a trial, or the free week's 3), usage = credits spent.
-const checkCombinedActionsLimit = async (userId) => {
+// The credit balance. An essay analysis costs 2 credits, a study pack or
+// a citation search 1 (creditService.CREDIT_COSTS). `cost` is what the
+// action about to run needs. limit = credits available this period,
+// usage = credits spent.
+const checkCombinedActionsLimit = async (userId, cost = 1) => {
   try {
     const creditService = require('./creditService');
     const credits = await creditService.getCreditState(userId);
     return {
-      allowed: credits.remaining > 0,
+      allowed: credits.remaining >= Math.max(1, cost),
+      cost,
       limit: credits.total,
       usage: credits.used,
       remaining: credits.remaining,
@@ -959,6 +961,48 @@ const TRIAL_FEE_CENTS = Number.isFinite(Number(process.env.TRIAL_FEE_CENTS)) && 
   ? Math.max(0, Math.round(Number(process.env.TRIAL_FEE_CENTS)))
   : 100;
 const TRIAL_FEE_CURRENCY = (process.env.TRIAL_FEE_CURRENCY || 'usd').toLowerCase();
+
+/** One-off Checkout for a credit top-up. The credits are added when Stripe confirms payment. */
+const createTopUpCheckoutSession = async (customerId, userId, pack, successUrl, cancelUrl) => {
+  try {
+    const { TOPUP_PACKS, TOPUP_MONTHS } = require('./creditService');
+    const def = TOPUP_PACKS[pack];
+    if (!def) return { success: false, error: 'Unknown pack' };
+    const base = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      customer: customerId,
+      payment_method_types: ['card'],
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: def.priceCents,
+          product_data: {
+            name: `${def.credits} WriteScholar credits`,
+            description: `Extra credits that last ${TOPUP_MONTHS} months and are used after your plan's own credits.`,
+          },
+        },
+      }],
+      metadata: { kind: 'credit_topup', user_id: String(userId), pack, credits: String(def.credits) },
+      success_url: successUrl || `${base}/dashboard?topup=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: cancelUrl || `${base}/pricing?topup=cancelled`,
+    });
+    return { success: true, sessionId: session.id, url: session.url };
+  } catch (error) {
+    console.error('createTopUpCheckoutSession:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/** Read a Checkout session back from Stripe (used to confirm a top-up on return). */
+const retrieveCheckoutSession = async (sessionId) => {
+  try {
+    return { success: true, session: await stripe.checkout.sessions.retrieve(sessionId) };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
 
 const createCheckoutSession = async (
   customerId,
@@ -2228,6 +2272,8 @@ module.exports = {
   recordTrialDecline,
   createStripeCustomer,
   createCheckoutSession,
+  createTopUpCheckoutSession,
+  retrieveCheckoutSession,
   syncCheckoutSessionForUser,
   getStripeSubscription,
   getActiveSubscriptionByCustomer,

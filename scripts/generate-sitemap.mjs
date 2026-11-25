@@ -45,6 +45,7 @@ const staticRoutes = [
   { loc: '/tools/analyze',                    priority: '0.95', changefreq: 'weekly',  lastmod: today },
   { loc: '/tools/citations',                  priority: '0.9',  changefreq: 'weekly',  lastmod: today },
   { loc: '/tools/study-pack',                 priority: '0.92', changefreq: 'weekly',  lastmod: today },
+  { loc: '/essay-writer',                     priority: '0.95', changefreq: 'weekly',  lastmod: today },
   { loc: '/tools/summarizer',                 priority: '0.9',  changefreq: 'weekly',  lastmod: today },
   { loc: '/tools/quiz-generator',             priority: '0.95', changefreq: 'weekly',  lastmod: today },
   { loc: '/tools/create-flashcards',          priority: '0.95', changefreq: 'weekly',  lastmod: today },

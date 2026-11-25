@@ -337,7 +337,7 @@ const PLANS: Record<PlanId, Plan> = {
       'Unused credits roll over, up to 499',
       'See your score before your professor does',
       'Walk into exams ready with flashcards & quizzes',
-      'References done right in APA, MLA, and Chicago',
+      'Essay writer: 100 outlines and 500 writing helps a month',
     ],
     monthly: {
       firstCyclePrice: '$9.99',
@@ -359,6 +359,7 @@ const PLANS: Record<PlanId, Plan> = {
     features: [
       'Everything in Pro',
       '199 credits a month, built for finals and thesis season',
+      'Essay writer: 250 outlines and 1,000 writing helps a month',
       'Reach the 499 rollover cap twice as fast',
       'Every draft and source in one place (1GB)',
     ],
@@ -2543,7 +2544,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     column stays compact and the form stays above the fold. */}
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 pt-1">
                   {[
-                    '1 credit = 1 essay check, study pack or citation search',
+                    'An essay check costs 2 credits; a study pack or citation search costs 1',
                     'Full annotations + one-click fixes',
                     `${MONTHLY_CREDITS.pro} credits a month on Pro`,
                     'Unused credits roll over (up to 499)',
@@ -2754,7 +2755,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       onClick={() => setShowPremium(true)}
                       className="w-full text-center py-2 text-[12px] font-extrabold text-[#A560E8] hover:text-[#8A48C7] underline underline-offset-4 decoration-[#A560E8]/40 hover:decoration-[#A560E8] transition-colors"
                     >
-                      Compare Premium (2× the credits)
+                      Compare Premium (2× the credits, 250 outlines)
                     </button>
                   )}
                 </div>
