@@ -356,25 +356,24 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
           </h2>
 
           {/* Two doors: no box, no questions. One tap to sign-up; the dashboard opens on the right side. */}
-          <div className="mt-5 grid w-full grid-cols-1 gap-2.5 text-left text-[#1C1917] sm:mt-6 sm:grid-cols-2 sm:gap-3">
+          <div className="mt-7 grid w-full grid-cols-1 gap-3.5 text-left text-[#1C1917] sm:mt-8 sm:grid-cols-2 sm:gap-4">
             {([
-              { door: 'essay' as const, title: 'I have an essay', body: 'Write it with help on every paragraph, or paste a draft to get graded.', cta: 'Write or grade my essay', icon: '/icons/write.webp', btn: BTN_GREEN },
-              { door: 'exam' as const, title: 'I have an exam', body: 'Get flashcards, a practice quiz and study games for any topic.', cta: 'Study for my exam', icon: '/icons/study-pack.webp', btn: BTN_PURPLE },
+              { door: 'essay' as const, title: 'I have an essay', cta: 'Write or grade my essay', icon: '/icons/write.webp', btn: BTN_GREEN },
+              { door: 'exam' as const, title: 'I have an exam', cta: 'Study for my exam', icon: '/icons/study-pack.webp', btn: BTN_PURPLE },
             ]).map((d) => (
-              <div key={d.door} className="flex flex-col gap-1.5 rounded-[18px] border-b-4 border-[#D9C2F2] bg-white p-3 shadow-[0_18px_34px_-20px_rgba(42,21,64,0.55)] transition-transform duration-200 hover:-translate-y-0.5 sm:p-3.5">
+              <div key={d.door} className="flex flex-col gap-3 rounded-[22px] border-b-[5px] border-[#D9C2F2] bg-white p-4 shadow-[0_24px_40px_-20px_rgba(42,21,64,0.55)] transition-transform duration-200 hover:-translate-y-1 sm:p-5">
                 <div className="flex items-center gap-2.5">
-                  <img src={d.icon} alt="" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
-                  <h3 className="m-0 text-[18px] font-black leading-tight sm:text-[19px]">{d.title}</h3>
+                  <img src={d.icon} alt="" width={52} height={52} className="h-12 w-12 shrink-0 object-contain sm:h-[52px] sm:w-[52px]" />
+                  <h3 className="m-0 text-[21px] font-black leading-tight sm:text-[23px]">{d.title}</h3>
                 </div>
-                <p className="m-0 line-clamp-2 text-[13.5px] font-bold leading-snug text-[#57534E]">{d.body}</p>
-                <button type="button" onClick={() => startDoor(d.door, 'hero_card')} className={`group/btn mt-0.5 min-h-[44px] w-full px-4 text-[15.5px] ${d.btn}`}>
+                <button type="button" onClick={() => startDoor(d.door, 'hero_card')} className={`group/btn mt-1 min-h-[58px] w-full px-5 text-[18px] sm:text-[19px] ${d.btn}`}>
                   {d.cta}
-                  <svg className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" /></svg>
+                  <svg className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </button>
               </div>
             ))}
           </div>
-          <p className="m-0 mt-2 text-[12.5px] font-bold text-[#EBDDFB] sm:text-[13px]">
+          <p className="m-0 mt-3 text-[13px] font-bold text-[#EBDDFB] sm:text-[13.5px]">
             Free account, about 30 seconds. No card needed.
           </p>
 
