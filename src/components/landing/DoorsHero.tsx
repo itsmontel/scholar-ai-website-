@@ -326,7 +326,7 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
             </Tile>
           </div>
 
-        <div className="relative mx-auto flex w-full max-w-[48rem] flex-col items-center text-center opacity-0 animate-hero-card-enter">
+        <div className="relative mx-auto flex w-full max-w-[48rem] flex-col items-center pt-2 text-center opacity-0 animate-hero-card-enter sm:pt-5 lg:pt-6">
           <h1 className="m-0 w-full font-black leading-[0.98] tracking-[-0.035em]">
             <span className="block whitespace-nowrap text-[1.85rem] min-[390px]:text-[2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.55rem] xl:text-[4.15rem]">
               Turn your grades from
@@ -356,13 +356,13 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
           </h2>
 
           {/* Two doors: no box, no questions. One tap to sign-up; the dashboard opens on the right side. */}
-          <div className="mt-7 grid w-full grid-cols-1 gap-3.5 text-left text-[#1C1917] sm:mt-8 sm:grid-cols-2 sm:gap-4">
+          <div className="mt-7 grid w-full grid-cols-1 gap-3.5 text-center text-[#1C1917] sm:mt-8 sm:grid-cols-2 sm:gap-4">
             {([
               { door: 'essay' as const, title: 'I have an essay', cta: 'Write or grade my essay', icon: '/icons/write.webp', btn: BTN_GREEN },
               { door: 'exam' as const, title: 'I have an exam', cta: 'Study for my exam', icon: '/icons/study-pack.webp', btn: BTN_PURPLE },
             ]).map((d) => (
-              <div key={d.door} className="flex flex-col gap-3 rounded-[22px] border-b-[5px] border-[#D9C2F2] bg-white p-4 shadow-[0_24px_40px_-20px_rgba(42,21,64,0.55)] transition-transform duration-200 hover:-translate-y-1 sm:p-5">
-                <div className="flex items-center gap-2.5">
+              <div key={d.door} className="flex flex-col items-center gap-3 rounded-[22px] border-b-[5px] border-[#D9C2F2] bg-white p-4 shadow-[0_24px_40px_-20px_rgba(42,21,64,0.55)] transition-transform duration-200 hover:-translate-y-1 sm:p-5">
+                <div className="flex flex-col items-center gap-2">
                   <img src={d.icon} alt="" width={52} height={52} className="h-12 w-12 shrink-0 object-contain sm:h-[52px] sm:w-[52px]" />
                   <h3 className="m-0 text-[21px] font-black leading-tight sm:text-[23px]">{d.title}</h3>
                 </div>
