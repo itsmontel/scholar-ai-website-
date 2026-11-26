@@ -356,25 +356,25 @@ export default function DoorsHero({ wide, onNavigate, onPackSubmit, onEssaySubmi
           </h2>
 
           {/* Two doors: no box, no questions. One tap to sign-up; the dashboard opens on the right side. */}
-          <div className="mt-8 grid w-full grid-cols-1 gap-3.5 text-left text-[#1C1917] sm:mt-9 sm:grid-cols-2 sm:gap-4">
+          <div className="mt-6 grid w-full grid-cols-1 gap-3 text-left text-[#1C1917] sm:mt-7 sm:grid-cols-2 sm:gap-3.5">
             {([
-              { door: 'essay' as const, title: 'I have an essay', body: 'Write it with help on every paragraph, or paste a draft to get graded with line-by-line fixes.', cta: 'Write or grade my essay', icons: ['/icons/write.webp', '/icons/grade-essay.webp'], btn: BTN_GREEN },
-              { door: 'exam' as const, title: 'I have an exam', body: 'Type the topic and get flashcards, a practice quiz and study games built for it.', cta: 'Study for my exam', icons: ['/icons/study-pack.webp', '/icons/quiz.webp'], btn: BTN_PURPLE },
+              { door: 'essay' as const, title: 'I have an essay', body: 'Write it with help on every paragraph, or paste a draft to get graded.', cta: 'Write or grade my essay', icon: '/icons/write.webp', btn: BTN_GREEN },
+              { door: 'exam' as const, title: 'I have an exam', body: 'Get flashcards, a practice quiz and study games for any topic.', cta: 'Study for my exam', icon: '/icons/study-pack.webp', btn: BTN_PURPLE },
             ]).map((d) => (
-              <div key={d.door} className="flex flex-col gap-2.5 rounded-[26px] border-b-[6px] border-[#D9C2F2] bg-white p-4 shadow-[0_30px_50px_-22px_rgba(42,21,64,0.55)] transition-transform duration-200 hover:-translate-y-1 sm:rounded-[28px] sm:p-5">
-                <div className="flex items-center gap-2">
-                  {d.icons.map((src) => <img key={src} src={src} alt="" width={52} height={52} className="h-12 w-12 object-contain sm:h-[52px] sm:w-[52px]" />)}
+              <div key={d.door} className="flex flex-col gap-2 rounded-[22px] border-b-[5px] border-[#D9C2F2] bg-white p-3.5 shadow-[0_26px_44px_-22px_rgba(42,21,64,0.55)] transition-transform duration-200 hover:-translate-y-1 sm:p-4">
+                <div className="flex items-center gap-2.5">
+                  <img src={d.icon} alt="" width={44} height={44} className="h-11 w-11 shrink-0 object-contain" />
+                  <h3 className="m-0 text-[20px] font-black leading-tight sm:text-[21px]">{d.title}</h3>
                 </div>
-                <h3 className="m-0 text-[22px] font-black leading-tight sm:text-[24px]">{d.title}</h3>
-                <p className="m-0 text-[15px] font-bold leading-snug text-[#57534E] sm:text-[15.5px]">{d.body}</p>
-                <button type="button" onClick={() => startDoor(d.door, 'hero_card')} className={`group/btn mt-1.5 min-h-[56px] w-full px-5 text-[17px] sm:text-[17.5px] ${d.btn}`}>
+                <p className="m-0 text-[14px] font-bold leading-snug text-[#57534E] sm:text-[14.5px]">{d.body}</p>
+                <button type="button" onClick={() => startDoor(d.door, 'hero_card')} className={`group/btn min-h-[50px] w-full px-4 text-[16px] sm:text-[16.5px] ${d.btn}`}>
                   {d.cta}
-                  <svg className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" /></svg>
+                  <svg className="h-[18px] w-[18px] transition-transform group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </button>
               </div>
             ))}
           </div>
-          <p className="m-0 mt-3.5 text-[12.5px] font-bold text-[#EBDDFB] sm:text-[13px]">
+          <p className="m-0 mt-2.5 text-[12.5px] font-bold text-[#EBDDFB] sm:text-[13px]">
             Free account, about 30 seconds. No card needed.
           </p>
 
