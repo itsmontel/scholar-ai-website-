@@ -185,6 +185,19 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           { '@type': 'Question', name: "What if I have too much material and not enough time?", acceptedAnswer: { '@type': 'Answer', text: "Prioritize. Focus on the concepts that show up most often in past exams or that your professor emphasized. Use active recall on the high-yield material first. A quiz on the most important 20 percent of the content will help more than passive reading of everything. WriteScholar can generate quizzes and flashcards quickly so you can test yourself on the material that matters most." } },
         ],
       });
+    } else if (post.slug === 'how-to-start-an-essay-step-by-step') {
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: "How do I start an essay when I have no ideas?", acceptedAnswer: { '@type': 'Answer', text: "Do a five-minute free write answering the question in plain words, then circle the sentence you believe most. That sentence is your working thesis. Evidence and structure come after you know what you want to argue." } },
+          { '@type': 'Question', name: "What is the first step in writing an essay?", acceptedAnswer: { '@type': 'Answer', text: "Read the question closely and mark the instruction word, the topic and any limits. Most essays that miss the mark answered a slightly different question from the one set." } },
+          { '@type': 'Question', name: "Should I write the introduction first or last?", acceptedAnswer: { '@type': 'Answer', text: "Last, for most essays. An introduction states what the essay argues, and you only know that once you have worked out your evidence and written the body. If you prefer to draft it first, plan to rewrite it at the end." } },
+          { '@type': 'Question', name: "How long should I plan before I start writing?", acceptedAnswer: { '@type': 'Answer', text: "There is no fixed rule, but a useful guide is to spend a fifth to a quarter of your total time on reading the question, finding evidence and outlining. That time usually comes back as less rewriting later." } },
+          { '@type': 'Question', name: "How do I start an essay if I am short on time?", acceptedAnswer: { '@type': 'Answer', text: "Write your answer as one sentence, list three points that support it, and give each point a rough word count. Then write the easiest body paragraph first and the introduction last." } },
+          { '@type': 'Question', name: "What is the difference between a working thesis and a final thesis?", acceptedAnswer: { '@type': 'Answer', text: "A working thesis is your best answer before you have finished the evidence. The final thesis is the same claim rewritten to match what your essay actually proves. It is normal for the two to differ." } },
+        ],
+      });
     } else if (post.slug === 'how-to-write-effectively') {
       injectJsonLd('blog-post-faq', {
         '@context': 'https://schema.org',

@@ -29,6 +29,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-start-an-essay-step-by-step',
+    title: 'How to Start an Essay: A Step-by-Step Guide',
+    description:
+      'How to start an essay step by step: read the question, work out what you think, write a working thesis, sort your evidence, outline with a word budget, and write the introduction last.',
+    date: '2026-11-27',
+    author: 'WriteScholar Team',
+    readTime: '9 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Starting an essay is a short sequence of decisions, not a first sentence: read the question, decide what you think, and write a one-sentence thesis before anything else.',
+      'Sort your evidence and outline each paragraph with a word budget, then write the easiest body paragraph first so the page is never blank.',
+      'Write the introduction last. By then you know what the essay argues, which is exactly what an introduction has to say.',
+    ],
+  },
+  {
     slug: 'how-to-write-effectively',
     title: 'How to Write Effectively: 12 Habits That Make Any Essay Clearer',
     description:

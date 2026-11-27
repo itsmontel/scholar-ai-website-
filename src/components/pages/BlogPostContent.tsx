@@ -266,6 +266,176 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
         </>
       );
 
+    case 'how-to-start-an-essay-step-by-step':
+      return (
+        <>
+          <p className={p}>
+            The blank page is rarely the real problem. The real problem is that you are trying to write an opening sentence before you know what the essay says. So you type a line, delete it, type another, and an hour disappears.
+          </p>
+          <p className={p}>
+            The fix is to stop treating &quot;starting&quot; as the first sentence. Starting an essay is a short sequence of decisions, and the opening paragraph comes near the end of it. This guide walks through those steps in order, with one example question carried all the way through.
+          </p>
+
+          <h2 className={h2}>How to start an essay: the short version</h2>
+          <p className={p}>
+            <strong>Read the question closely, work out what you think, turn that into a one-sentence thesis, sort your evidence, outline the paragraphs with a word budget, write the easiest body paragraph first, and write the introduction last.</strong> Each step is small, and each one makes the next easier.
+          </p>
+
+          <h2 className={h2}>Step 1: Read the question and mark the task</h2>
+          <p className={p}>
+            Before anything else, find three things in the question: the <strong>instruction word</strong> (discuss, evaluate, compare, to what extent), the <strong>topic</strong>, and any <strong>limits</strong> (a time period, a text, a number of examples). Underline them.
+          </p>
+          <p className={p}>
+            Our example question is: <em>&quot;To what extent was the Treaty of Versailles too harsh on Germany?&quot;</em> The instruction phrase is &quot;to what extent&quot;, which asks for a judgement with degrees, not a list of facts. The topic is the Treaty of Versailles. The limit is Germany. A good answer will say how harsh it was, compared with what, and for whom.
+          </p>
+          <p className={p}>
+            Students lose marks here more often than anywhere else, by answering a slightly different question from the one set. If the wording is unclear, ask your instructor early, and check the marking criteria for what earns the marks. Our guide to <a href="/blog/what-does-critically-evaluate-mean" className={internalLink}>what &quot;critically evaluate&quot; means</a> covers the instruction words that trip people up most.
+          </p>
+
+          <InlineArt name="start-essay-question" alt="Scholar holding a magnifying glass over an essay question card, picking out the key words" />
+
+          <h2 className={h2}>Step 2: Work out what you actually think</h2>
+          <p className={p}>
+            Set a timer for five minutes and write, badly and without stopping, your answer to the question in plain words. Do not worry about order or quality. You are finding out what you believe, not drafting.
+          </p>
+          <p className={p}>
+            For our example you might write: &quot;The treaty was harsh in some ways, like the army limit and the blame clause, but the reparations were probably not as crushing as people said, and it was a lot milder than what Germany did to Russia in 1918.&quot; That messy paragraph already contains an answer with two sides, which is exactly what a &quot;to what extent&quot; question wants.
+          </p>
+
+          <h2 className={h2}>Step 3: Turn it into a working thesis</h2>
+          <p className={p}>
+            A thesis is the one-sentence answer to the question that the rest of the essay defends. At this stage it is a <em>working</em> thesis. You can sharpen it once you have seen your evidence.
+          </p>
+          <p className={p}>
+            <strong>Weak:</strong> &quot;The Treaty of Versailles was a treaty signed after the First World War and it had effects on Germany.&quot;
+          </p>
+          <p className={p}>
+            <strong>Strong:</strong> &quot;The Treaty of Versailles was harsh in principle but less crushing in practice: the war-guilt clause and the army limit humiliated Germany, yet the economic damage owed more to how the reparations were handled than to the terms themselves.&quot;
+          </p>
+          <p className={p}>
+            The first only names the topic. The second makes a claim someone could argue against and previews the shape of the essay. If you are stuck, our guide to <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>writing a thesis statement</a> has formulas and more examples, and the <a href="/tools/thesis-generator" className={internalLink}>thesis generator</a> can give you a few directions to react to.
+          </p>
+
+          <h2 className={h2}>Step 4: Sort your evidence before you outline</h2>
+          <p className={p}>
+            List the three to five pieces of evidence you could use, and for each one write a single line on what it proves. For the example: the 100,000-man army limit (it removed German military power), Article 231 (it assigned blame and wounded national pride), and the reparations bill (it was large, but the real question is how much was actually paid and how it was handled).
+          </p>
+          <p className={p}>
+            This is also the moment to notice gaps. If one of your points has no evidence behind it, find a source or drop the point. It is far cheaper to discover that now than after you have written four hundred words around it. When you do pull in sources, note the details you will need for citations while you read, not afterwards.
+          </p>
+
+          <h2 className={h2}>Step 5: Outline the paragraphs and give each a word budget</h2>
+          <p className={p}>
+            An outline for an essay does not need to be fancy. It is one line per paragraph saying what that paragraph will prove, plus a rough length. Budgeting words stops a long first paragraph from eating the whole essay.
+          </p>
+          <p className={p}>
+            For a 1,500-word essay, a simple split looks like this: introduction 150 words, four body paragraphs of about 300 words each, and a conclusion of 150 words. Each body paragraph follows the same pattern: a point, the evidence, an explanation of what it shows, and a link back to the thesis.
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-1 text-stone-600 dark:text-stone-400 leading-relaxed">
+            <li><strong>Paragraph 1 (300):</strong> the army limit and territory: harsh, but the point is what they changed in practice.</li>
+            <li><strong>Paragraph 2 (300):</strong> Article 231: why the blame clause mattered more than its legal effect.</li>
+            <li><strong>Paragraph 3 (300):</strong> reparations: what was demanded, what was paid, and how it was handled.</li>
+            <li><strong>Paragraph 4 (300):</strong> the counter-argument: compared with what Germany imposed on Russia, was it harsh at all?</li>
+          </ul>
+          <p className={p}>
+            Our <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline guide</a> shows more layouts, including for compare-and-contrast and argumentative essays.
+          </p>
+
+          <InlineArt name="start-essay-outline" alt="Scholar stacking colourful blocks of different lengths into an essay outline" />
+
+          <h2 className={h2}>Step 6: Write the easiest body paragraph first</h2>
+          <p className={p}>
+            You do not have to begin at the beginning. Pick the paragraph you understand best and write it. Once one paragraph exists, the page is no longer blank, and momentum does most of the rest.
+          </p>
+          <p className={p}>
+            Open that paragraph with its point, then give the evidence, then explain what it shows, then link it back to the thesis. Do not stop to polish. A rough paragraph you can fix tomorrow is worth more than a perfect sentence you never finish. When you are not sure what should come next in a paragraph, ask yourself the question a reader would: &quot;so what?&quot;
+          </p>
+
+          <h2 className={h2}>Step 7: Write the introduction last</h2>
+          <p className={p}>
+            By now you know what the essay actually argues, which is exactly what an introduction needs to say. A simple three-part recipe works for most essays:
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-1 text-stone-600 dark:text-stone-400 leading-relaxed">
+            <li><strong>Context:</strong> one or two sentences placing the question in its setting.</li>
+            <li><strong>The issue:</strong> the debate or tension the question is about.</li>
+            <li><strong>Your thesis:</strong> the claim from step 3, rewritten to match what the body really argues.</li>
+          </ul>
+          <p className={p}>
+            That is enough. If you want the opening sentence itself to do more, our guides to <a href="/blog/how-to-start-an-essay" className={internalLink}>openings and hooks</a> and <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>writing a good introduction</a> go into weak and strong examples in detail. Finish with the conclusion, then revise in passes. Our <a href="/blog/how-to-write-effectively" className={internalLink}>guide to writing effectively</a> covers the editing habits that make a draft read clearly.
+          </p>
+
+          <h2 className={h2}>If you are stuck on a step</h2>
+          <p className={p}>
+            <strong>You cannot write a thesis.</strong> Go back to step 2 and write your answer to the question out loud, as if explaining it to a friend. Then write down the sentence you just said.
+          </p>
+          <p className={p}>
+            <strong>You have too many ideas.</strong> Pick the three that best support your thesis and park the rest. An essay is a defence of one claim, not everything you know.
+          </p>
+          <p className={p}>
+            <strong>You have too little evidence.</strong> Narrow the claim. A smaller thesis you can prove beats a big one you cannot.
+          </p>
+          <p className={p}>
+            <strong>You have started three times and hated every version.</strong> Skip the introduction entirely, write a body paragraph, and come back to it at the end.
+          </p>
+
+          <h2 className={h2}>Common mistakes when starting an essay</h2>
+          <p className={p}>
+            <strong>Starting with the introduction.</strong> It is the hardest paragraph to write before you know your argument. Write it last, or at least rewrite it last.
+          </p>
+          <p className={p}>
+            <strong>Skipping the plan.</strong> Twenty minutes of outlining usually saves far more than that in rewriting. It also shows you early if your argument has a hole.
+          </p>
+          <p className={p}>
+            <strong>Answering a different question.</strong> Reread the question before you outline and again before you submit.
+          </p>
+          <p className={p}>
+            <strong>Treating the first thesis as final.</strong> Your evidence will change what you can claim. Update the thesis to match what you actually found.
+          </p>
+
+          <h2 className={h2}>Start your own essay</h2>
+          <p className={p}>
+            You now have the steps. The hardest part is doing step 1 on your own question, so do it now rather than later. Paste your question below and the Essay Writer gives you a set of possible arguments to choose from and an outline with a word budget for every paragraph. You still write the essay yourself, with help when you get stuck on a paragraph.
+          </p>
+
+          <BlogEssayQuestionBox onNavigate={onNavigate} source="how-to-start-an-essay-step-by-step" />
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How do I start an essay when I have no ideas?',
+                answer:
+                  "Do a five-minute free write answering the question in plain words, then circle the sentence you believe most. That sentence is your working thesis. Evidence and structure come after you know what you want to argue.",
+              },
+              {
+                question: 'What is the first step in writing an essay?',
+                answer:
+                  "Read the question closely and mark the instruction word, the topic and any limits. Most essays that miss the mark answered a slightly different question from the one set.",
+              },
+              {
+                question: 'Should I write the introduction first or last?',
+                answer:
+                  "Last, for most essays. An introduction states what the essay argues, and you only know that once you have worked out your evidence and written the body. If you prefer to draft it first, plan to rewrite it at the end.",
+              },
+              {
+                question: 'How long should I plan before I start writing?',
+                answer:
+                  "There is no fixed rule, but a useful guide is to spend a fifth to a quarter of your total time on reading the question, finding evidence and outlining. That time usually comes back as less rewriting later.",
+              },
+              {
+                question: 'How do I start an essay if I am short on time?',
+                answer:
+                  "Write your answer as one sentence, list three points that support it, and give each point a rough word count. Then write the easiest body paragraph first and the introduction last.",
+              },
+              {
+                question: 'What is the difference between a working thesis and a final thesis?',
+                answer:
+                  "A working thesis is your best answer before you have finished the evidence. The final thesis is the same claim rewritten to match what your essay actually proves. It is normal for the two to differ.",
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-memorize-things-fast':
       return (
         <>
